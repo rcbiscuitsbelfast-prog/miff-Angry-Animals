@@ -20,7 +20,8 @@ public partial class RageDisplay : Control
 		if (_rageLabel != null)
 			_rageLabel.Text = "Rage: 0%";
 
-		RageSystem.Instance.OnRageUpdated += OnRageUpdated;
+		if (RageSystem.Instance != null)
+			RageSystem.Instance.OnRageUpdated += OnRageUpdated;
 	}
 
 	private void OnRageUpdated(float rage)
@@ -34,6 +35,7 @@ public partial class RageDisplay : Control
 
 	public override void _ExitTree()
 	{
-		RageSystem.Instance.OnRageUpdated -= OnRageUpdated;
+		if (RageSystem.Instance != null)
+			RageSystem.Instance.OnRageUpdated -= OnRageUpdated;
 	}
 }

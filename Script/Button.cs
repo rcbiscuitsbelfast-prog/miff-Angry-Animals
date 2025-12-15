@@ -23,15 +23,17 @@ public partial class Button : TextureButton
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		// Initializing label.
-		_levelLabel.Text = $"{LevelNumber}";
-		_scoreLabel.Text = ScoreManager.GetLevelBestScore(LevelNumber).ToString("D4");
+		if (_levelLabel != null)
+			_levelLabel.Text = $"{LevelNumber}";
+
+		if (_scoreLabel != null)
+			_scoreLabel.Text = ScoreManager.GetLevelBestScore(LevelNumber).ToString("D4");
 
 		// Connecting button events.
 		MouseEntered += OnMouseEntered;
 		MouseExited += OnMouseExited;
 		Pressed += OnButtonPressed;
-    }
+	}
 
 
 	/// <summary>

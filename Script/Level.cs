@@ -12,28 +12,38 @@ public partial class Level : Node2D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		//Spawns an Animal at the start of the game.
+		if (_animalScene == null)
+		{
+			GD.PrintErr("Animal scene not assigned in Level");
+			return;
+		}
+
+		if (_spawnMarker == null)
+		{
+			GD.PrintErr("Spawn marker not assigned in Level");
+			return;
+		}
+
 		SpawnAnimal();
 
-		// Connects the respawn signal.
-		SignalManager.Instance.Connect(SignalManager.SignalName.OnAnimalDied, Callable.From(SpawnAnimal));
+		if (SignalManager.Instance != null)
+			SignalManager.Instance.Connect(SignalManager.SignalName.OnAnimalDied, Callable.From(SpawnAnimal));
 	}
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		// Allows returning to the main menu by pressing the Q key.
 		if (Input.IsKeyPressed(Key.Q)) GameManager.LoadMain();
 	}
-
 
 	/// <summary>
 	/// Instanciates and spawns a new animal at the spawn marker position.
 	/// </summary>
 	private void SpawnAnimal()
 	{
+		if (_animalScene == null || _spawnMarker == null) return;
+
 		Animal newAnimal = _animalScene.Instantiate<Animal>();
-        newAnimal.Position = _spawnMarker.Position;
+		newAnimal.Position = _spawnMarker.Position;
 		AddChild(newAnimal);
 	}
 }

@@ -10,7 +10,8 @@ public partial class Score : Label
 
 	public override void _Ready()
 	{
-		SignalManager.Instance.OnScoreUpdated += OnScoreUpdated;
+		if (SignalManager.Instance != null)
+			SignalManager.Instance.OnScoreUpdated += OnScoreUpdated;
 
 		Text = _scorePrefix + "0";
 	}
@@ -22,6 +23,7 @@ public partial class Score : Label
 
 	public override void _ExitTree()
 	{
-		SignalManager.Instance.OnScoreUpdated -= OnScoreUpdated;
+		if (SignalManager.Instance != null)
+			SignalManager.Instance.OnScoreUpdated -= OnScoreUpdated;
 	}
 }

@@ -21,7 +21,7 @@ public partial class RageSystem : Node
 
 	public static void SetRage(float rage)
 	{
-		Instance._rage = Mathf.Clamp(rage, 0, Instance.MAX_RAGE);
+		Instance._rage = Mathf.Clamp(rage, 0, MAX_RAGE);
 		Instance.EmitSignal(SignalName.OnRageUpdated, Instance._rage);
 	}
 

@@ -11,14 +11,21 @@ public partial class Water : Area2D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		// Triggers the splash sound.
 		BodyEntered += OnAnimalDied;
 	}
 
+	public override void _ExitTree()
+	{
+		BodyEntered -= OnAnimalDied;
+	}
 
-    /// <summary>
-    /// Plays the splash sound when a body enters the water.
-    /// </summary>
-    /// <param name="body">The node that entered the water (expected to be an animal).</param>
-    private void OnAnimalDied(Node2D body) => _splashSound.Play();
+	/// <summary>
+	/// Plays the splash sound when a body enters the water.
+	/// </summary>
+	/// <param name="body">The node that entered the water (expected to be an animal).</param>
+	private void OnAnimalDied(Node2D body)
+	{
+		if (_splashSound != null)
+			_splashSound.Play();
+	}
 }

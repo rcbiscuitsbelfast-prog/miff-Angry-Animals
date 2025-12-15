@@ -76,6 +76,8 @@ public partial class AudioManager : Node
 
 	public static void PlaySFX(string sfxPath, float volumeDb = 0f)
 	{
+		if (Instance == null) return;
+
 		var audioStream = GD.Load<AudioStream>(sfxPath);
 		if (audioStream == null)
 		{

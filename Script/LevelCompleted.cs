@@ -30,7 +30,8 @@ public partial class LevelCompleted : CanvasLayer
 		if (_panel != null)
 			_panel.Modulate = new Color(1, 1, 1, 0);
 
-		SignalManager.Instance.OnLevelCompleted += OnLevelComplete;
+		if (SignalManager.Instance != null)
+			SignalManager.Instance.OnLevelCompleted += OnLevelComplete;
 	}
 
 	private void OnLevelComplete()
@@ -93,6 +94,7 @@ public partial class LevelCompleted : CanvasLayer
 		if (_levelSelectButton != null)
 			_levelSelectButton.Pressed -= OnLevelSelectPressed;
 
-		SignalManager.Instance.OnLevelCompleted -= OnLevelComplete;
+		if (SignalManager.Instance != null)
+			SignalManager.Instance.OnLevelCompleted -= OnLevelComplete;
 	}
 }
