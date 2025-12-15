@@ -36,6 +36,16 @@ public partial class SignalManager : Node
 	/// <param name="score">The new score value.</param>
 	[Signal] public delegate void OnScoreUpdatedEventHandler(int score);
 
+	/// <summary>
+	/// Triggered when the game is paused.
+	/// </summary>
+	[Signal] public delegate void OnPausedEventHandler();
+
+	/// <summary>
+	/// Triggered when the game is resumed.
+	/// </summary>
+	[Signal] public delegate void OnResumedEventHandler();
+
 
 
     // Called when the node enters the scene tree for the first time.
@@ -68,4 +78,14 @@ public partial class SignalManager : Node
     /// </summary>
     /// <param name="score">The updated score to send with the signa.</param>
     public static void EmitOnScoreUpdated(int score) => Instance.EmitSignal(SignalName.OnScoreUpdated, score);
+
+	/// <summary>
+	/// Emits the OnPaused signal.
+	/// </summary>
+	public static void EmitOnPaused() => Instance.EmitSignal(SignalName.OnPaused);
+
+	/// <summary>
+	/// Emits the OnResumed signal.
+	/// </summary>
+	public static void EmitOnResumed() => Instance.EmitSignal(SignalName.OnResumed);
 }

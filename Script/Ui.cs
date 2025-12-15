@@ -10,6 +10,8 @@ public partial class Ui : MarginContainer
 	[Export] Label _attemptLabel;
 	[Export] BoxContainer _gameOverVB;
 
+	private bool _levelCompleted = false;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -26,9 +28,9 @@ public partial class Ui : MarginContainer
     public override void _Process(double delta)
     {
         // Checks if the Game Over panel is visible and listens for the restar input.
-        if (_gameOverVB.Visible && Input.IsActionJustPressed("level_completed"))
+        if (_levelCompleted && Input.IsActionJustPressed("level_completed"))
         {
-			GameManager.LoadMain();
+			GameManager.LoadLevelCompleted();
         }
     }
 
@@ -51,5 +53,9 @@ public partial class Ui : MarginContainer
 	/// <summary>
 	/// Displays the Game Over panel when the level is completed.
 	/// </summary>
-    private void OnLevelFinished() => _gameOverVB.Show();
+    private void OnLevelFinished()
+    {
+        _gameOverVB.Show();
+        _levelCompleted = true;
+    }
 }

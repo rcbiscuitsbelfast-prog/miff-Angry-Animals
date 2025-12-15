@@ -1,0 +1,63 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6spvyt8xn8a"]
+
+[ext_resource type="Script" path="res://Script/LevelCompleted.cs" id="1_2c4kt"]
+
+[node name="LevelCompleted" type="CanvasLayer" node_paths=PackedStringArray("_completedLabel", "_scoreLabel", "_nextLevelButton", "_retryButton", "_levelSelectButton", "_panel")]
+script = ExtResource("1_2c4kt")
+_completedLabel = NodePath("Panel/VBoxContainer/CompletedLabel")
+_scoreLabel = NodePath("Panel/VBoxContainer/ScoreLabel")
+_nextLevelButton = NodePath("Panel/VBoxContainer/NextLevelButton")
+_retryButton = NodePath("Panel/VBoxContainer/RetryButton")
+_levelSelectButton = NodePath("Panel/VBoxContainer/LevelSelectButton")
+_panel = NodePath("Panel")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_fill_parent = true
+color = Color(0, 0, 0, 0.5)
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchors_fill_parent = true
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 100
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 100
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="CompletedLabel" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 64
+text = "Level Complete!"
+horizontal_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 48
+text = "Score: 0 attempts"
+horizontal_alignment = 1
+
+[node name="NextLevelButton" type="Button" parent="Panel/VBoxContainer"]
+custom_minimum_size = Vector2(300, 80)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 32
+text = "Next Level"
+
+[node name="RetryButton" type="Button" parent="Panel/VBoxContainer"]
+custom_minimum_size = Vector2(300, 80)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 32
+text = "Retry"
+
+[node name="LevelSelectButton" type="Button" parent="Panel/VBoxContainer"]
+custom_minimum_size = Vector2(300, 80)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 32
+text = "Level Select"

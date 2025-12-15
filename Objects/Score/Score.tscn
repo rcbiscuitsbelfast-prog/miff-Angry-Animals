@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://d31d4g8i3cxye"]
+
+[ext_resource type="Script" path="res://Objects/Score/Score.cs" id="1_nrmj1"]
+
+[node name="Score" type="Label"]
+text = "Attempts: 0"
+script = ExtResource("1_nrmj1")

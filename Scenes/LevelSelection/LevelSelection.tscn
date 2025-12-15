@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3 uid="uid://btl9u5wrmqknc"]
+
+[ext_resource type="Script" path="res://Script/LevelSelection.cs" id="1_x8o15"]
+
+[node name="LevelSelection" type="CanvasLayer" node_paths=PackedStringArray("_levelButtonContainer", "_backButton", "_titleLabel")]
+script = ExtResource("1_x8o15")
+_levelButtonContainer = NodePath("VBoxContainer/ScrollContainer/GridContainer")
+_backButton = NodePath("VBoxContainer/BackButton")
+_titleLabel = NodePath("VBoxContainer/TitleLabel")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_fill_parent = true
+color = Color(0.2, 0.2, 0.2, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_fill_parent = true
+theme_override_constants/separation = 10
+alignment = 0
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Select Level"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 5
+
+[node name="BackButton" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(150, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 24
+text = "Back"

@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3 uid="uid://cqsw4r8y4oohd"]
+
+[ext_resource type="Script" path="res://Objects/Score/RageDisplay.cs" id="1_h1s9l"]
+
+[node name="RageDisplay" type="Control" node_paths=PackedStringArray("_rageBar", "_rageLabel")]
+custom_minimum_size = Vector2(300, 60)
+script = ExtResource("1_h1s9l")
+_rageBar = NodePath("VBoxContainer/RageBar")
+_rageLabel = NodePath("VBoxContainer/RageLabel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_fill_parent = true
+
+[node name="RageLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Rage: 0%"
+
+[node name="RageBar" type="ProgressBar" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+value = 50.0
