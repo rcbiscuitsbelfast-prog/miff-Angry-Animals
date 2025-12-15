@@ -36,6 +36,21 @@ public partial class SignalManager : Node
 	/// <param name="score">The new score value.</param>
 	[Signal] public delegate void OnScoreUpdatedEventHandler(int score);
 
+	/// <summary>
+	/// Triggered when a room is completed in the traversal phase.
+	/// </summary>
+	[Signal] public delegate void OnRoomCompletedEventHandler();
+
+	/// <summary>
+	/// Triggered when the traversal phase starts (after slingshot phase).
+	/// </summary>
+	[Signal] public delegate void OnTraversalStartedEventHandler();
+
+	/// <summary>
+	/// Triggered when a projectile is launched in the slingshot phase.
+	/// </summary>
+	[Signal] public delegate void OnProjectileLaunchedEventHandler();
+
 
 
     // Called when the node enters the scene tree for the first time.
@@ -68,4 +83,19 @@ public partial class SignalManager : Node
     /// </summary>
     /// <param name="score">The updated score to send with the signa.</param>
     public static void EmitOnScoreUpdated(int score) => Instance.EmitSignal(SignalName.OnScoreUpdated, score);
+
+	/// <summary>
+	/// Emits the OnRoomCompleted signal.
+	/// </summary>
+	public static void EmitOnRoomCompleted() => Instance.EmitSignal(SignalName.OnRoomCompleted);
+
+	/// <summary>
+	/// Emits the OnTraversalStarted signal.
+	/// </summary>
+	public static void EmitOnTraversalStarted() => Instance.EmitSignal(SignalName.OnTraversalStarted);
+
+	/// <summary>
+	/// Emits the OnProjectileLaunched signal.
+	/// </summary>
+	public static void EmitOnProjectileLaunched() => Instance.EmitSignal(SignalName.OnProjectileLaunched);
 }

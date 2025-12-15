@@ -1,0 +1,88 @@
+[gd_scene load_steps=3 format=3 uid="uid://b2v1u6ppy6w1c"]
+
+[ext_resource type="Script" path="res://Script/RoomSelection.cs" id="1_3x8mn"]
+[ext_resource type="Script" path="res://Script/RoomSelection.cs" id="2_4x9op"]
+
+[node name="RoomSelection" type="Node2D"]
+script = ExtResource("1_3x8mn")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/UI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="CanvasLayer/UI/VBoxContainer"]
+layout_mode = 2
+text = "Select a Room"
+
+[node name="Description" type="Label" parent="CanvasLayer/UI/VBoxContainer"]
+layout_mode = 2
+text = "Choose a room to begin"
+
+[node name="RoomButtons" type="GridContainer" parent="CanvasLayer/UI/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 5
+
+[node name="RoomButton1" type="TextureButton" parent="CanvasLayer/UI/VBoxContainer/RoomButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("2_4x9op")
+_roomNumber = 1
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/VBoxContainer/RoomButtons/RoomButton1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="CanvasLayer/UI/VBoxContainer/RoomButtons/RoomButton1"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -30.0
+offset_right = 20.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "0000"
+
+[node name="LockLabel" type="Label" parent="CanvasLayer/UI/VBoxContainer/RoomButtons/RoomButton1"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -15.0
+offset_top = -15.0
+offset_right = 15.0
+offset_bottom = 15.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "🔒"
+horizontal_alignment = 1
+vertical_alignment = 1

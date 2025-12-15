@@ -6,7 +6,7 @@ using Godot;
 /// </summary>
 public partial class GameManager : Node
 {
-	public static GameManager Instance { get; private set; } // Singleton for global access as an AutoLoad.
+    public static GameManager Instance { get; private set; } // Singleton for global access as an AutoLoad.
 
     /// <summary>
     /// Reference to the main scen, preloaded as a PackedScene.
@@ -16,12 +16,12 @@ public partial class GameManager : Node
 
 
 
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready() => Instance = this;
+    // Called when the node enters the scene tree for the first time.
+    public override void _Ready() => Instance = this;
 
 
     /// <summary>
     /// Loads the main scene into the current scene tree.
     /// </summary>
-	public static void LoadMain() => Instance.GetTree().ChangeSceneToPacked(Instance._mainScene);
+    public static void LoadMain() => Instance.GetTree().ChangeSceneToPacked(Instance._mainScene);
 }
