@@ -36,6 +36,20 @@ public partial class SignalManager : Node
 	/// <param name="score">The new score value.</param>
 	[Signal] public delegate void OnScoreUpdatedEventHandler(int score);
 
+    /// <summary>
+    /// Triggered when a destructible prop is damaged.
+    /// </summary>
+    [Signal] public delegate void OnPropDamagedEventHandler(Node prop, int damage);
+
+    /// <summary>
+    /// Triggered when a destructible prop is destroyed.
+    /// </summary>
+    [Signal] public delegate void OnPropDestroyedEventHandler(Node prop, int scoreValue);
+
+    /// <summary>
+    /// Triggered when the destruction score is updated.
+    /// </summary>
+    [Signal] public delegate void OnDestructionScoreUpdatedEventHandler(int score);
 
 
     // Called when the node enters the scene tree for the first time.
@@ -68,4 +82,8 @@ public partial class SignalManager : Node
     /// </summary>
     /// <param name="score">The updated score to send with the signa.</param>
     public static void EmitOnScoreUpdated(int score) => Instance.EmitSignal(SignalName.OnScoreUpdated, score);
+
+    public static void EmitOnPropDamaged(Node prop, int damage) => Instance.EmitSignal(SignalName.OnPropDamaged, prop, damage);
+    public static void EmitOnPropDestroyed(Node prop, int scoreValue) => Instance.EmitSignal(SignalName.OnPropDestroyed, prop, scoreValue);
+    public static void EmitOnDestructionScoreUpdated(int score) => Instance.EmitSignal(SignalName.OnDestructionScoreUpdated, score);
 }
