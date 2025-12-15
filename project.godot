@@ -23,6 +23,7 @@ RageSystem="*res://Globals/RageSystem.cs"
 SignalManager="*res://Globals/SignalManager.cs"
 ScoreManager="*res://Globals/ScoreManager.cs"
 FileManager="*res://Globals/FileManager.cs"
+AudioManager="*res://Globals/AudioManager.cs"
 
 [audio]
 
