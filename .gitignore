@@ -1,16 +1,72 @@
 # Godot 4+ specific ignores
 .godot/
-.nomedia
+.import/
+.import_3d/
 
 # Godot-specific ignores
-.import/
-export.cfg
-export_credentials.cfg
+*.tmp
+*.translation*~
 
-# Imported translations (automatically generated from CSV files)
-*.translation
+# C# specific ignores
+*.csproj.user
+*.sln.DotSettings.user
 
-# Mono-specific ignores
-.mono/
-data_*/
+# Godot 4+ auto-generated files
+export_presets.cfg
+
+# Compiled binaries
+*.dll
+*.pdb
+*.mdb
+*.exe
+
+# User-specific files (VS Code)
+.vscode/
+*.userprefs
+
+# Mono specific ignores
 mono_crash.*.json
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# User Environment Variables
+.user
+
+# Logs
+logs
+*.log
+
+# Save files
+user://*.save
+user://*.profile
+user://*.data
+
+# Asset Imports
+.import/
+
+# Build outputs
+bin/
+obj/
