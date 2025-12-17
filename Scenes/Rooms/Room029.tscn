@@ -1,0 +1,185 @@
+[gd_scene load_steps=8 format=3]
+
+    [ext_resource type="Script" path="res://Script/RoomBase.cs" id="1_roombase"]
+    [ext_resource type="PackedScene" path="res://Scenes/Objects/Slingshot.tscn" id="2_slingshot"]
+    [ext_resource type="PackedScene" path="res://Scenes/Objects/ProjectilesLoader.tscn" id="3_loader"]
+    [ext_resource type="Script" path="res://Script/CameraFocus.cs" id="4_camera"]
+    [ext_resource type="Script" path="res://Globals/GameHud.cs" id="5_hud"]
+
+    [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+    size = Vector2(2000, 50)
+
+    [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+    size = Vector2(50, 1000)
+
+    [sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
+    size = Vector2(100, 150)
+
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_obs_0"]
+size = Vector2(50, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_obs_1"]
+size = Vector2(50, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_obs_2"]
+size = Vector2(50, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_obs_3"]
+size = Vector2(50, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_obs_4"]
+size = Vector2(50, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_obs_5"]
+size = Vector2(50, 50)
+
+
+    [node name="Room029" type="Node2D"]
+    script = ExtResource("1_roombase")
+    _slingshotPath = NodePath("Slingshot")
+    _exitDoorPath = NodePath("ExitDoor")
+    _projectilesLoaderPath = NodePath("ProjectilesLoader")
+    _targetScore = 1165
+
+    [node name="CameraFocus" type="Camera2D" parent="."]
+    position = Vector2(960, 540)
+    script = ExtResource("4_camera")
+
+    [node name="Slingshot" parent="." instance=ExtResource("2_slingshot")]
+    position = Vector2(250, 800)
+
+    [node name="ProjectilesLoader" parent="." node_paths=PackedStringArray("_slingshot") instance=ExtResource("3_loader")]
+    _slingshot = NodePath("../Slingshot")
+    _projectileCount = 4
+
+    [node name="StickCloneSpawn" type="Marker2D" parent="."]
+    position = Vector2(300, 800)
+
+    [node name="ExitDoor" type="Area2D" parent="."]
+    position = Vector2(1500, 825)
+    collision_layer = 2
+    collision_mask = 1
+
+    [node name="ColorRect" type="ColorRect" parent="ExitDoor"]
+    offset_left = -50.0
+    offset_top = -75.0
+    offset_right = 50.0
+    offset_bottom = 75.0
+    color = Color(0.2, 0.8, 0.2, 1)
+
+    [node name="CollisionShape2D" type="CollisionShape2D" parent="ExitDoor"]
+    shape = SubResource("RectangleShape2D_exit")
+
+    [node name="Environment" type="StaticBody2D" parent="."]
+    collision_layer = 2
+    collision_mask = 3
+
+    [node name="Floor" type="CollisionShape2D" parent="Environment"]
+    position = Vector2(1000, 925)
+    shape = SubResource("RectangleShape2D_floor")
+
+    [node name="FloorRect" type="ColorRect" parent="Environment/Floor"]
+    offset_left = -1000.0
+    offset_top = -25.0
+    offset_right = 1000.0
+    offset_bottom = 25.0
+    color = Color(0.5, 0.4, 0.3, 1)
+
+    [node name="WallL" type="CollisionShape2D" parent="Environment"]
+    position = Vector2(-25, 500)
+    shape = SubResource("RectangleShape2D_wall")
+
+    [node name="WallR" type="CollisionShape2D" parent="Environment"]
+    position = Vector2(2025, 500)
+    shape = SubResource("RectangleShape2D_wall")
+
+    [node name="Obstacles" type="Node2D" parent="."]
+
+[node name="Obstacle_0" type="RigidBody2D" parent="Obstacles"]
+position = Vector2(612.6938131740826, 870)
+mass = 2.0
+
+[node name="ColorRect" type="ColorRect" parent="Obstacles/Obstacle_0"]
+offset_left = -33.5972035666741
+offset_top = -27.053123905738868
+offset_right = 33.5972035666741
+offset_bottom = 27.053123905738868
+color = Color(0.019143231792266402, 0.3605822820862312, 0.09993756950674793, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Obstacle_0"]
+shape = SubResource("RectangleShape2D_obs_0")
+
+[node name="Obstacle_1" type="RigidBody2D" parent="Obstacles"]
+position = Vector2(956.7032938691013, 810)
+mass = 2.0
+
+[node name="ColorRect" type="ColorRect" parent="Obstacles/Obstacle_1"]
+offset_left = -29.507716915794617
+offset_top = -32.75700107528958
+offset_right = 29.507716915794617
+offset_bottom = 32.75700107528958
+color = Color(0.6570140148215203, 0.04372021353255118, 0.48459430817989857, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Obstacle_1"]
+shape = SubResource("RectangleShape2D_obs_1")
+
+[node name="Obstacle_2" type="RigidBody2D" parent="Obstacles"]
+position = Vector2(812.3474073780966, 750)
+mass = 2.0
+
+[node name="ColorRect" type="ColorRect" parent="Obstacles/Obstacle_2"]
+offset_left = -32.10126256104131
+offset_top = -39.229647459739844
+offset_right = 32.10126256104131
+offset_bottom = 39.229647459739844
+color = Color(0.4894572696730727, 0.1810482927227417, 0.1096377278452092, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Obstacle_2"]
+shape = SubResource("RectangleShape2D_obs_2")
+
+[node name="Obstacle_3" type="RigidBody2D" parent="Obstacles"]
+position = Vector2(931.2166694427121, 690)
+mass = 2.0
+
+[node name="ColorRect" type="ColorRect" parent="Obstacles/Obstacle_3"]
+offset_left = -39.378894279598654
+offset_top = -22.8096455340552
+offset_right = 39.378894279598654
+offset_bottom = 22.8096455340552
+color = Color(0.35059182857235627, 0.7143370350618282, 0.4320199123989079, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Obstacle_3"]
+shape = SubResource("RectangleShape2D_obs_3")
+
+[node name="Obstacle_4" type="RigidBody2D" parent="Obstacles"]
+position = Vector2(945.603047469019, 630)
+mass = 2.0
+
+[node name="ColorRect" type="ColorRect" parent="Obstacles/Obstacle_4"]
+offset_left = -34.806768988517376
+offset_top = -34.51455889094731
+offset_right = 34.806768988517376
+offset_bottom = 34.51455889094731
+color = Color(0.8811872339925225, 0.7468216118353309, 0.8282661549408193, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Obstacle_4"]
+shape = SubResource("RectangleShape2D_obs_4")
+
+[node name="Obstacle_5" type="RigidBody2D" parent="Obstacles"]
+position = Vector2(803.1761376002362, 570)
+mass = 2.0
+
+[node name="ColorRect" type="ColorRect" parent="Obstacles/Obstacle_5"]
+offset_left = -39.294662217068336
+offset_top = -26.462267017091023
+offset_right = 39.294662217068336
+offset_bottom = 26.462267017091023
+color = Color(0.25958956544663914, 0.7026849714293482, 0.25679079364064783, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacles/Obstacle_5"]
+shape = SubResource("RectangleShape2D_obs_5")
+
+
+    [node name="GameHud" type="CanvasLayer" parent="."]
+    script = ExtResource("5_hud")

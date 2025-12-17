@@ -17,6 +17,7 @@ public partial class MainMenu : Control
     [Export] private NodePath _quitButtonPath;
     [Export] private NodePath _titleLabelPath;
     [Export] private NodePath _versionLabelPath;
+    [Export] private string _roomSelectionScenePath = "res://Scenes/Main/RoomSelection.tscn";
 
     private Button? _playButton;
     private Button? _roomSelectionButton;
@@ -188,9 +189,7 @@ public partial class MainMenu : Control
         EmitSignal(SignalName.RoomSelectionButtonPressed);
         PlayUiClickSound();
         
-        // Navigate to room selection scene
-        // TODO: Load room selection scene
-        GameManager.StartRoomByLevelNumber(1); // Temporary fallback
+        Globals.GotoScene(_roomSelectionScenePath);
     }
 
     private void OnSettingsButtonPressed()

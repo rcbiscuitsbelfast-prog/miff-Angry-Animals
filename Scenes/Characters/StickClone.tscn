@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Script/StickClone.cs" id="1_script"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 15.0
+height = 60.0
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_body"]
+size = Vector2(30, 60)
+
+[node name="StickClone" type="CharacterBody2D" node_paths=PackedStringArray("_faceSprite", "_hatNodePath", "_glassesNodePath")]
+script = ExtResource("1_script")
+_faceSprite = NodePath("Sprite2D")
+_hatNodePath = NodePath("HatNode")
+_glassesNodePath = NodePath("GlassesNode")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_body")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("PlaceholderTexture2D_body")
+
+[node name="HatNode" type="Node2D" parent="."]
+position = Vector2(0, -30)
+
+[node name="GlassesNode" type="Node2D" parent="."]
+position = Vector2(0, -10)

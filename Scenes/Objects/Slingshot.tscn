@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://Script/Slingshot.cs" id="1_script"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/InputArea.tscn" id="2_input"]
+[ext_resource type="PackedScene" path="res://Scenes/Objects/TrajectoryDrawer.tscn" id="3_traj"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_base"]
+size = Vector2(40, 100)
+
+[node name="Slingshot" type="Node2D" node_paths=PackedStringArray("_inputArea", "_trajectoryDrawer", "_projectileHolder", "_restPosition")]
+script = ExtResource("1_script")
+_inputArea = NodePath("InputArea")
+_trajectoryDrawer = NodePath("TrajectoryDrawer")
+_projectileHolder = NodePath("ProjectileHolder")
+_restPosition = NodePath("RestPosition")
+
+[node name="BaseVisual" type="Sprite2D" parent="."]
+texture = SubResource("PlaceholderTexture2D_base")
+position = Vector2(0, -50)
+
+[node name="InputArea" parent="." instance=ExtResource("2_input")]
+position = Vector2(0, -100)
+
+[node name="TrajectoryDrawer" parent="." instance=ExtResource("3_traj")]
+position = Vector2(0, -100)
+
+[node name="ProjectileHolder" type="Marker2D" parent="."]
+position = Vector2(0, -100)
+
+[node name="RestPosition" type="Marker2D" parent="."]
+position = Vector2(0, -100)
