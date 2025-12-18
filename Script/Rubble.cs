@@ -11,7 +11,7 @@ public partial class Rubble : RigidBody2D
         
         // Random rotation and impulse for better feel
         Rotation = GD.Randf() * Mathf.Tau;
-        ApplyTorqueImpulse(GD.RandfRange(-10, 10));
+        ApplyTorqueImpulse((float)GD.RandRange(-10, 10));
         
         GetTree().CreateTimer(FadeDelay).Timeout += StartFade;
     }

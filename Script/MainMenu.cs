@@ -155,7 +155,7 @@ public partial class MainMenu : Control
     private void HandleMenuSelection()
     {
         // Find the currently focused button and trigger it
-        var focusedControl = GetViewPort().GuiGetFocusedControl();
+        var focusedControl = GetViewport().GuiGetFocusOwner();
         if (focusedControl is Button focusedButton && focusedButton.Disabled == false)
         {
             focusedButton.EmitSignal("pressed");

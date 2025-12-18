@@ -57,7 +57,7 @@ public partial class DestructibleProp : StaticBody2D
         }
     }
 
-    protected virtual void Die()
+    public virtual void Die()
     {
         SignalManager.EmitOnPropDestroyed(this, ScoreValue);
 
@@ -96,7 +96,7 @@ public partial class DestructibleProp : StaticBody2D
         for (int i = 0; i < count; i++)
         {
             var rubble = RubbleScene.Instantiate<RigidBody2D>();
-            rubble.GlobalPosition = GlobalPosition + new Vector2(GD.RandfRange(-10, 10), GD.RandfRange(-10, 10));
+            rubble.GlobalPosition = GlobalPosition + new Vector2((float)GD.RandRange(-10, 10), (float)GD.RandRange(-10, 10));
             GetTree().CurrentScene.CallDeferred("add_child", rubble);
         }
     }
@@ -117,7 +117,7 @@ public partial class DestructibleProp : StaticBody2D
         
         for(int i=0; i<5; i++)
         {
-            Vector2 offset = new Vector2(GD.RandfRange(-3, 3), GD.RandfRange(-3, 3));
+            Vector2 offset = new Vector2((float)GD.RandRange(-3, 3), (float)GD.RandRange(-3, 3));
             _shakeTween.TweenProperty(Sprite, "position", startPos + offset, 0.05f);
         }
         _shakeTween.TweenProperty(Sprite, "position", startPos, 0.05f);

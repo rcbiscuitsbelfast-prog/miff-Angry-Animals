@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class RageSystem : Node
+public partial class ScoreFeedbackSystem : Node
 {
     [Export] public PackedScene ScorePopupScene;
     

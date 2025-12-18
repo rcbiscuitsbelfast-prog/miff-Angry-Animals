@@ -168,7 +168,7 @@ public partial class StickClone : CharacterBody2D
         {
             if (shape is CollisionShape2D collisionShape)
             {
-                collisionShape.PhysicsMaterialOverride = physicsMaterial;
+                // collisionShape.PhysicsMaterialOverride = physicsMaterial; // Not supported on CollisionShape2D
             }
         }
     }

@@ -154,6 +154,7 @@ public partial class Slingshot : Node2D
         _currentProjectile.Launch(impulse);
         
         EmitSignal(SignalName.ProjectileLaunched, _currentProjectile);
+        ScoreManager.IncrementAttempts();
         SignalManager.EmitOnAttemptMade();
         
         _currentProjectile = null;

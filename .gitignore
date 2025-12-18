@@ -12,7 +12,7 @@
 *.sln.DotSettings.user
 
 # Godot 4+ auto-generated files
-export_presets.cfg
+# export_presets.cfg
 
 # Compiled binaries
 *.dll

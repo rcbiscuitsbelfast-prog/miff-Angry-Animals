@@ -32,6 +32,11 @@ public partial class ScoreManager : Node
     private int _score = 0;
 
     /// <summary>
+    /// Current attempts count.
+    /// </summary>
+    private int _attempts = 0;
+
+    /// <summary>
     /// The currently selected level number.
     /// </summary>
     private int _selectedLevel;
@@ -132,5 +137,32 @@ public partial class ScoreManager : Node
 
         // Add a new entry if the level has no score yet.
         else Instance._levelScores.Add(new LevelScore(levelNumber, score));
+    }
+
+    public static int GetScore() => Instance._score;
+    public static int GetAttempts() => Instance._attempts;
+
+    public static void IncrementAttempts()
+    {
+        Instance._attempts++;
+        Instance.EmitSignal(SignalName.AttemptsChanged, Instance._attempts);
+    }
+
+    public static void ResetAttempts()
+    {
+        Instance._attempts = 0;
+        Instance.EmitSignal(SignalName.AttemptsChanged, 0);
+    }
+
+    public static void AddScore(int points)
+    {
+        Instance._score += points;
+        Instance.EmitSignal(SignalName.ScoreChanged, Instance._score);
+    }
+
+    public static void ResetScore()
+    {
+        Instance._score = 0;
+        Instance.EmitSignal(SignalName.ScoreChanged, 0);
     }
 }

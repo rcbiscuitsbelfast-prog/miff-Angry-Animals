@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// Global file manager for saving and loading level scores.
-/// This class handles serialization of LevelScore objects to JSON, and stores/loads them from them disk using Godot's FileAccess System. 
+/// This class handles serialization of LevelScore objects to JSON, and stores/loads them from them disk using Godot's Godot.FileAccess System. 
 /// </summary>
 public partial class FileManager : Node
 {
@@ -26,7 +26,7 @@ public partial class FileManager : Node
 	/// <param name="content">List of LevelScore objects to save</param>
 	public static void SaveLevelScoreToFile(string path, List<LevelScore> content)
 	{
-		using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
+		using var file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Write);
 
 		if (file != null)
 		{
@@ -47,7 +47,7 @@ public partial class FileManager : Node
 	/// </returns>
     public static List<LevelScore> LoadLevelScoreFromFile(string path)
     {
-        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+        using var file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
 
         if (file != null)
         {

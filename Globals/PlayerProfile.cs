@@ -134,7 +134,7 @@ public partial class PlayerProfile : Node
 
         try
         {
-            using var file = FileAccess.Open(ProfilePath, FileAccess.ModeFlags.Write);
+            using var file = Godot.FileAccess.Open(ProfilePath, Godot.FileAccess.ModeFlags.Write);
             file?.StoreString(JsonConvert.SerializeObject(data, Formatting.Indented));
         }
         catch (Exception ex)
@@ -147,14 +147,14 @@ public partial class PlayerProfile : Node
     {
         try
         {
-            if (!FileAccess.FileExists(ProfilePath))
+            if (!Godot.FileAccess.FileExists(ProfilePath))
             {
                 HighestUnlockedRoomIndex = 0;
                 Save();
                 return;
             }
 
-            using var file = FileAccess.Open(ProfilePath, FileAccess.ModeFlags.Read);
+            using var file = Godot.FileAccess.Open(ProfilePath, Godot.FileAccess.ModeFlags.Read);
             var json = file?.GetAsText() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(json))
                 return;

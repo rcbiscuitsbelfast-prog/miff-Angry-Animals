@@ -46,7 +46,7 @@ public partial class GameManager : Node
     private void DeferredInit()
     {
         State = GameState.MainMenu;
-        EmitSignal(SignalName.GameStateChanged, State);
+        EmitSignal(SignalName.GameStateChanged, (int)State);
 
         _signalManager = GetNodeOrNull<SignalManager>("/root/SignalManager");
         if (_signalManager != null)
@@ -70,7 +70,7 @@ public partial class GameManager : Node
     {
         CurrentRoomIndex = -1;
         State = GameState.MainMenu;
-        EmitSignal(SignalName.GameStateChanged, State);
+        EmitSignal(SignalName.GameStateChanged, (int)State);
         Globals.GotoScene(MainScenePath);
     }
 
@@ -94,10 +94,12 @@ public partial class GameManager : Node
 
         CurrentRoomIndex = roomIndex;
         State = GameState.InRoom;
-        EmitSignal(SignalName.GameStateChanged, State);
+        EmitSignal(SignalName.GameStateChanged, (int)State);
         EmitSignal(SignalName.RoomStarted, roomIndex);
 
         ScoreManager.SetLevel(roomIndex + 1);
+        ScoreManager.ResetScore();
+        ScoreManager.ResetAttempts();
         Globals.GotoScene(Rooms[roomIndex].ScenePath);
     }
 
@@ -117,7 +119,7 @@ public partial class GameManager : Node
             return;
 
         State = GameState.RoomComplete;
-        EmitSignal(SignalName.GameStateChanged, State);
+        EmitSignal(SignalName.GameStateChanged, (int)State);
         EmitSignal(SignalName.RoomCompleted, CurrentRoomIndex);
 
         UnlockNextRoom();
@@ -152,7 +154,7 @@ public partial class GameManager : Node
     {
         GetTree().Paused = true;
         State = GameState.Paused;
-        EmitSignal(SignalName.GameStateChanged, State);
+        EmitSignal(SignalName.GameStateChanged, (int)State);
     }
 
     public static void ResumeGame() => Instance.ResumeGameInternal();
@@ -161,6 +163,6 @@ public partial class GameManager : Node
     {
         GetTree().Paused = false;
         State = CurrentRoomIndex >= 0 ? GameState.InRoom : GameState.MainMenu;
-        EmitSignal(SignalName.GameStateChanged, State);
+        EmitSignal(SignalName.GameStateChanged, (int)State);
     }
 }

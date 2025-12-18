@@ -54,38 +54,38 @@ public partial class AudioManager : Node
         _backgroundMusicPlayer = new AudioStreamPlayer();
         _backgroundMusicPlayer.Name = "BackgroundMusicPlayer";
         _backgroundMusicPlayer.Bus = MUSIC_BUS;
-        _backgroundMusicPlayer.VolumeDb = LinearToDb(MusicVolume);
+        _backgroundMusicPlayer.VolumeDb = Mathf.LinearToDb(MusicVolume);
         AddChild(_backgroundMusicPlayer);
 
         // Initialize SFX players
         _slingshotSfxPlayer = new AudioStreamPlayer();
         _slingshotSfxPlayer.Name = "SlingshotSfxPlayer";
         _slingshotSfxPlayer.Bus = SFX_BUS;
-        _slingshotSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _slingshotSfxPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_slingshotSfxPlayer);
 
         _destructionSfxPlayer = new AudioStreamPlayer();
         _destructionSfxPlayer.Name = "DestructionSfxPlayer";
         _destructionSfxPlayer.Bus = SFX_BUS;
-        _destructionSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _destructionSfxPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_destructionSfxPlayer);
 
         _uiClickPlayer = new AudioStreamPlayer();
         _uiClickPlayer.Name = "UiClickPlayer";
         _uiClickPlayer.Bus = UI_BUS;
-        _uiClickPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _uiClickPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_uiClickPlayer);
 
         _comboPlayer = new AudioStreamPlayer();
         _comboPlayer.Name = "ComboPlayer";
         _comboPlayer.Bus = SFX_BUS;
-        _comboPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _comboPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_comboPlayer);
 
         _ragePlayer = new AudioStreamPlayer();
         _ragePlayer.Name = "RagePlayer";
         _ragePlayer.Bus = SFX_BUS;
-        _ragePlayer.VolumeDb = LinearToDb(SfxVolume);
+        _ragePlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_ragePlayer);
     }
 
@@ -272,7 +272,7 @@ public partial class AudioManager : Node
         MusicVolume = Mathf.Clamp(volume, 0f, 1f);
         if (_backgroundMusicPlayer != null)
         {
-            _backgroundMusicPlayer.VolumeDb = LinearToDb(MusicVolume);
+            _backgroundMusicPlayer.VolumeDb = Mathf.LinearToDb(MusicVolume);
         }
         EmitSignal(SignalName.MusicVolumeChanged, MusicVolume);
     }
@@ -282,15 +282,15 @@ public partial class AudioManager : Node
         SfxVolume = Mathf.Clamp(volume, 0f, 1f);
         
         if (_slingshotSfxPlayer != null)
-            _slingshotSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _slingshotSfxPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         if (_destructionSfxPlayer != null)
-            _destructionSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _destructionSfxPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         if (_uiClickPlayer != null)
-            _uiClickPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _uiClickPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         if (_comboPlayer != null)
-            _comboPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _comboPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         if (_ragePlayer != null)
-            _ragePlayer.VolumeDb = LinearToDb(SfxVolume);
+            _ragePlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
 
         EmitSignal(SignalName.SfxVolumeChanged, SfxVolume);
     }
@@ -300,7 +300,7 @@ public partial class AudioManager : Node
         MuteMusic = muted;
         if (_backgroundMusicPlayer != null)
         {
-            _backgroundMusicPlayer.Muted = muted;
+            _backgroundMusicPlayer.StreamPaused = muted;
         }
     }
 
@@ -309,15 +309,15 @@ public partial class AudioManager : Node
         MuteSfx = muted;
         
         if (_slingshotSfxPlayer != null)
-            _slingshotSfxPlayer.Muted = muted;
+            _slingshotSfxPlayer.StreamPaused = muted;
         if (_destructionSfxPlayer != null)
-            _destructionSfxPlayer.Muted = muted;
+            _destructionSfxPlayer.StreamPaused = muted;
         if (_uiClickPlayer != null)
-            _uiClickPlayer.Muted = muted;
+            _uiClickPlayer.StreamPaused = muted;
         if (_comboPlayer != null)
-            _comboPlayer.Muted = muted;
+            _comboPlayer.StreamPaused = muted;
         if (_ragePlayer != null)
-            _ragePlayer.Muted = muted;
+            _ragePlayer.StreamPaused = muted;
     }
 
     // Public static API for other scripts

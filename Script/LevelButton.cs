@@ -4,7 +4,7 @@ using Godot;
 /// Level selection button in the menu.
 /// Displays the level number and best score, and loads the corresponding sceme when pressed.
 /// </summary>
-public partial class Button : TextureButton
+public partial class LevelButton : TextureButton
 {
     /// <summary>
     /// The level number the button represents.
