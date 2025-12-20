@@ -87,13 +87,40 @@ public partial class StickClone : CharacterBody2D
             ApplyGlasses(_currentGlasses);
         }
 
-        // Apply emotion to face
+        // Apply emotion to face or load custom face
         if (_faceSprite != null)
         {
-            ApplyEmotion(_currentEmotion);
+            if (!string.IsNullOrEmpty(PlayerProfile.Instance.FaceImagePath))
+            {
+                ApplyCustomFace(PlayerProfile.Instance.FaceImagePath);
+            }
+            else
+            {
+                ApplyEmotion(_currentEmotion);
+            }
         }
 
         GD.Print($"StickClone spawned with: Hat={_currentHat}, Glasses={_currentGlasses}, Emotion={_currentEmotion}");
+    }
+
+    private void ApplyCustomFace(string path)
+    {
+        if (_faceSprite == null) return;
+
+        // Load custom face from user:// directory
+        var image = new Image();
+        var error = image.Load(path);
+        
+        if (error == Error.Ok)
+        {
+            var texture = ImageTexture.CreateFromImage(image);
+            _faceSprite.Texture = texture;
+        }
+        else
+        {
+            GD.PushWarning($"Failed to load custom face from {path}: {error}");
+            ApplyEmotion(_currentEmotion); // Fallback
+        }
     }
 
     private void ApplyHat(string hatType)
