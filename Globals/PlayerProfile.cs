@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Godot;
 using Newtonsoft.Json;
 
@@ -44,6 +45,8 @@ public partial class PlayerProfile : Node
     public int SelectedGlassesIndex { get; private set; }
     public int SelectedFilterIndex { get; private set; }
     public int SelectedEmotionIndex { get; private set; }
+
+    public string FaceImagePath { get; private set; } = "";
 
     public int HighestUnlockedRoomIndex { get; private set; }
 
@@ -129,6 +132,7 @@ public partial class PlayerProfile : Node
             SelectedGlassesIndex = SelectedGlassesIndex,
             SelectedFilterIndex = SelectedFilterIndex,
             SelectedEmotionIndex = SelectedEmotionIndex,
+            FaceImagePath = FaceImagePath,
             HighestUnlockedRoomIndex = HighestUnlockedRoomIndex
         };
 
@@ -168,6 +172,7 @@ public partial class PlayerProfile : Node
             SelectedGlassesIndex = Mathf.Clamp(data.SelectedGlassesIndex, 0, DefaultGlasses.Length - 1);
             SelectedFilterIndex = Mathf.Clamp(data.SelectedFilterIndex, 0, DefaultFilters.Length - 1);
             SelectedEmotionIndex = Mathf.Clamp(data.SelectedEmotionIndex, 0, DefaultEmotions.Length - 1);
+            FaceImagePath = data.FaceImagePath ?? "";
             HighestUnlockedRoomIndex = Math.Max(0, data.HighestUnlockedRoomIndex);
         }
         catch (Exception ex)
@@ -176,9 +181,29 @@ public partial class PlayerProfile : Node
         }
     }
 
-    public static void RequestCameraCapture()
+    public static Task<string?> CapturePhotoAsync()
     {
-        GD.PushWarning("Camera capture is not implemented in this C# port yet.");
+        // This will be handled by the UI layer, but we provide the API point.
+        // In a real implementation, this might signal the UI to open the camera.
+        GD.Print("CapturePhotoAsync called - Waiting for UI implementation");
+        return Task.FromResult<string?>(null);
+    }
+
+    public static Task<string?> SelectFromGalleryAsync()
+    {
+        GD.Print("SelectFromGalleryAsync called - Waiting for UI implementation");
+        return Task.FromResult<string?>(null);
+    }
+
+    public static void SetFaceImage(string path)
+    {
+        Instance.FaceImagePath = path ?? "";
+        Instance.Save();
+    }
+
+    public static void SaveCosmetics()
+    {
+        Instance.Save();
     }
 
     private sealed class SaveData
@@ -189,6 +214,7 @@ public partial class PlayerProfile : Node
         public int SelectedGlassesIndex { get; set; }
         public int SelectedFilterIndex { get; set; }
         public int SelectedEmotionIndex { get; set; }
+        public string FaceImagePath { get; set; } = "";
         public int HighestUnlockedRoomIndex { get; set; }
     }
 }

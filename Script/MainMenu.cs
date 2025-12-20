@@ -28,8 +28,38 @@ public partial class MainMenu : Control
     public override void _Ready()
     {
         InitializeMenu();
+        AddCustomizeFaceButton();
         ConnectSignals();
         SetupInputMap();
+    }
+
+    private void AddCustomizeFaceButton()
+    {
+        if (_playButton != null && _playButton.GetParent() is Control container)
+        {
+            var customizeBtn = new Button();
+            customizeBtn.Text = "Customize Face";
+            customizeBtn.Name = "CustomizeFaceButton";
+            customizeBtn.Pressed += OnCustomizeFaceButtonPressed;
+            
+            // Add to the same container as other buttons
+            container.AddChild(customizeBtn);
+            
+            // Position it after Room Selection button if possible
+            if (_roomSelectionButton != null)
+            {
+                container.MoveChild(customizeBtn, _roomSelectionButton.GetIndex() + 1);
+            }
+        }
+    }
+
+    private void OnCustomizeFaceButtonPressed()
+    {
+        GD.Print("Customize Face button pressed");
+        PlayUiClickSound();
+
+        var screen = new FaceCustomizationScreen();
+        GetTree().Root.AddChild(screen);
     }
 
     private void InitializeMenu()
