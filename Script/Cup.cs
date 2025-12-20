@@ -15,7 +15,7 @@ public partial class Cup : DestructibleProp
 	{
         // Initialize base DestructibleProp
         base._Ready();
-        
+         
         // Ensure some defaults if not set
         if (MaxHp <= 0) MaxHp = 10; // Default cup HP
         CurrentHp = MaxHp; // Reset CurrentHp as DestructibleProp._Ready might have run before we set MaxHp if we set it here. 
@@ -23,7 +23,7 @@ public partial class Cup : DestructibleProp
         // If MaxHp was 0 from export defaults, then CurrentHp is 0. 
         // We should set MaxHp before base._Ready if possible, or reset CurrentHp.
         // But _Ready order is Base then Derived. So base._Ready() runs first.
-        
+         
         if (MaxHp == 0 || MaxHp == 100) // If default 100 from base or 0
         {
              // Maybe we want specific cup defaults?
@@ -39,10 +39,10 @@ public partial class Cup : DestructibleProp
     {
         // Emit legacy signal
         SignalManager.EmitOnCupDestroyed();
-        
+         
         // Base Die() emits PropDestroyed, spawns rubble, plays sound, and QueueFrees.
         // We want to delay QueueFree until animation finishes.
-        
+         
         SignalManager.EmitOnPropDestroyed(this, ScoreValue);
         SpawnRubble(); // Use base helper
         
@@ -56,7 +56,7 @@ public partial class Cup : DestructibleProp
         else { SpawnRubble(); if (DestructionSound != null) ... }
         QueueFree();
         */
-        
+         
         // We want to override the visual part (Animation instead of EffectScene) but keep score/rubble.
         
         // We already emitted score and spawned rubble above.

@@ -18,17 +18,21 @@ public partial class RoomBase : Node2D
     [Export] private int _targetScore = 3;
     [Export] private bool _isBonusRoom = false;
     [Export] private NodePath _nextRoomPath; // For bonus room transitions
+    [Export] private Marker2D _stickCloneSpawn; // Spawn position marker for StickClone
 
     private Slingshot? _slingshot;
     private Node2D? _exitDoor;
     private ProjectilesLoader? _projectilesLoader;
     private Node2D? _nextRoomMarker;
+    private StickClone? _stickClone;
 
     private enum RoomPhase { SLINGSHOT, TRAVERSAL, COMPLETE }
     private RoomPhase _currentPhase = RoomPhase.SLINGSHOT;
 
     private int _destructionScore = 0;
     private bool _exitUnlocked = false;
+    private int _roomNumber = 1;
+    private string _faceCustomization = ""; // Path to face texture for StickClone
 
     public override void _Ready()
     {
@@ -54,6 +58,7 @@ public partial class RoomBase : Node2D
         if (currentRoomIndex >= 0 && currentRoomIndex < GameManager.Instance.Rooms.Length)
         {
             _targetScore = GameManager.Instance.Rooms[currentRoomIndex].TargetScore;
+            _roomNumber = currentRoomIndex + 1;
         }
     }
 
@@ -64,6 +69,7 @@ public partial class RoomBase : Node2D
         SignalManager.Instance.OnCupDestroyed += OnCupDestroyed;
         SignalManager.Instance.OnPropDestroyed += OnPropDestroyed;
         SignalManager.Instance.OnAnimalDied += OnAnimalDied;
+        SignalManager.Instance.OnLevelCompleted += OnSlinghotPhaseComplete;
 
         // Connect to projectiles loader for phase transitions
         if (_projectilesLoader != null)
@@ -88,6 +94,7 @@ public partial class RoomBase : Node2D
             SignalManager.Instance.OnCupDestroyed -= OnCupDestroyed;
             SignalManager.Instance.OnPropDestroyed -= OnPropDestroyed;
             SignalManager.Instance.OnAnimalDied -= OnAnimalDied;
+            SignalManager.Instance.OnLevelCompleted -= OnSlinghotPhaseComplete;
         }
 
         if (_projectilesLoader != null)
@@ -292,6 +299,26 @@ public partial class RoomBase : Node2D
     /// Checks if the exit door is unlocked.
     /// </summary>
     public bool IsExitUnlocked() => _exitUnlocked;
+
+    /// <summary>
+    /// Sets the room number for this room.
+    /// </summary>
+    public void SetRoomNumber(int roomNumber) => _roomNumber = roomNumber;
+
+    /// <summary>
+    /// Sets the face customization for StickClone.
+    /// </summary>
+    public void SetFaceCustomization(string faceResourcePath) => _faceCustomization = faceResourcePath;
+
+    /// <summary>
+    /// Gets the current phase of the room.
+    /// </summary>
+    public RoomPhase GetCurrentPhase() => _currentPhase;
+
+    /// <summary>
+    /// Gets the StickClone instance if spawned.
+    /// </summary>
+    public StickClone GetStickClone() => _stickClone;
 
     /// <summary>
     /// Finds a suitable spawn position for StickClone.

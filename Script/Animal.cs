@@ -38,10 +38,11 @@ public partial class Animal : RigidBody2D
 
 
 
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     // Private State
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     
+
     private AnimalState _state = AnimalState.READY; // Current gameplay state.
 
     private Vector2 _initialPosition = Vector2.Zero; // Starting position before drag.
@@ -55,9 +56,10 @@ public partial class Animal : RigidBody2D
 
     
 
-    // -------------------------------------------------------------------------------
+
+    // --------------------------------------------------------------------------------
     // Godot Lifecycle
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
@@ -72,9 +74,9 @@ public partial class Animal : RigidBody2D
 
 
 
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     // Initialization
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
 
     /// <summary>
     /// Sets the initial values for variables and prepares the arrow indicator.
@@ -99,9 +101,9 @@ public partial class Animal : RigidBody2D
 
 
 
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     // State Handling
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
 
     /// <summary>
     /// Changes the animal's current state and triggers related behavior.
@@ -135,9 +137,9 @@ public partial class Animal : RigidBody2D
 
 
 
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     // Dragging & Launching
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
 
     /// <summary>
     /// Called when dragging starts. Shows the arrow indicator.
@@ -184,9 +186,9 @@ public partial class Animal : RigidBody2D
 
 
 
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     // Dragging Helpers
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
 
     /// <summary>
     /// Updates the dragged vector based on mouse position.
@@ -220,9 +222,9 @@ public partial class Animal : RigidBody2D
 
 
 
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     // Sound & Feedback
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
 
     /// <summary>
     /// Plays the kick sound on the first collision during flight.
@@ -250,9 +252,9 @@ public partial class Animal : RigidBody2D
 
 
 
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     // Input & Physics
-    // -------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
 
     /// <summary>
     /// Calculates the inpulse vector applied to the animal when launched.
@@ -302,21 +304,25 @@ public partial class Animal : RigidBody2D
         {
             foreach (Node2D body in GetCollidingBodies())
             {
-                if (body is Cup cup) cup.Die();
-
-                CallDeferred("Die");
+                if (body is Cup cup)
+                {
+                    cup.Die();
+                }
             }
+
+            Die();
         }
     }
 
 
+    /// <summary>
+    /// Triggered when the animal leaves the screen.
+    /// </summary>
+    private void IsOffScreen() => Die();
 
-    // -------------------------------------------------------------------------------
-    // Death & Cleanup.
-    // -------------------------------------------------------------------------------
 
     /// <summary>
-    /// Handles the animal1s death. Emits and frees the node.
+    /// Destroys the animal and emits the death signal.
     /// </summary>
     private void Die()
     {
@@ -326,7 +332,31 @@ public partial class Animal : RigidBody2D
 
 
     /// <summary>
-    /// Called when the animal leaves the screen. Triggers death.
+    /// Gets the current state of the animal.
     /// </summary>
-    private void IsOffScreen() => Die();
+    /// <returns>The current state.</returns>
+    public AnimalState GetState() => _state;
+
+
+    /// <summary>
+    /// Sets the animal's position.
+    /// </summary>
+    /// <param name="position">The new position.</param>
+    public void SetPosition(Vector2 position)
+    {
+        Position = position;
+        _initialPosition = position;
+    }
+
+
+    /// <summary>
+    /// Resets the animal to its initial state.
+    /// </summary>
+    public void Reset()
+    {
+        Position = _initialPosition;
+        _state = AnimalState.READY;
+        _arrow.Visible = false;
+        Freeze = true;
+    }
 }

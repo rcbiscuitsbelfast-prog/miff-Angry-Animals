@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://boihxq2p2f8bg"]
+
+[ext_resource type="Script" path="res://Script/StickClone.cs" id="1_2k3lm"]
+
+[node name="StickClone" type="CharacterBody2D"]
+script = ExtResource("1_2k3lm")
+_walkSpeed = 200.0
+_jumpForce = -400.0
+_gravity = 800.0
+_climbSpeed = 150.0
+_maxFallSpeed = 400.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="FaceSprite" type="Sprite2D" parent="Sprite2D"]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
