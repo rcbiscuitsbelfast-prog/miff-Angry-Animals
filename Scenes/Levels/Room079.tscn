@@ -1,0 +1,76 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://Script/RoomBase.cs" id="1_script"]
+[ext_resource type="PackedScene" path="res://Scenes/Infrastructure/Slingshot.tscn" id="2_sling"]
+[ext_resource type="PackedScene" path="res://Scenes/Infrastructure/ProjectilesLoader.tscn" id="3_loader"]
+[ext_resource type="PackedScene" path="res://Scenes/Infrastructure/CameraFocus.tscn" id="4_cam"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/GameHud.tscn" id="5_hud"]
+[ext_resource type="PackedScene" path="res://Scenes/Obstacles/Cup.tscn" id="6_cup"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(1200, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
+size = Vector2(60, 100)
+
+[node name="Room079" type="Node2D"]
+script = ExtResource("1_script")
+_slingshotPath = NodePath("Slingshot")
+_exitDoorPath = NodePath("Environment/ExitDoor")
+_projectilesLoaderPath = NodePath("ProjectilesLoader")
+_targetScore = 10
+
+[node name="Slingshot" parent="." instance=ExtResource("2_sling")]
+position = Vector2(200, 500)
+
+[node name="ProjectilesLoader" parent="." instance=ExtResource("3_loader")]
+position = Vector2(100, 500)
+_slingshot = NodePath("../Slingshot")
+
+[node name="CameraFocus" parent="." instance=ExtResource("4_cam")]
+_slingshot = NodePath("../Slingshot")
+_slingshotPosition = NodePath("../Slingshot")
+
+[node name="GameHud" parent="." instance=ExtResource("5_hud")]
+
+[node name="Environment" type="Node2D" parent="."]
+
+[node name="Floor" type="StaticBody2D" parent="Environment"]
+position = Vector2(600, 600)
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/Floor"]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="ColorRect" type="ColorRect" parent="Environment/Floor"]
+offset_left = -600.0
+offset_top = -20.0
+offset_right = 600.0
+offset_bottom = 20.0
+color = Color(0.3, 0.6, 0.3, 1)
+
+[node name="ExitDoor" type="Area2D" parent="Environment"]
+position = Vector2(1000, 530)
+collision_layer = 2
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/ExitDoor"]
+shape = SubResource("RectangleShape2D_exit")
+
+[node name="ColorRect" type="ColorRect" parent="Environment/ExitDoor"]
+offset_left = -30.0
+offset_top = -50.0
+offset_right = 30.0
+offset_bottom = 50.0
+color = Color(0.4, 0.2, 0, 1)
+
+[node name="Obstacles" type="Node2D" parent="."]
+
+[node name="Cup1" parent="Obstacles" instance=ExtResource("6_cup")]
+position = Vector2(800, 550)
+
+[node name="Cup2" parent="Obstacles" instance=ExtResource("6_cup")]
+position = Vector2(850, 550)
+
+[node name="Cup3" parent="Obstacles" instance=ExtResource("6_cup")]
+position = Vector2(825, 510)

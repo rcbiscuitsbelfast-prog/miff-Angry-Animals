@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Script/TrajectoryDrawer.cs" id="1_script"]
+
+[sub_resource type="Gradient" id="Gradient_1"]
+colors = PackedColorArray(1, 0, 0, 1, 1, 1, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1"]
+gradient = SubResource("Gradient_1")
+width = 32
+height = 32
+fill_from = Vector2(0, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="TrajectoryDrawer" type="Node2D" node_paths=PackedStringArray("_trajectoryLine", "_arrow")]
+script = ExtResource("1_script")
+_trajectoryLine = NodePath("Line2D")
+_arrow = NodePath("Arrow")
+
+[node name="Line2D" type="Line2D" parent="."]
+points = PackedVector2Array(0, 0, 100, 0)
+width = 5.0
+default_color = Color(1, 0, 0, 0.501961)
+
+[node name="Arrow" type="Sprite2D" parent="."]
+texture = SubResource("GradientTexture2D_1")
+offset = Vector2(16, 0)

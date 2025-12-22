@@ -1,4 +1,5 @@
 using Godot;
+using System.Linq;
 
 public partial class GameManager : Node
 {
@@ -15,15 +16,9 @@ public partial class GameManager : Node
 
     public readonly record struct RoomInfo(string ScenePath, string Description, int TargetScore);
 
-    public RoomInfo[] Rooms { get; } =
-    [
-        new RoomInfo("res://Scenes/Level/Level1.tscn", "Room 1", 3),
-        new RoomInfo("res://Scenes/Level/Level2.tscn", "Room 2", 3),
-        new RoomInfo("res://Scenes/Level/Level3.tscn", "Room 3", 4),
-        new RoomInfo("res://Scenes/Level/Level4.tscn", "Room 4", 4),
-        new RoomInfo("res://Scenes/Level/Level5.tscn", "Room 5", 5),
-        new RoomInfo("res://Scenes/Level/Level6.tscn", "Room 6", 5)
-    ];
+    public RoomInfo[] Rooms { get; } = Enumerable.Range(1, 100)
+        .Select(i => new RoomInfo($"res://Scenes/Levels/Room{i:D3}.tscn", $"Room {i}", 3))
+        .ToArray();
 
     public GameState State { get; private set; } = GameState.Boot;
     public int CurrentRoomIndex { get; private set; } = -1;

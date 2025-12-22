@@ -1,0 +1,100 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Script/GameHud.cs" id="1_script"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/PausePanel.tscn" id="2_pause"]
+
+[node name="GameHud" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_script")
+_attemptsLabelPath = NodePath("MarginContainer/HBoxContainer/AttemptsLabel")
+_rageBarPath = NodePath("MarginContainer/HBoxContainer/RageContainer/RageBar")
+_rageFillPath = NodePath("MarginContainer/HBoxContainer/RageContainer/RageBar/Fill")
+_comboLabelPath = NodePath("ComboLabel")
+_pauseButtonPath = NodePath("MarginContainer/PauseButton")
+_pausePanelPath = NodePath("PausePanel")
+_resumeButtonPath = NodePath("PausePanel/CenterContainer/VBoxContainer/ResumeButton")
+_quitButtonPath = NodePath("PausePanel/CenterContainer/VBoxContainer/QuitButton")
+_scoreLabelPath = NodePath("MarginContainer/HBoxContainer/ScoreLabel")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 40
+
+[node name="AttemptsLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Attempts: 0"
+
+[node name="ScoreLabel" type="Label" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Score: 0"
+
+[node name="RageContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="MarginContainer/HBoxContainer/RageContainer"]
+layout_mode = 2
+text = "RAGE"
+
+[node name="RageBar" type="ProgressBar" parent="MarginContainer/HBoxContainer/RageContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+show_percentage = false
+
+[node name="Fill" type="ColorRect" parent="MarginContainer/HBoxContainer/RageContainer/RageBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.3)
+
+[node name="PauseButton" type="Button" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "PAUSE"
+
+[node name="ComboLabel" type="Label" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
+theme_override_font_sizes/font_size = 64
+text = "COMBO x3"
+
+[node name="PausePanel" parent="." instance=ExtResource("2_pause")]
+visible = false

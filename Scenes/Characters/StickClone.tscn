@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Script/StickClone.cs" id="1_script"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
+radius = 15.0
+height = 60.0
+
+[node name="StickClone" type="CharacterBody2D"]
+collision_mask = 2
+script = ExtResource("1_script")
+_faceSpritePath = NodePath("Visuals/Head/FaceSprite")
+_hatNodePath = NodePath("Visuals/Head/HatNode")
+_glassesNodePath = NodePath("Visuals/Head/GlassesNode")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_1")
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Body" type="ColorRect" parent="Visuals"]
+offset_left = -5.0
+offset_top = -30.0
+offset_right = 5.0
+offset_bottom = 30.0
+color = Color(0, 0, 0, 1)
+
+[node name="Head" type="Node2D" parent="Visuals"]
+position = Vector2(0, -35)
+
+[node name="FaceSprite" type="Sprite2D" parent="Visuals/Head"]
+
+[node name="HatNode" type="Node2D" parent="Visuals/Head"]
+visible = false
+
+[node name="GlassesNode" type="Node2D" parent="Visuals/Head"]
+visible = false
