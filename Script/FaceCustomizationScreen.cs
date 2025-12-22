@@ -52,7 +52,7 @@ public partial class FaceCustomizationScreen : Control
 
         // LEFT SIDE: Preview & Camera
         var leftVBox = new VBoxContainer();
-        leftVBox.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        leftVBox.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
         leftVBox.CustomMinimumSize = new Vector2(400, 0);
         leftVBox.Alignment = BoxContainer.AlignmentMode.Center;
         mainHBox.AddChild(leftVBox);

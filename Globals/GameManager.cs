@@ -15,15 +15,17 @@ public partial class GameManager : Node
 
     public readonly record struct RoomInfo(string ScenePath, string Description, int TargetScore);
 
-    public RoomInfo[] Rooms { get; } =
-    [
-        new RoomInfo("res://Scenes/Level/Level1.tscn", "Room 1", 3),
-        new RoomInfo("res://Scenes/Level/Level2.tscn", "Room 2", 3),
-        new RoomInfo("res://Scenes/Level/Level3.tscn", "Room 3", 4),
-        new RoomInfo("res://Scenes/Level/Level4.tscn", "Room 4", 4),
-        new RoomInfo("res://Scenes/Level/Level5.tscn", "Room 5", 5),
-        new RoomInfo("res://Scenes/Level/Level6.tscn", "Room 6", 5)
-    ];
+    /// <summary>
+    /// Total number of levels included in the full game.
+    /// </summary>
+    public const int TotalLevels = 100;
+
+    /// <summary>
+    /// Number of levels available in the free tier.
+    /// </summary>
+    public const int FreeLevels = 20;
+
+    public RoomInfo[] Rooms { get; } = CreateDefaultRooms();
 
     public GameState State { get; private set; } = GameState.Boot;
     public int CurrentRoomIndex { get; private set; } = -1;
@@ -86,7 +88,15 @@ public partial class GameManager : Node
             return;
         }
 
-        if (!PlayerProfile.IsRoomUnlocked(roomIndex))
+        bool fullUnlocked = MonetizationManager.Instance?.IsFullGameUnlocked ?? false;
+
+        if (!fullUnlocked && roomIndex >= FreeLevels)
+        {
+            GD.PushWarning($"StartRoom: paywalled room {roomIndex}. Unlock full game to play.");
+            return;
+        }
+
+        if (!fullUnlocked && !PlayerProfile.IsRoomUnlocked(roomIndex))
         {
             GD.PushWarning($"StartRoom: room locked {roomIndex}");
             return;
@@ -130,8 +140,14 @@ public partial class GameManager : Node
             return;
 
         int next = Instance.CurrentRoomIndex + 1;
-        if (next < Instance.Rooms.Length)
-            PlayerProfile.UnlockRoom(next);
+        if (next >= Instance.Rooms.Length)
+            return;
+
+        bool fullUnlocked = MonetizationManager.Instance?.IsFullGameUnlocked ?? false;
+        if (!fullUnlocked && next >= FreeLevels)
+            return;
+
+        PlayerProfile.UnlockRoom(next);
     }
 
     public static void ShowRoomComplete()
@@ -162,5 +178,19 @@ public partial class GameManager : Node
         GetTree().Paused = false;
         State = CurrentRoomIndex >= 0 ? GameState.InRoom : GameState.MainMenu;
         EmitSignal(SignalName.GameStateChanged, State);
+    }
+
+    private static RoomInfo[] CreateDefaultRooms()
+    {
+        var rooms = new RoomInfo[TotalLevels];
+        for (int i = 0; i < TotalLevels; i++)
+        {
+            int levelNumber = i + 1;
+            rooms[i] = new RoomInfo(
+                $"res://Scenes/Level/Level{levelNumber}.tscn",
+                $"Level {levelNumber}",
+                3);
+        }
+        return rooms;
     }
 }

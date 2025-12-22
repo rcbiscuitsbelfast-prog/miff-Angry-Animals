@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Godot;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 public partial class PlayerProfile : Node
 {
@@ -40,6 +41,11 @@ public partial class PlayerProfile : Node
     ];
 
     public string PlayerName { get; private set; } = "Player";
+
+    /// <summary>
+    /// Whether the full game has been unlocked via in-app purchase.
+    /// </summary>
+    public bool IsFullGameUnlocked { get; set; } = false;
 
     public int SelectedHatIndex { get; private set; }
     public int SelectedGlassesIndex { get; private set; }
@@ -125,21 +131,26 @@ public partial class PlayerProfile : Node
 
     public void Save()
     {
-        var data = new SaveData
+        var root = new JObject
         {
-            PlayerName = PlayerName,
-            SelectedHatIndex = SelectedHatIndex,
-            SelectedGlassesIndex = SelectedGlassesIndex,
-            SelectedFilterIndex = SelectedFilterIndex,
-            SelectedEmotionIndex = SelectedEmotionIndex,
-            FaceImagePath = FaceImagePath,
-            HighestUnlockedRoomIndex = HighestUnlockedRoomIndex
+            ["version"] = 2,
+            ["profile_name"] = PlayerName,
+            ["is_full_game_unlocked"] = IsFullGameUnlocked,
+            ["face_image_path"] = FaceImagePath,
+            ["highest_unlocked_room_index"] = HighestUnlockedRoomIndex,
+            ["cosmetics"] = new JObject
+            {
+                ["hat_index"] = SelectedHatIndex,
+                ["glasses_index"] = SelectedGlassesIndex,
+                ["filter_index"] = SelectedFilterIndex,
+                ["emotion_index"] = SelectedEmotionIndex
+            }
         };
 
         try
         {
             using var file = FileAccess.Open(ProfilePath, FileAccess.ModeFlags.Write);
-            file?.StoreString(JsonConvert.SerializeObject(data, Formatting.Indented));
+            file?.StoreString(JsonConvert.SerializeObject(root, Formatting.Indented));
         }
         catch (Exception ex)
         {
@@ -163,17 +174,40 @@ public partial class PlayerProfile : Node
             if (string.IsNullOrWhiteSpace(json))
                 return;
 
-            var data = JsonConvert.DeserializeObject<SaveData>(json);
-            if (data == null)
-                return;
+            var root = JObject.Parse(json);
 
-            PlayerName = string.IsNullOrWhiteSpace(data.PlayerName) ? "Player" : data.PlayerName;
-            SelectedHatIndex = Mathf.Clamp(data.SelectedHatIndex, 0, DefaultHats.Length - 1);
-            SelectedGlassesIndex = Mathf.Clamp(data.SelectedGlassesIndex, 0, DefaultGlasses.Length - 1);
-            SelectedFilterIndex = Mathf.Clamp(data.SelectedFilterIndex, 0, DefaultFilters.Length - 1);
-            SelectedEmotionIndex = Mathf.Clamp(data.SelectedEmotionIndex, 0, DefaultEmotions.Length - 1);
-            FaceImagePath = data.FaceImagePath ?? "";
-            HighestUnlockedRoomIndex = Math.Max(0, data.HighestUnlockedRoomIndex);
+            PlayerName = ReadString(root, "profile_name")
+                ?? ReadString(root, "PlayerName")
+                ?? "Player";
+
+            IsFullGameUnlocked = ReadBool(root, "is_full_game_unlocked")
+                ?? ReadBool(root, "IsFullGameUnlocked")
+                ?? false;
+
+            FaceImagePath = ReadString(root, "face_image_path")
+                ?? ReadString(root, "FaceImagePath")
+                ?? "";
+
+            HighestUnlockedRoomIndex = Math.Max(0,
+                ReadInt(root, "highest_unlocked_room_index")
+                ?? ReadInt(root, "HighestUnlockedRoomIndex")
+                ?? 0);
+
+            var cosmeticsToken = root["cosmetics"];
+            if (cosmeticsToken is JObject cosmetics)
+            {
+                SelectedHatIndex = Mathf.Clamp(ReadInt(cosmetics, "hat_index") ?? 0, 0, DefaultHats.Length - 1);
+                SelectedGlassesIndex = Mathf.Clamp(ReadInt(cosmetics, "glasses_index") ?? 0, 0, DefaultGlasses.Length - 1);
+                SelectedFilterIndex = Mathf.Clamp(ReadInt(cosmetics, "filter_index") ?? 0, 0, DefaultFilters.Length - 1);
+                SelectedEmotionIndex = Mathf.Clamp(ReadInt(cosmetics, "emotion_index") ?? 0, 0, DefaultEmotions.Length - 1);
+            }
+            else
+            {
+                SelectedHatIndex = Mathf.Clamp(ReadInt(root, "SelectedHatIndex") ?? 0, 0, DefaultHats.Length - 1);
+                SelectedGlassesIndex = Mathf.Clamp(ReadInt(root, "SelectedGlassesIndex") ?? 0, 0, DefaultGlasses.Length - 1);
+                SelectedFilterIndex = Mathf.Clamp(ReadInt(root, "SelectedFilterIndex") ?? 0, 0, DefaultFilters.Length - 1);
+                SelectedEmotionIndex = Mathf.Clamp(ReadInt(root, "SelectedEmotionIndex") ?? 0, 0, DefaultEmotions.Length - 1);
+            }
         }
         catch (Exception ex)
         {
@@ -206,15 +240,40 @@ public partial class PlayerProfile : Node
         Instance.Save();
     }
 
-    private sealed class SaveData
+    private static string? ReadString(JObject root, string key)
     {
-        public int Version { get; set; } = 1;
-        public string PlayerName { get; set; } = "Player";
-        public int SelectedHatIndex { get; set; }
-        public int SelectedGlassesIndex { get; set; }
-        public int SelectedFilterIndex { get; set; }
-        public int SelectedEmotionIndex { get; set; }
-        public string FaceImagePath { get; set; } = "";
-        public int HighestUnlockedRoomIndex { get; set; }
+        if (!root.TryGetValue(key, out var token))
+            return null;
+
+        var value = token.Type == JTokenType.String ? token.Value<string>() : token.ToString();
+        return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    private static int? ReadInt(JObject root, string key)
+    {
+        if (!root.TryGetValue(key, out var token))
+            return null;
+
+        if (token.Type == JTokenType.Integer)
+            return token.Value<int>();
+
+        if (int.TryParse(token.ToString(), out int value))
+            return value;
+
+        return null;
+    }
+
+    private static bool? ReadBool(JObject root, string key)
+    {
+        if (!root.TryGetValue(key, out var token))
+            return null;
+
+        if (token.Type == JTokenType.Boolean)
+            return token.Value<bool>();
+
+        if (bool.TryParse(token.ToString(), out bool value))
+            return value;
+
+        return null;
     }
 }

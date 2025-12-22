@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 /// <summary>
@@ -25,10 +26,18 @@ public partial class MainMenu : Control
     private Label? _titleLabel;
     private Label? _versionLabel;
 
+    private Button? _unlockFullGameButton;
+    private ConfirmationDialog? _unlockConfirmation;
+    private AcceptDialog? _purchaseCompleteDialog;
+    private ConfirmationDialog? _purchaseFailedDialog;
+
+    private bool _purchaseInProgress;
+
     public override void _Ready()
     {
         InitializeMenu();
         AddCustomizeFaceButton();
+        AddUnlockFullGameButton();
         ConnectSignals();
         SetupInputMap();
     }
@@ -37,20 +46,42 @@ public partial class MainMenu : Control
     {
         if (_playButton != null && _playButton.GetParent() is Control container)
         {
-            var customizeBtn = new Button();
-            customizeBtn.Text = "Customize Face";
-            customizeBtn.Name = "CustomizeFaceButton";
-            customizeBtn.Pressed += OnCustomizeFaceButtonPressed;
-            
-            // Add to the same container as other buttons
-            container.AddChild(customizeBtn);
-            
-            // Position it after Room Selection button if possible
-            if (_roomSelectionButton != null)
+            var customizeBtn = new Button
             {
+                Text = "Customize Face",
+                Name = "CustomizeFaceButton"
+            };
+            customizeBtn.Pressed += OnCustomizeFaceButtonPressed;
+
+            container.AddChild(customizeBtn);
+
+            if (_roomSelectionButton != null)
                 container.MoveChild(customizeBtn, _roomSelectionButton.GetIndex() + 1);
-            }
         }
+    }
+
+    private void AddUnlockFullGameButton()
+    {
+        if (_playButton == null || _playButton.GetParent() is not Control container)
+            return;
+
+        if (MonetizationManager.Instance?.IsFullGameUnlocked ?? false)
+            return;
+
+        _unlockFullGameButton = new Button
+        {
+            Text = "Unlock Full Game - £1.50",
+            Name = "UnlockFullGameButton",
+            Modulate = new Color(1f, 0.95f, 0.5f)
+        };
+
+        _unlockFullGameButton.Pressed += OnUnlockButtonPressed;
+
+        container.AddChild(_unlockFullGameButton);
+
+        // Put it near the Play/Room Selection actions.
+        if (_roomSelectionButton != null)
+            container.MoveChild(_unlockFullGameButton, _roomSelectionButton.GetIndex() + 1);
     }
 
     private void OnCustomizeFaceButtonPressed()
@@ -71,101 +102,121 @@ public partial class MainMenu : Control
         _titleLabel = GetNodeOrNull<Label>(_titleLabelPath);
         _versionLabel = GetNodeOrNull<Label>(_versionLabelPath);
 
-        // Set up title
         if (_titleLabel != null)
-        {
             _titleLabel.Text = "Angry Animals";
-        }
 
-        // Set up version
         if (_versionLabel != null)
-        {
             _versionLabel.Text = "Version 1.0.0";
-        }
 
-        // Connect button signals
         if (_playButton != null)
-        {
             _playButton.Pressed += OnPlayButtonPressed;
-        }
 
         if (_roomSelectionButton != null)
-        {
             _roomSelectionButton.Pressed += OnRoomSelectionButtonPressed;
-        }
 
         if (_settingsButton != null)
-        {
             _settingsButton.Pressed += OnSettingsButtonPressed;
-        }
 
         if (_quitButton != null)
-        {
             _quitButton.Pressed += OnQuitButtonPressed;
-        }
+
+        EnsureDialogs();
+    }
+
+    private void EnsureDialogs()
+    {
+        _unlockConfirmation = new ConfirmationDialog
+        {
+            Name = "UnlockConfirmationDialog",
+            Title = "Unlock Full Game",
+            DialogText = "Unlock all 100 levels and remove ads?",
+            ProcessMode = ProcessModeEnum.Always
+        };
+        _unlockConfirmation.GetOkButton().Text = "Continue";
+        _unlockConfirmation.GetCancelButton().Text = "Cancel";
+        _unlockConfirmation.Confirmed += OnUnlockConfirmationAccepted;
+        AddChild(_unlockConfirmation);
+
+        _purchaseCompleteDialog = new AcceptDialog
+        {
+            Name = "PurchaseCompleteDialog",
+            Title = "Purchase Complete",
+            DialogText = "Purchase Complete! Enjoy all 100 levels!",
+            ProcessMode = ProcessModeEnum.Always
+        };
+        AddChild(_purchaseCompleteDialog);
+
+        _purchaseFailedDialog = new ConfirmationDialog
+        {
+            Name = "PurchaseFailedDialog",
+            Title = "Purchase Failed",
+            DialogText = "Purchase failed.",
+            ProcessMode = ProcessModeEnum.Always
+        };
+        _purchaseFailedDialog.GetOkButton().Text = "Retry";
+        _purchaseFailedDialog.GetCancelButton().Text = "Cancel";
+        _purchaseFailedDialog.Confirmed += OnPurchaseRetry;
+        AddChild(_purchaseFailedDialog);
     }
 
     private void ConnectSignals()
     {
-        // Connect to GameManager for state changes
         if (GameManager.Instance != null)
-        {
             GameManager.Instance.GameStateChanged += OnGameStateChanged;
-        }
 
-        // Connect to AudioManager for UI sound effects
-        var audioManager = GetNodeOrNull<AudioManager>("/root/AudioManager");
-        if (audioManager != null)
+        if (MonetizationManager.Instance != null)
         {
-            // AudioManager handles its own button sound effects
+            MonetizationManager.Instance.PurchaseSucceeded += OnPurchaseCompleted;
+            MonetizationManager.Instance.PurchaseFailed += OnPurchaseFailed;
         }
     }
 
     public override void _ExitTree()
     {
         if (GameManager.Instance != null)
-        {
             GameManager.Instance.GameStateChanged -= OnGameStateChanged;
+
+        if (MonetizationManager.Instance != null)
+        {
+            MonetizationManager.Instance.PurchaseSucceeded -= OnPurchaseCompleted;
+            MonetizationManager.Instance.PurchaseFailed -= OnPurchaseFailed;
         }
 
-        // Disconnect button signals
         if (_playButton != null)
-        {
             _playButton.Pressed -= OnPlayButtonPressed;
-        }
 
         if (_roomSelectionButton != null)
-        {
             _roomSelectionButton.Pressed -= OnRoomSelectionButtonPressed;
-        }
 
         if (_settingsButton != null)
-        {
             _settingsButton.Pressed -= OnSettingsButtonPressed;
-        }
 
         if (_quitButton != null)
-        {
             _quitButton.Pressed -= OnQuitButtonPressed;
-        }
+
+        if (_unlockFullGameButton != null)
+            _unlockFullGameButton.Pressed -= OnUnlockButtonPressed;
+
+        if (_unlockConfirmation != null)
+            _unlockConfirmation.Confirmed -= OnUnlockConfirmationAccepted;
+
+        if (_purchaseFailedDialog != null)
+            _purchaseFailedDialog.Confirmed -= OnPurchaseRetry;
     }
 
     private void SetupInputMap()
     {
-        // Add menu navigation actions to InputMap if they don't exist
         if (!InputMap.HasAction("ui_menu_select"))
         {
             InputMap.AddAction("ui_menu_select");
-            var selectEvent = new InputEventKey();
-            selectEvent.Keycode = Key.Enter;
+            var selectEvent = new InputEventKey { Keycode = Key.Enter };
             InputMap.ActionAddEvent("ui_menu_select", selectEvent);
         }
 
         if (!InputMap.HasAction("ui_menu_back"))
         {
             InputMap.AddAction("ui_menu_back");
-            var backEvent = new InputEventKey();
-            backEvent.Keycode = Key.Escape;
+            var backEvent = new InputEventKey { Keycode = Key.Escape };
             InputMap.ActionAddEvent("ui_menu_back", backEvent);
         }
     }
@@ -173,33 +224,23 @@ public partial class MainMenu : Control
     public override void _Input(InputEvent @event)
     {
         if (@event.IsActionPressed("ui_menu_select"))
-        {
             HandleMenuSelection();
-        }
         else if (@event.IsActionPressed("ui_menu_back"))
-        {
             HandleMenuBack();
-        }
     }
 
     private void HandleMenuSelection()
     {
-        // Find the currently focused button and trigger it
-        var focusedControl = GetViewPort().GuiGetFocusedControl();
+        var focusedControl = GetViewport().GuiGetFocusOwner();
         if (focusedControl is Button focusedButton && focusedButton.Disabled == false)
-        {
-            focusedButton.EmitSignal("pressed");
-        }
+            focusedButton.EmitSignal(BaseButton.SignalName.Pressed);
     }
 
     private void HandleMenuBack()
     {
-        // Handle back navigation - could close settings panel or quit to main menu
         var settingsPanel = GetNodeOrNull<Control>("SettingsPanel");
         if (settingsPanel != null && settingsPanel.Visible)
-        {
             settingsPanel.Visible = false;
-        }
     }
 
     private void OnPlayButtonPressed()
@@ -207,8 +248,7 @@ public partial class MainMenu : Control
         GD.Print("Play button pressed");
         EmitSignal(SignalName.PlayButtonPressed);
         PlayUiClickSound();
-        
-        // Go to room selection (most common flow)
+
         GameManager.StartRoomByLevelNumber(1);
     }
 
@@ -217,10 +257,8 @@ public partial class MainMenu : Control
         GD.Print("Room selection button pressed");
         EmitSignal(SignalName.RoomSelectionButtonPressed);
         PlayUiClickSound();
-        
-        // Navigate to room selection scene
-        // TODO: Load room selection scene
-        GameManager.StartRoomByLevelNumber(1); // Temporary fallback
+
+        GameManager.StartRoomByLevelNumber(1);
     }
 
     private void OnSettingsButtonPressed()
@@ -228,8 +266,7 @@ public partial class MainMenu : Control
         GD.Print("Settings button pressed");
         EmitSignal(SignalName.SettingsButtonPressed);
         PlayUiClickSound();
-        
-        // Show settings panel
+
         ShowSettingsPanel();
     }
 
@@ -238,32 +275,108 @@ public partial class MainMenu : Control
         GD.Print("Quit button pressed");
         EmitSignal(SignalName.QuitButtonPressed);
         PlayUiClickSound();
-        
-        // Quit the game
+
         GetTree().Quit();
     }
 
     private void OnGameStateChanged(GameManager.GameState state)
     {
-        // Handle game state changes if needed
         switch (state)
         {
             case GameManager.GameState.MainMenu:
-                // Ensure we're visible when at main menu
                 Visible = true;
+                RefreshMenu();
                 break;
-            case GameManager.GameState.InRoom:
-            case GameManager.GameState.RoomComplete:
-            case GameManager.GameState.Paused:
-                // Hide when not at main menu
+            default:
                 Visible = false;
                 break;
         }
     }
 
+    private void OnUnlockButtonPressed()
+    {
+        ShowUnlockConfirmation();
+    }
+
+    private void ShowUnlockConfirmation()
+    {
+        if (_purchaseInProgress)
+            return;
+
+        _unlockConfirmation?.PopupCentered();
+    }
+
+    private async void OnUnlockConfirmationAccepted()
+    {
+        if (_purchaseInProgress)
+            return;
+
+        OnPurchaseStarted();
+
+        try
+        {
+            if (MonetizationManager.Instance != null)
+                await MonetizationManager.Instance.PurchaseFullGame();
+            else
+                OnPurchaseFailed("Monetization manager unavailable.");
+        }
+        catch (Exception ex)
+        {
+            OnPurchaseFailed(ex.Message);
+        }
+    }
+
+    private void OnPurchaseStarted()
+    {
+        _purchaseInProgress = true;
+
+        if (_unlockFullGameButton != null)
+        {
+            _unlockFullGameButton.Disabled = true;
+            _unlockFullGameButton.Text = "Processing...";
+        }
+    }
+
+    private void OnPurchaseCompleted()
+    {
+        _purchaseInProgress = false;
+
+        _purchaseCompleteDialog?.PopupCentered();
+        RefreshMenu();
+    }
+
+    private void OnPurchaseFailed(string reason)
+    {
+        _purchaseInProgress = false;
+
+        if (_unlockFullGameButton != null)
+        {
+            _unlockFullGameButton.Disabled = false;
+            _unlockFullGameButton.Text = "Unlock Full Game - £1.50";
+        }
+
+        if (_purchaseFailedDialog != null)
+        {
+            _purchaseFailedDialog.DialogText = string.IsNullOrWhiteSpace(reason) ? "Purchase failed." : reason;
+            _purchaseFailedDialog.PopupCentered();
+        }
+    }
+
+    private void OnPurchaseRetry()
+    {
+        if (_unlockConfirmation == null)
+            return;
+
+        OnUnlockConfirmationAccepted();
+    }
+
+    private void OnPurchaseFailedDialogCanceled()
+    {
+        // no-op
+    }
+
     private void ShowSettingsPanel()
     {
-        // TODO: Implement settings panel
         GD.Print("Settings panel not yet implemented");
     }
 
@@ -287,10 +400,15 @@ public partial class MainMenu : Control
     /// </summary>
     public void RefreshMenu()
     {
-        // Refresh any dynamic content
-        if (PlayerProfile.Instance != null)
+        var unlocked = MonetizationManager.Instance?.IsFullGameUnlocked ?? false;
+
+        if (_unlockFullGameButton != null)
+            _unlockFullGameButton.Visible = !unlocked;
+
+        if (_unlockFullGameButton != null && !_purchaseInProgress)
         {
-            // Update any player-specific information
+            _unlockFullGameButton.Disabled = false;
+            _unlockFullGameButton.Text = "Unlock Full Game - £1.50";
         }
     }
 }
