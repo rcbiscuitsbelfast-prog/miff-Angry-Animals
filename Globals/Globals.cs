@@ -21,6 +21,32 @@ public partial class Globals : Node
         EnsureAudioBuses();
         SetupMusicPlayer();
         EnsureFadeOverlay();
+
+        CallDeferred(nameof(InitializeMonetization));
+    }
+
+    private void InitializeMonetization()
+    {
+        var monetization = GetNodeOrNull<MonetizationManager>("/root/MonetizationManager");
+        monetization?.Initialize(
+            ReadProjectSettingString("monetization/iap/ios_product_id", "full_game_unlock"),
+            ReadProjectSettingString("monetization/iap/android_product_id", "full_game_unlock"));
+
+        var ads = GetNodeOrNull<AdsManager>("/root/AdsManager");
+        ads?.Initialize(
+            ReadProjectSettingString("monetization/admob/app_id", ""),
+            ReadProjectSettingString("monetization/admob/banner_ad_unit_id", ""),
+            ReadProjectSettingString("monetization/admob/interstitial_ad_unit_id", ""),
+            ReadProjectSettingString("monetization/admob/rewarded_ad_unit_id", ""));
+    }
+
+    private static string ReadProjectSettingString(string key, string fallback)
+    {
+        if (!ProjectSettings.HasSetting(key))
+            return fallback;
+
+        var value = ProjectSettings.GetSetting(key).AsString();
+        return string.IsNullOrWhiteSpace(value) ? fallback : value;
     }
 
     private void EnsureAudioBuses()

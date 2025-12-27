@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Godot;
 
 /// <summary>
@@ -24,15 +26,20 @@ public partial class RoomBase : Node2D
     private ProjectilesLoader? _projectilesLoader;
     private Node2D? _nextRoomMarker;
 
+    private ConfirmationDialog? _rewardedDialog;
+
     private enum RoomPhase { SLINGSHOT, TRAVERSAL, COMPLETE }
     private RoomPhase _currentPhase = RoomPhase.SLINGSHOT;
 
-    private int _destructionScore = 0;
-    private bool _exitUnlocked = false;
+    private int _destructionScore;
+    private bool _exitUnlocked;
+
+    private bool _handlingFailure;
 
     public override void _Ready()
     {
         InitializeRoom();
+        EnsureRewardDialog();
         ConnectSignals();
     }
 
@@ -46,42 +53,58 @@ public partial class RoomBase : Node2D
         if (_exitDoor != null)
         {
             _exitDoor.SetProcess(false);
-            // TODO: Set exit door visual state to locked
         }
 
-        // Set up target score from GameManager if available
         var currentRoomIndex = GameManager.Instance?.CurrentRoomIndex ?? 0;
-        if (currentRoomIndex >= 0 && currentRoomIndex < GameManager.Instance.Rooms.Length)
-        {
+        if (GameManager.Instance != null && currentRoomIndex >= 0 && currentRoomIndex < GameManager.Instance.Rooms.Length)
             _targetScore = GameManager.Instance.Rooms[currentRoomIndex].TargetScore;
-        }
+    }
+
+    private void EnsureRewardDialog()
+    {
+        _rewardedDialog = new ConfirmationDialog
+        {
+            Name = "RewardedDialog",
+            Title = "Bonus",
+            DialogText = "Watch an ad to get 5 bonus points?",
+            ProcessMode = ProcessModeEnum.Always
+        };
+        _rewardedDialog.GetOkButton().Text = "Watch";
+        _rewardedDialog.GetCancelButton().Text = "Retry";
+        _rewardedDialog.Confirmed += OnRewardedAccepted;
+        _rewardedDialog.Canceled += OnRewardedCanceled;
+        AddChild(_rewardedDialog);
     }
 
     private void ConnectSignals()
     {
-        // Connect to SignalManager for game events
-        SignalManager.Instance.OnDestructionScoreUpdated += OnDestructionScoreUpdated;
-        SignalManager.Instance.OnCupDestroyed += OnCupDestroyed;
-        SignalManager.Instance.OnPropDestroyed += OnPropDestroyed;
-        SignalManager.Instance.OnAnimalDied += OnAnimalDied;
+        if (SignalManager.Instance != null)
+        {
+            SignalManager.Instance.OnDestructionScoreUpdated += OnDestructionScoreUpdated;
+            SignalManager.Instance.OnCupDestroyed += OnCupDestroyed;
+            SignalManager.Instance.OnPropDestroyed += OnPropDestroyed;
+            SignalManager.Instance.OnAnimalDied += OnAnimalDied;
+        }
 
-        // Connect to projectiles loader for phase transitions
         if (_projectilesLoader != null)
         {
             _projectilesLoader.ProjectileLaunched += OnProjectileLaunched;
             _projectilesLoader.AllProjectilesUsed += OnAllProjectilesUsed;
         }
 
-        // Connect to slingshot for launch events
         if (_slingshot != null)
         {
             _slingshot.ProjectileLaunched += OnSlingshotProjectileLaunched;
+        }
+
+        if (AdsManager.Instance != null)
+        {
+            AdsManager.Instance.RewardEarned += OnRewardEarned;
         }
     }
 
     public override void _ExitTree()
     {
-        // Disconnect signals to prevent memory leaks
         if (SignalManager.Instance != null)
         {
             SignalManager.Instance.OnDestructionScoreUpdated -= OnDestructionScoreUpdated;
@@ -100,73 +123,69 @@ public partial class RoomBase : Node2D
         {
             _slingshot.ProjectileLaunched -= OnSlingshotProjectileLaunched;
         }
+
+        if (AdsManager.Instance != null)
+        {
+            AdsManager.Instance.RewardEarned -= OnRewardEarned;
+        }
+
+        if (_rewardedDialog != null)
+        {
+            _rewardedDialog.Confirmed -= OnRewardedAccepted;
+            _rewardedDialog.Canceled -= OnRewardedCanceled;
+        }
     }
 
     private void OnDestructionScoreUpdated(int score)
     {
         _destructionScore = score;
-        
-        // Check if target score is reached
+
         if (_destructionScore >= _targetScore && !_exitUnlocked)
-        {
             UnlockExitDoor();
-        }
     }
 
     private void OnCupDestroyed()
     {
-        // Cup destruction contributes to score
         GD.Print("Cup destroyed in room");
     }
 
     private void OnPropDestroyed(Node prop, int scoreValue)
     {
-        // Prop destruction contributes to score
         GD.Print($"Prop destroyed with score value: {scoreValue}");
     }
 
     private void OnAnimalDied()
     {
-        // Animal death triggers traversal phase if projectiles are available
         if (_currentPhase == RoomPhase.SLINGSHOT && _projectilesLoader != null)
         {
-            // Check if more projectiles are available
             if (_projectilesLoader.HasMoreProjectiles)
-            {
                 StartTraversalPhase();
-            }
             else
-            {
-                // No more projectiles, check if level should complete
-                MaybeCompleteRoom();
-            }
+                HandleAttemptsFailed();
         }
     }
 
     private void OnProjectileLaunched(Projectile projectile)
     {
-        // Projectile launched from projectiles loader
     }
 
     private void OnSlingshotProjectileLaunched(Projectile projectile)
     {
-        // Projectile launched from slingshot - start monitoring for death
         projectile.AlmostStopped += () => OnProjectileAlmostStopped(projectile);
     }
 
     private void OnProjectileAlmostStopped(Projectile projectile)
     {
-        // This will trigger the traversal phase
         if (_currentPhase == RoomPhase.SLINGSHOT)
-        {
             StartTraversalPhase();
-        }
     }
 
     private void OnAllProjectilesUsed()
     {
-        // All projectiles used, check if room should complete
-        MaybeCompleteRoom();
+        if (_exitUnlocked)
+            CompleteRoom();
+        else
+            HandleAttemptsFailed();
     }
 
     private void StartTraversalPhase()
@@ -178,18 +197,15 @@ public partial class RoomBase : Node2D
         _currentPhase = RoomPhase.TRAVERSAL;
         EmitSignal(SignalName.TraversalPhaseStarted);
 
-        // Spawn StickClone with player's face customization
         SpawnStickClone();
     }
 
     private void SpawnStickClone()
     {
-        // Get face customization from PlayerProfile
         var hat = PlayerProfile.GetHats()[PlayerProfile.Instance.SelectedHatIndex];
         var glasses = PlayerProfile.GetGlasses()[PlayerProfile.Instance.SelectedGlassesIndex];
         var emotion = PlayerProfile.GetEmotions()[PlayerProfile.Instance.SelectedEmotionIndex];
 
-        // Find a spawn position for the StickClone
         var spawnPosition = FindStickCloneSpawnPosition();
         if (spawnPosition == Vector2.Zero)
         {
@@ -197,14 +213,13 @@ public partial class RoomBase : Node2D
             return;
         }
 
-        // Create StickClone instance
         var stickCloneScene = ResourceLoader.Load<PackedScene>("res://Scenes/Characters/StickClone.tscn");
         if (stickCloneScene != null)
         {
             var stickClone = stickCloneScene.Instantiate<StickClone>();
             stickClone.GlobalPosition = spawnPosition;
             AddChild(stickClone);
-            
+
             GD.Print($"Spawning StickClone at {spawnPosition} with: Hat={hat}, Glasses={glasses}, Emotion={emotion}");
         }
         else
@@ -216,29 +231,15 @@ public partial class RoomBase : Node2D
     private void UnlockExitDoor()
     {
         _exitUnlocked = true;
-        
+
         if (_exitDoor != null)
-        {
-            // TODO: Set exit door visual state to unlocked
             _exitDoor.SetProcess(true);
-        }
 
         GD.Print($"Exit door unlocked! Score: {_destructionScore}/{_targetScore}");
         EmitSignal(SignalName.ExitDoorUnlocked);
     }
 
-    private void MaybeCompleteRoom()
-    {
-        // Room completes when:
-        // 1. Exit door is unlocked AND
-        // 2. All projectiles are used OR player reaches exit
-        if (_exitUnlocked)
-        {
-            CompleteRoom();
-        }
-    }
-
-    private void CompleteRoom()
+    private async void CompleteRoom()
     {
         if (_currentPhase == RoomPhase.COMPLETE)
             return;
@@ -247,26 +248,118 @@ public partial class RoomBase : Node2D
         _currentPhase = RoomPhase.COMPLETE;
         EmitSignal(SignalName.RoomTargetReached);
 
-        // Handle bonus room transitions
+        await MaybeShowInterstitialBeforeCompletionAsync();
+        OnLevelCompleted();
+    }
+
+    /// <summary>
+    /// Called when the room is completed and the completion flow should proceed.
+    /// </summary>
+    private void OnLevelCompleted()
+    {
         if (_isBonusRoom && _nextRoomMarker != null)
-        {
             HandleBonusRoomTransition();
-        }
         else
-        {
-            // Standard room completion
             SignalManager.EmitOnLevelCompleted();
-        }
     }
 
     private void HandleBonusRoomTransition()
     {
-        // Handle special transitions like Cafeteria -> VentEscape
         GD.Print("Bonus room completed, handling transition...");
-        
-        // TODO: Implement specific bonus room logic
-        // For now, just complete the room
         SignalManager.EmitOnLevelCompleted();
+    }
+
+    private async Task MaybeShowInterstitialBeforeCompletionAsync()
+    {
+        if (MonetizationManager.Instance?.ShowAds != true)
+            return;
+
+        if (AdsManager.Instance == null)
+            return;
+
+        try
+        {
+            await AdsManager.Instance.ShowInterstitialAd();
+        }
+        catch (Exception ex)
+        {
+            GD.PushWarning($"Interstitial ad failed: {ex.Message}");
+        }
+    }
+
+    private void HandleAttemptsFailed()
+    {
+        if (_handlingFailure || _currentPhase == RoomPhase.COMPLETE)
+            return;
+
+        _handlingFailure = true;
+        OnAttemptsFailed();
+    }
+
+    /// <summary>
+    /// Called when the player runs out of attempts / all projectiles are used without meeting the target.
+    /// Offers an optional rewarded ad for a small score boost.
+    /// </summary>
+    private void OnAttemptsFailed()
+    {
+        if (_rewardedDialog == null)
+        {
+            GameManager.RestartRoom();
+            return;
+        }
+
+        if (MonetizationManager.Instance?.ShowAds != true || AdsManager.Instance == null)
+        {
+            GameManager.RestartRoom();
+            return;
+        }
+
+        _rewardedDialog.PopupCentered();
+    }
+
+    private async void OnRewardedAccepted()
+    {
+        if (AdsManager.Instance == null)
+        {
+            GameManager.RestartRoom();
+            return;
+        }
+
+        try
+        {
+            var rewardTask = ToSignal(AdsManager.Instance, AdsManager.SignalName.RewardEarned);
+            await AdsManager.Instance.ShowRewardedAd();
+
+            if (rewardTask.IsCompleted)
+                ApplyRewardPoints(5);
+        }
+        finally
+        {
+            _handlingFailure = false;
+
+            if (_exitUnlocked)
+                CompleteRoom();
+            else
+                GameManager.RestartRoom();
+        }
+    }
+
+    private void OnRewardedCanceled()
+    {
+        _handlingFailure = false;
+        GameManager.RestartRoom();
+    }
+
+    private void OnRewardEarned()
+    {
+        // Bonus points are applied in OnRewardedAccepted after the ad flow.
+    }
+
+    private void ApplyRewardPoints(int points)
+    {
+        _destructionScore += points;
+        OnDestructionScoreUpdated(_destructionScore);
+        SignalManager.EmitOnDestructionScoreUpdated(_destructionScore);
     }
 
     /// <summary>
@@ -275,7 +368,9 @@ public partial class RoomBase : Node2D
     public void OnExitReached()
     {
         GD.Print("Player reached exit door");
-        MaybeCompleteRoom();
+
+        if (_exitUnlocked)
+            CompleteRoom();
     }
 
     /// <summary>
@@ -299,20 +394,13 @@ public partial class RoomBase : Node2D
     /// <returns>Spawn position or Vector2.Zero if not found</returns>
     private Vector2 FindStickCloneSpawnPosition()
     {
-        // Look for a spawn marker
         var spawnMarker = GetNodeOrNull<Node2D>("StickCloneSpawn");
         if (spawnMarker != null)
-        {
             return spawnMarker.GlobalPosition;
-        }
 
-        // Fallback to slingshot position
         if (_slingshot != null)
-        {
             return _slingshot.GlobalPosition + new Vector2(100, 0);
-        }
 
-        // Ultimate fallback to origin
         return Vector2.Zero;
     }
 }

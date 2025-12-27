@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 /// <summary>
@@ -6,199 +7,286 @@ using Godot;
 /// </summary>
 public partial class RoomSelection : Control
 {
-	[Signal] public delegate void RoomSelectedEventHandler(int roomIndex);
+    [Signal] public delegate void RoomSelectedEventHandler(int roomIndex);
 
-	[Export] private NodePath _roomsContainerPath;
-	[Export] private NodePath _titleLabelPath;
-	[Export] private NodePath _backButtonPath;
-	[Export] private PackedScene _roomButtonScene;
+    [Export] private NodePath _roomsContainerPath;
+    [Export] private NodePath _titleLabelPath;
+    [Export] private NodePath _backButtonPath;
+    [Export] private PackedScene _roomButtonScene;
 
-	private VBoxContainer? _roomsContainer;
-	private Label? _titleLabel;
-	private Button? _backButton;
+    private VBoxContainer? _roomsContainer;
+    private Label? _titleLabel;
+    private Button? _backButton;
 
-	public override void _Ready()
-	{
-		InitializeUI();
-		ConnectSignals();
-		PopulateRoomButtons();
-	}
+    private Button? _unlockFullGameButton;
+    private AcceptDialog? _purchaseDialog;
 
-	private void InitializeUI()
-	{
-		_roomsContainer = GetNodeOrNull<VBoxContainer>(_roomsContainerPath);
-		_titleLabel = GetNodeOrNull<Label>(_titleLabelPath);
-		_backButton = GetNodeOrNull<Button>(_backButtonPath);
+    public override void _Ready()
+    {
+        InitializeUI();
+        ConnectSignals();
+        PopulateRoomButtons();
+    }
 
-		if (_titleLabel != null)
-		{
-			_titleLabel.Text = "Select a Room";
-		}
+    private void InitializeUI()
+    {
+        _roomsContainer = GetNodeOrNull<VBoxContainer>(_roomsContainerPath);
+        _titleLabel = GetNodeOrNull<Label>(_titleLabelPath);
+        _backButton = GetNodeOrNull<Button>(_backButtonPath);
 
-		if (_backButton != null)
-		{
-			_backButton.Text = "Back to Main Menu";
-			_backButton.Pressed += OnBackButtonPressed;
-		}
-	}
+        if (_titleLabel != null)
+            _titleLabel.Text = "Select a Room";
 
-	private void ConnectSignals()
-	{
-		// Connect to GameManager for state changes
-		if (GameManager.Instance != null)
-		{
-			GameManager.Instance.GameStateChanged += OnGameStateChanged;
-		}
+        if (_backButton != null)
+        {
+            _backButton.Text = "Back to Main Menu";
+            _backButton.Pressed += OnBackButtonPressed;
+        }
 
-		// Connect to SignalManager for room completion events
-		if (SignalManager.Instance != null)
-		{
-			SignalManager.Instance.OnLevelCompleted += OnLevelCompleted;
-		}
+        _purchaseDialog = new AcceptDialog
+        {
+            Title = "Purchase",
+            DialogText = "",
+            ProcessMode = ProcessModeEnum.Always
+        };
+        AddChild(_purchaseDialog);
+    }
 
-		// Connect to PlayerProfile for unlock state changes
-		if (PlayerProfile.Instance != null)
-		{
-			// PlayerProfile doesn't have signals, so we'll refresh when needed
-		}
-	}
+    private void ConnectSignals()
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.GameStateChanged += OnGameStateChanged;
 
-	public override void _ExitTree()
-	{
-		if (GameManager.Instance != null)
-		{
-			GameManager.Instance.GameStateChanged -= OnGameStateChanged;
-		}
+        if (SignalManager.Instance != null)
+            SignalManager.Instance.OnLevelCompleted += OnLevelCompleted;
 
-		if (SignalManager.Instance != null)
-		{
-			SignalManager.Instance.OnLevelCompleted -= OnLevelCompleted;
-		}
+        if (MonetizationManager.Instance != null)
+        {
+            MonetizationManager.Instance.PurchaseSucceeded += OnPurchaseSucceeded;
+            MonetizationManager.Instance.PurchaseFailed += OnPurchaseFailed;
+        }
+    }
 
-		if (_backButton != null)
-		{
-			_backButton.Pressed -= OnBackButtonPressed;
-		}
-	}
+    public override void _ExitTree()
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.GameStateChanged -= OnGameStateChanged;
 
-	private void PopulateRoomButtons()
-	{
-		if (_roomsContainer == null || GameManager.Instance == null)
-			return;
+        if (SignalManager.Instance != null)
+            SignalManager.Instance.OnLevelCompleted -= OnLevelCompleted;
 
-		// Clear existing buttons
-		for (int i = _roomsContainer.GetChildCount() - 1; i >= 0; i--)
-		{
-			var child = _roomsContainer.GetChild(i);
-			child.QueueFree();
-		}
+        if (MonetizationManager.Instance != null)
+        {
+            MonetizationManager.Instance.PurchaseSucceeded -= OnPurchaseSucceeded;
+            MonetizationManager.Instance.PurchaseFailed -= OnPurchaseFailed;
+        }
 
-		// Create buttons for each room
-		for (int i = 0; i < GameManager.Instance.Rooms.Length; i++)
-		{
-			var roomInfo = GameManager.Instance.Rooms[i];
-			var isUnlocked = PlayerProfile.IsRoomUnlocked(i);
+        if (_backButton != null)
+            _backButton.Pressed -= OnBackButtonPressed;
 
-			var roomButton = CreateRoomButton(i, roomInfo, isUnlocked);
-			_roomsContainer.AddChild(roomButton);
-		}
-	}
+        if (_unlockFullGameButton != null)
+            _unlockFullGameButton.Pressed -= OnUnlockButtonPressed;
+    }
 
-	private Button CreateRoomButton(int roomIndex, GameManager.RoomInfo roomInfo, bool isUnlocked)
-	{
-		var button = new Button();
-		button.Name = $"RoomButton_{roomIndex}";
-		button.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-		button.CustomMinimumSize = new Vector2(400, 60);
+    private void PopulateRoomButtons()
+    {
+        if (_roomsContainer == null || GameManager.Instance == null)
+            return;
 
-		// Create container for button content
-		var container = new HBoxContainer();
-		container.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        for (int i = _roomsContainer.GetChildCount() - 1; i >= 0; i--)
+        {
+            var child = _roomsContainer.GetChild(i);
+            child.QueueFree();
+        }
 
-		// Room index and name
-		var roomLabel = new Label();
-		roomLabel.Text = $"{roomIndex + 1}. {roomInfo.Description}";
-		roomLabel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-		
-		// Target score
-		var scoreLabel = new Label();
-		scoreLabel.Text = $"Target: {roomInfo.TargetScore}";
-		scoreLabel.Modulate = Colors.Yellow;
+        for (int i = 0; i < GameManager.Instance.Rooms.Length; i++)
+        {
+            var roomInfo = GameManager.Instance.Rooms[i];
+            var isUnlocked = IsRoomAccessible(i);
+            var roomButton = CreateRoomButton(i, roomInfo, isUnlocked);
+            _roomsContainer.AddChild(roomButton);
+        }
 
-		// Lock status
-		var lockLabel = new Label();
-		if (isUnlocked)
-		{
-			lockLabel.Text = "✓";
-			lockLabel.Modulate = Colors.Green;
-			button.Disabled = false;
-		}
-		else
-		{
-			lockLabel.Text = "🔒";
-			lockLabel.Modulate = Colors.Red;
-			button.Disabled = true;
-			button.TooltipText = "Complete previous rooms to unlock";
-		}
+        CreateOrUpdateUnlockButton();
+    }
 
-		container.AddChild(roomLabel);
-		container.AddChild(new Control { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill });
-		container.AddChild(scoreLabel);
-		container.AddChild(lockLabel);
+    private bool IsRoomAccessible(int roomIndex)
+    {
+        var fullUnlocked = MonetizationManager.Instance?.IsFullGameUnlocked ?? false;
+        if (fullUnlocked)
+            return true;
 
-		button.AddChild(container);
+        if (roomIndex >= 20)
+            return false;
 
-		// Connect button signal
-		if (!button.Disabled)
-		{
-			button.Pressed += () => OnRoomButtonPressed(roomIndex);
-		}
+        return PlayerProfile.IsRoomUnlocked(roomIndex);
+    }
 
-		return button;
-	}
+    private Button CreateRoomButton(int roomIndex, GameManager.RoomInfo roomInfo, bool isUnlocked)
+    {
+        var button = new Button
+        {
+            Name = $"RoomButton_{roomIndex}",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            CustomMinimumSize = new Vector2(400, 60)
+        };
 
-	private void OnRoomButtonPressed(int roomIndex)
-	{
-		GD.Print($"Room selected: {roomIndex}");
-		EmitSignal(SignalName.RoomSelected, roomIndex);
-		GameManager.StartRoom(roomIndex);
-	}
+        var container = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
 
-	private void OnBackButtonPressed()
-	{
-		GD.Print("Back to main menu");
-		GameManager.LoadMain();
-	}
+        var roomLabel = new Label
+        {
+            Text = $"{roomIndex + 1}. {roomInfo.Description}",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+        };
 
-	private void OnGameStateChanged(GameManager.GameState state)
-	{
-		// Refresh UI when game state changes
-		if (state == GameManager.GameState.MainMenu)
-		{
-			PopulateRoomButtons();
-		}
-	}
+        var scoreLabel = new Label
+        {
+            Text = $"Target: {roomInfo.TargetScore}",
+            Modulate = Colors.Yellow
+        };
 
-	private void OnLevelCompleted()
-	{
-		// A level was completed, refresh room buttons to show new unlocks
-		CallDeferred(nameof(PopulateRoomButtons));
-	}
+        var lockLabel = new Label();
+        if (isUnlocked)
+        {
+            lockLabel.Text = "✓";
+            lockLabel.Modulate = Colors.Green;
+            button.Disabled = false;
+        }
+        else
+        {
+            lockLabel.Text = "🔒";
+            lockLabel.Modulate = Colors.Red;
+            button.Disabled = true;
 
-	/// <summary>
-	/// Refreshes the room selection buttons to reflect current unlock state.
-	/// </summary>
-	public void RefreshRoomButtons()
-	{
-		PopulateRoomButtons();
-	}
+            if (roomIndex >= 20)
+                button.TooltipText = "Unlock Full Game to access levels 21-100";
+            else
+                button.TooltipText = "Complete previous rooms to unlock";
+        }
 
-	/// <summary>
-	/// Gets the currently selected room index, or -1 if none selected.
-	/// </summary>
-	public int GetSelectedRoomIndex()
-	{
-		// This would be implemented if we had a concept of "selected" room
-		return -1;
-	}
+        container.AddChild(roomLabel);
+        container.AddChild(new Control { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill });
+        container.AddChild(scoreLabel);
+        container.AddChild(lockLabel);
+        button.AddChild(container);
+
+        if (!button.Disabled)
+            button.Pressed += () => OnRoomButtonPressed(roomIndex);
+
+        return button;
+    }
+
+    private void CreateOrUpdateUnlockButton()
+    {
+        if (_roomsContainer == null)
+            return;
+
+        var showUnlock = !(MonetizationManager.Instance?.IsFullGameUnlocked ?? false) && GameManager.Instance != null && GameManager.Instance.Rooms.Length > 20;
+        if (!showUnlock)
+        {
+            _unlockFullGameButton = null;
+            return;
+        }
+
+        _unlockFullGameButton = new Button
+        {
+            Name = "UnlockFullGameButton",
+            Text = "Unlock Full Game - £1.50",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            CustomMinimumSize = new Vector2(400, 60),
+            Modulate = new Color(1f, 0.95f, 0.5f)
+        };
+        _unlockFullGameButton.Pressed += OnUnlockButtonPressed;
+
+        _roomsContainer.AddChild(new HSeparator());
+        _roomsContainer.AddChild(_unlockFullGameButton);
+    }
+
+    /// <summary>
+    /// Refreshes lock state based on the monetization status.
+    /// </summary>
+    public void UpdateLockUI()
+    {
+        PopulateRoomButtons();
+    }
+
+    private async void OnUnlockButtonPressed()
+    {
+        if (_unlockFullGameButton != null)
+        {
+            _unlockFullGameButton.Disabled = true;
+            _unlockFullGameButton.Text = "Unlocking...";
+        }
+
+        try
+        {
+            if (MonetizationManager.Instance != null)
+                await MonetizationManager.Instance.PurchaseFullGame();
+            else
+                OnPurchaseFailed("Monetization manager unavailable.");
+        }
+        catch (Exception ex)
+        {
+            OnPurchaseFailed(ex.Message);
+        }
+    }
+
+    private void OnPurchaseSucceeded()
+    {
+        if (_purchaseDialog != null)
+        {
+            _purchaseDialog.DialogText = "Purchase Complete! Enjoy all 100 levels!";
+            _purchaseDialog.PopupCentered();
+        }
+        CallDeferred(nameof(UpdateLockUI));
+    }
+
+    private void OnPurchaseFailed(string reason)
+    {
+        if (_unlockFullGameButton != null)
+        {
+            _unlockFullGameButton.Disabled = false;
+            _unlockFullGameButton.Text = "Unlock Full Game - £1.50";
+        }
+
+        if (_purchaseDialog != null)
+        {
+            _purchaseDialog.DialogText = string.IsNullOrWhiteSpace(reason) ? "Purchase failed." : reason;
+            _purchaseDialog.PopupCentered();
+        }
+    }
+
+    private void OnRoomButtonPressed(int roomIndex)
+    {
+        GD.Print($"Room selected: {roomIndex}");
+        EmitSignal(SignalName.RoomSelected, roomIndex);
+        GameManager.StartRoom(roomIndex);
+    }
+
+    private void OnBackButtonPressed()
+    {
+        GD.Print("Back to main menu");
+        GameManager.LoadMain();
+    }
+
+    private void OnGameStateChanged(GameManager.GameState state)
+    {
+        if (state == GameManager.GameState.MainMenu)
+            PopulateRoomButtons();
+    }
+
+    private void OnLevelCompleted()
+    {
+        CallDeferred(nameof(PopulateRoomButtons));
+    }
+
+    /// <summary>
+    /// Refreshes the room selection buttons to reflect current unlock state.
+    /// </summary>
+    public void RefreshRoomButtons() => PopulateRoomButtons();
+
+    /// <summary>
+    /// Gets the currently selected room index, or -1 if none selected.
+    /// </summary>
+    public int GetSelectedRoomIndex() => -1;
 }
