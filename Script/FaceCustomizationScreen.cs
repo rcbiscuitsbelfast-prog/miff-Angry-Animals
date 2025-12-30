@@ -239,11 +239,15 @@ public partial class FaceCustomizationScreen : Control
              // Workaround: We will just hide the camera preview and show a "captured" state.
              // For the actual image data, we'll pretend we got it.
              
-             _capturedImage = _cameraPreview.Texture.GetImage();
+             _capturedImage = GetPlaceholderImage().GetImage();
+        }
+        else if (_cameraPreview.Texture != null)
+        {
+            _capturedImage = _cameraPreview.Texture.GetImage();
         }
         else
         {
-            _capturedImage = _cameraPreview.Texture.GetImage();
+            _capturedImage = GetPlaceholderImage().GetImage();
         }
         
         if (_capturedImage != null)

@@ -6,7 +6,7 @@ using Godot;
 /// </summary>
 public partial class SignalManager : Node
 {
-	public static SignalManager Instance { get; private set; } // Singleton for global access as an AutoLoad.
+    public static SignalManager Instance { get; private set; } = null!; // Singleton for global access as an AutoLoad.
 
 
     /// <summary>
@@ -25,16 +25,16 @@ public partial class SignalManager : Node
     [Signal] public delegate void OnLevelCompletedEventHandler();
     
     /// <summary>
-	/// Triggered when the player makes an attempt (like shooting or failing).
-	/// </summary>
-	[Signal] public delegate void OnAttemptMadeEventHandler();
-	
+    /// Triggered when the player makes an attempt (like shooting or failing).
+    /// </summary>
+    [Signal] public delegate void OnAttemptMadeEventHandler();
+    
     /// <summary>
-	/// Triggered when the score is updated.
-	/// The score value is passed as a parameter.
-	/// </summary>
-	/// <param name="score">The new score value.</param>
-	[Signal] public delegate void OnScoreUpdatedEventHandler(int score);
+    /// Triggered when the score is updated.
+    /// The score value is passed as a parameter.
+    /// </summary>
+    /// <param name="score">The new score value.</param>
+    [Signal] public delegate void OnScoreUpdatedEventHandler(int score);
 
     /// <summary>
     /// Triggered when a destructible prop is damaged.
@@ -65,12 +65,12 @@ public partial class SignalManager : Node
     /// <summary>
     /// Emits the OnCupDestroyed.
     /// </summary>
-	public static void EmitOnCupDestroyed() => Instance.EmitSignal(SignalName.OnCupDestroyed);
+    public static void EmitOnCupDestroyed() => Instance.EmitSignal(SignalName.OnCupDestroyed);
 
     /// <summary>
     /// Emits the OnLevelCompleted signal.
     /// </summary>
-	public static void EmitOnLevelCompleted() => Instance.EmitSignal(SignalName.OnLevelCompleted);
+    public static void EmitOnLevelCompleted() => Instance.EmitSignal(SignalName.OnLevelCompleted);
 
     /// <summary>
     /// Emits the OnAttemptMade signal.
