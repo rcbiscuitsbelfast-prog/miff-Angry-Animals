@@ -62,6 +62,15 @@ public partial class ProjectilesLoader : Node2D
 
     public override void _ExitTree()
     {
+        // Disconnect all signals to prevent memory leaks
+        if (SignalManager.Instance != null)
+        {
+            SignalManager.Instance.Disconnect(
+                SignalManager.SignalName.OnAnimalDied,
+                Callable.From(OnProjectileDied)
+            );
+        }
+
         if (_slingshot != null)
             _slingshot.ProjectileLaunched -= OnSlingshotProjectileLaunched;
     }

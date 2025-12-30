@@ -38,7 +38,21 @@ public partial class ScoreManager : Node
         CallDeferred(nameof(DeferredConnectSignals));
     }
 
-    public override void _ExitTree() => FileManager.SaveLevelScoreToFile(SCORE_FILE, _levelScores);
+    public override void _ExitTree()
+    {
+        // Disconnect all signals to prevent memory leaks
+        if (SignalManager.Instance != null)
+        {
+            SignalManager.Instance.OnAttemptMade -= OnAttemptMade;
+            SignalManager.Instance.OnScoreUpdated -= OnScoreUpdated;
+            SignalManager.Instance.OnDestructionScoreUpdated -= OnDestructionScoreUpdated;
+        }
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.RoomStarted -= OnRoomStarted;
+
+        FileManager.SaveLevelScoreToFile(SCORE_FILE, _levelScores);
+    }
 
     private void DeferredConnectSignals()
     {

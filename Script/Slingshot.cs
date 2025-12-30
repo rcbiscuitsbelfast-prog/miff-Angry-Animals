@@ -48,6 +48,16 @@ public partial class Slingshot : Node2D
             _inputArea.DragEnded += OnDragEnded;
         }
     }
+
+    public override void _ExitTree()
+    {
+        // Disconnect all signals to prevent memory leaks
+        if (_inputArea != null)
+        {
+            _inputArea.DragStarted -= OnDragStarted;
+            _inputArea.DragEnded -= OnDragEnded;
+        }
+    }
     
     public void LoadProjectile(Projectile projectile)
     {

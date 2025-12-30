@@ -14,7 +14,7 @@ public partial class AudioManager : Node
     // Audio buses
     private const string MUSIC_BUS = "Music";
     private const string SFX_BUS = "SFX";
-    private const string UI_BUS = "UI";
+    private const string UI_BUS = "SFX"; // UI sounds use SFX bus
 
     // Audio streams
     private AudioStreamPlayer? _backgroundMusicPlayer;
@@ -158,6 +158,30 @@ public partial class AudioManager : Node
         if (GameManager.Instance != null)
         {
             GameManager.Instance.GameStateChanged += OnGameStateChanged;
+        }
+    }
+
+    public override void _ExitTree()
+    {
+        // Disconnect all signals to prevent memory leaks
+        if (SignalManager.Instance != null)
+        {
+            SignalManager.Instance.OnAttemptMade -= OnAttemptMade;
+            SignalManager.Instance.OnCupDestroyed -= OnCupDestroyed;
+            SignalManager.Instance.OnPropDestroyed -= OnPropDestroyed;
+            SignalManager.Instance.OnAnimalDied -= OnAnimalDied;
+        }
+
+        var rageSystem = GetNodeOrNull<RageSystem>("/root/RageSystem");
+        if (rageSystem != null)
+        {
+            rageSystem.RageThresholdReached -= OnRageThresholdReached;
+            rageSystem.ComboChanged -= OnComboChanged;
+        }
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameStateChanged -= OnGameStateChanged;
         }
     }
 

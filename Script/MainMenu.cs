@@ -156,6 +156,7 @@ public partial class MainMenu : Control
         _purchaseFailedDialog.GetOkButton().Text = "Retry";
         _purchaseFailedDialog.GetCancelButton().Text = "Cancel";
         _purchaseFailedDialog.Confirmed += OnPurchaseRetry;
+        _purchaseFailedDialog.Canceled += OnPurchaseFailedDialogCanceled;
         AddChild(_purchaseFailedDialog);
     }
 
@@ -201,7 +202,10 @@ public partial class MainMenu : Control
             _unlockConfirmation.Confirmed -= OnUnlockConfirmationAccepted;
 
         if (_purchaseFailedDialog != null)
+        {
             _purchaseFailedDialog.Confirmed -= OnPurchaseRetry;
+            _purchaseFailedDialog.Canceled -= OnPurchaseFailedDialogCanceled;
+        }
     }
 
     private void SetupInputMap()
