@@ -26,6 +26,7 @@ FileManager="*res://Globals/FileManager.cs"
 AudioManager="*res://Globals/AudioManager.cs"
 AdsManager="*res://Globals/AdsManager.cs"
 MonetizationManager="*res://Globals/MonetizationManager.cs"
+LevelGenerator="*res://Globals/LevelGenerator.cs"
 
 [audio]
 

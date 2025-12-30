@@ -6,6 +6,7 @@ using Godot;
 /// Base class for all room/level scenes.
 /// Handles the flow between slingshot phase and traversal phase,
 /// manages room completion and exit door unlocking.
+/// Supports procedural level generation and visual theming.
 /// </summary>
 public partial class RoomBase : Node2D
 {
@@ -21,10 +22,20 @@ public partial class RoomBase : Node2D
     [Export] private bool _isBonusRoom = false;
     [Export] private NodePath _nextRoomPath; // For bonus room transitions
 
+    // Procedural generation exports
+    [Export] private bool _enableProceduralGeneration = true;
+    [Export] private NodePath _cupsContainerPath;
+    [Export] private NodePath _backgroundPath;
+    [Export] private NodePath _floorPath;
+    [Export] private PackedScene _cupScene;
+
     private Slingshot? _slingshot;
     private Node2D? _exitDoor;
     private ProjectilesLoader? _projectilesLoader;
     private Node2D? _nextRoomMarker;
+    private Node2D? _cupsContainer;
+    private Sprite2D? _background;
+    private Sprite2D? _floor;
 
     private ConfirmationDialog? _rewardedDialog;
 
@@ -35,10 +46,12 @@ public partial class RoomBase : Node2D
     private bool _exitUnlocked;
 
     private bool _handlingFailure;
+    private LevelGenerator? _levelGenerator;
 
     public override void _Ready()
     {
         InitializeRoom();
+        ApplyProceduralGeneration();
         EnsureRewardDialog();
         ConnectSignals();
     }
@@ -49,6 +62,9 @@ public partial class RoomBase : Node2D
         _exitDoor = GetNodeOrNull<Node2D>(_exitDoorPath);
         _projectilesLoader = GetNodeOrNull<ProjectilesLoader>(_projectilesLoaderPath);
         _nextRoomMarker = GetNodeOrNull<Node2D>(_nextRoomPath);
+        _cupsContainer = GetNodeOrNull<Node2D>(_cupsContainerPath);
+        _background = GetNodeOrNull<Sprite2D>(_backgroundPath);
+        _floor = GetNodeOrNull<Sprite2D>(_floorPath);
 
         if (_exitDoor != null)
         {
@@ -58,6 +74,119 @@ public partial class RoomBase : Node2D
         var currentRoomIndex = GameManager.Instance?.CurrentRoomIndex ?? 0;
         if (GameManager.Instance != null && currentRoomIndex >= 0 && currentRoomIndex < GameManager.Instance.Rooms.Length)
             _targetScore = GameManager.Instance.Rooms[currentRoomIndex].TargetScore;
+
+        // Initialize level generator for procedural content
+        if (_enableProceduralGeneration && GameManager.Instance != null)
+        {
+            _levelGenerator = new LevelGenerator(currentRoomIndex + 1);
+        }
+    }
+
+    private void ApplyProceduralGeneration()
+    {
+        if (!_enableProceduralGeneration || _levelGenerator == null)
+            return;
+
+        int roomNumber = GameManager.Instance?.CurrentRoomIndex + 1 ?? 1;
+
+        // Apply visual theme
+        ApplyVisualTheme(roomNumber);
+
+        // Generate cups procedurally
+        GenerateCups();
+    }
+
+    private void ApplyVisualTheme(int roomNumber)
+    {
+        // Get theme configuration
+        var theme = LevelGenerator.GetThemeForRoom(roomNumber);
+
+        // Apply background color via modulate
+        if (_background != null)
+        {
+            _background.Modulate = theme.BackgroundColor;
+        }
+
+        // Apply floor color
+        if (_floor != null)
+        {
+            _floor.Modulate = theme.FloorColor;
+        }
+
+        // Apply premium effects if available
+        if (theme.HasPremiumEffects)
+        {
+            // Add subtle particle effects or visual enhancements
+            ApplyPremiumEffects();
+        }
+    }
+
+    private void ApplyPremiumEffects()
+    {
+        // Add visual enhancements for premium rooms
+        // This can include:
+        // - Additional particle systems
+        // - Enhanced floor texture
+        // - Special lighting effects
+        GD.Print("Applying premium visual effects");
+    }
+
+    private void GenerateCups()
+    {
+        if (_levelGenerator == null || _cupsContainer == null || _cupScene == null)
+            return;
+
+        // Clear existing cups
+        foreach (var child in _cupsContainer.GetChildren())
+        {
+            if (child is Node2D node)
+                node.QueueFree();
+        }
+
+        // Generate new cup configurations
+        int cupCount = LevelGenerator.GetCupCountForRoom(GameManager.Instance?.CurrentRoomIndex + 1 ?? 1);
+        var cupConfigs = _levelGenerator.GenerateCupConfigs(cupCount);
+
+        // Spawn cups
+        foreach (var config in cupConfigs)
+        {
+            SpawnCup(config);
+        }
+
+        GD.Print($"Generated {cupCount} cups for room {GameManager.Instance?.CurrentRoomIndex + 1}");
+    }
+
+    private void SpawnCup(LevelGenerator.CupConfig config)
+    {
+        if (_cupScene == null || _cupsContainer == null)
+            return;
+
+        var cup = _cupScene.Instantiate();
+        if (cup is Node2D cupNode)
+        {
+            cupNode.GlobalPosition = config.Position;
+            cupNode.Rotation = config.Rotation;
+            cupNode.Scale = new Vector2(config.Scale, config.Scale);
+
+            // Apply premium styling if needed
+            if (config.IsPremium)
+            {
+                ApplyPremiumCupStyle(cupNode);
+            }
+
+            _cupsContainer.AddChild(cupNode);
+        }
+    }
+
+    private void ApplyPremiumCupStyle(Node2D cup)
+    {
+        // Apply visual enhancement to premium room cups
+        // This could include different colors, glow effects, etc.
+        if (cup is Sprite2D sprite)
+        {
+            // Add slight glow or color variation for premium cups
+            sprite.Modulate = sprite.Modulate.Lightened(0.1f);
+        }
     }
 
     private void EnsureRewardDialog()

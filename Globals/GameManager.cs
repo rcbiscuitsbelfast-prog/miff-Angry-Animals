@@ -181,17 +181,51 @@ public partial class GameManager : Node
         EmitSignal(SignalName.GameStateChanged, State);
     }
 
+    /// <summary>
+    /// Gets the target score for the current room.
+    /// </summary>
+    public int GetCurrentTargetScore()
+    {
+        if (CurrentRoomIndex < 0 || CurrentRoomIndex >= Rooms.Length)
+            return 3;
+        return Rooms[CurrentRoomIndex].TargetScore;
+    }
+
+    /// <summary>
+    /// Gets whether the current room is in the free tier (levels 1-20).
+    /// </summary>
+    public bool IsCurrentRoomFreeTier() => CurrentRoomIndex < FreeLevels;
+
     private static RoomInfo[] CreateDefaultRooms()
     {
         var rooms = new RoomInfo[TotalLevels];
         for (int i = 0; i < TotalLevels; i++)
         {
             int levelNumber = i + 1;
+            int targetScore = CalculateTargetScore(levelNumber);
             rooms[i] = new RoomInfo(
                 $"res://Scenes/Levels/Room{levelNumber:D3}.tscn",
                 $"Room {levelNumber}",
-                3);
+                targetScore);
         }
         return rooms;
+    }
+
+    /// <summary>
+    /// Calculates target score based on level number.
+    /// Early levels (1-20): 3 cups target
+    /// Mid levels (21-50): 4 cups target
+    /// Late levels (51-100): 5+ cups target with higher scores
+    /// </summary>
+    private static int CalculateTargetScore(int levelNumber)
+    {
+        if (levelNumber <= 20)
+            return 3; // Free tier: 3 cups
+        else if (levelNumber <= 50)
+            return 4; // Early premium: 4 cups
+        else if (levelNumber <= 75)
+            return 5; // Mid premium: 5 cups
+        else
+            return 6; // Late premium: 6 cups (challenge levels)
     }
 }

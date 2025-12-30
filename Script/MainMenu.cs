@@ -383,7 +383,7 @@ public partial class MainMenu : Control
     private void PlayUiClickSound()
     {
         var audioManager = GetNodeOrNull<AudioManager>("/root/AudioManager");
-        audioManager?.PlayUiClickSound();
+        audioManager?.PlayUiClickSoundSfx();
     }
 
     /// <summary>

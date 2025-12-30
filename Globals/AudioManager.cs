@@ -326,28 +326,64 @@ public partial class AudioManager : Node
         if (Instance != null)
             Instance.PlaySlingshotSound();
     }
-    
+
+    public static void PlaySlingshotSoundSfx()
+    {
+        if (Instance != null)
+            Instance.PlaySlingshotSound();
+    }
+
     public static void PlayDestructionSfx()
     {
         if (Instance != null)
             Instance.PlayDestructionSound();
     }
-    
+
+    public static void PlayDestructionSoundSfx()
+    {
+        if (Instance != null)
+            Instance.PlayDestructionSound();
+    }
+
     public static void PlayUiClickSfx()
     {
         if (Instance != null)
             Instance.PlayUiClickSound();
     }
-    
+
+    public static void PlayUiClickSoundSfx()
+    {
+        if (Instance != null)
+            Instance.PlayUiClickSound();
+    }
+
     public static void PlayComboSfx()
     {
         if (Instance != null)
             Instance.PlayComboSound();
     }
-    
+
+    public static void PlayComboSoundSfx()
+    {
+        if (Instance != null)
+            Instance.PlayComboSound();
+    }
+
     public static void PlayRageSfx()
     {
         if (Instance != null)
             Instance.PlayRageSound();
+    }
+
+    public static void PlayRageSoundSfx()
+    {
+        if (Instance != null)
+            Instance.PlayRageSound();
+    }
+
+    public static void PlayCompletionSoundSfx()
+    {
+        if (Instance != null)
+            Instance.PlayComboSound();
     }
 }
