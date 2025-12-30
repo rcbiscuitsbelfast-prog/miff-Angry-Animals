@@ -8,7 +8,15 @@ using Godot;
 /// </summary>
 public partial class ProjectilesLoader : Node2D
 {
+    /// <summary>
+    /// Emitted when a projectile is launched from the slingshot.
+    /// </summary>
+    /// <param name="projectile">The projectile that was launched.</param>
     [Signal] public delegate void ProjectileLaunchedEventHandler(Projectile projectile);
+
+    /// <summary>
+    /// Emitted when all projectiles have been used up.
+    /// </summary>
     [Signal] public delegate void AllProjectilesUsedEventHandler();
 
     [Export] private PackedScene _faceProjectileScene;
@@ -48,10 +56,7 @@ public partial class ProjectilesLoader : Node2D
     {
         if (SignalManager.Instance != null)
         {
-            SignalManager.Instance.Connect(
-                SignalManager.SignalName.OnAnimalDied,
-                Callable.From(OnProjectileDied)
-            );
+            SignalManager.Instance.OnAnimalDied += OnProjectileDied;
         }
 
         if (_slingshot != null)
@@ -62,6 +67,11 @@ public partial class ProjectilesLoader : Node2D
 
     public override void _ExitTree()
     {
+        if (SignalManager.Instance != null)
+        {
+            SignalManager.Instance.OnAnimalDied -= OnProjectileDied;
+        }
+
         if (_slingshot != null)
             _slingshot.ProjectileLaunched -= OnSlingshotProjectileLaunched;
     }

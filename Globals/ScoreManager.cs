@@ -15,7 +15,14 @@ public partial class ScoreManager : Node
     /// </summary>
     public static ScoreManager Instance { get; private set; } = null!;
 
+    /// <summary>
+    /// Emitted when the current runtime score changes.
+    /// </summary>
     [Signal] public delegate void ScoreChangedEventHandler(int score);
+
+    /// <summary>
+    /// Emitted when the current runtime attempts count changes.
+    /// </summary>
     [Signal] public delegate void AttemptsChangedEventHandler(int attempts);
 
     private const int DEFAULT_SCORE = 0;
@@ -38,7 +45,20 @@ public partial class ScoreManager : Node
         CallDeferred(nameof(DeferredConnectSignals));
     }
 
-    public override void _ExitTree() => FileManager.SaveLevelScoreToFile(SCORE_FILE, _levelScores);
+    public override void _ExitTree()
+    {
+        FileManager.SaveLevelScoreToFile(SCORE_FILE, _levelScores);
+
+        if (SignalManager.Instance != null)
+        {
+            SignalManager.Instance.OnAttemptMade -= OnAttemptMade;
+            SignalManager.Instance.OnScoreUpdated -= OnScoreUpdated;
+            SignalManager.Instance.OnDestructionScoreUpdated -= OnDestructionScoreUpdated;
+        }
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.RoomStarted -= OnRoomStarted;
+    }
 
     private void DeferredConnectSignals()
     {

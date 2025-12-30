@@ -2,8 +2,15 @@ using Godot;
 using System;
 using System.Threading.Tasks;
 
+/// <summary>
+/// UI screen for face customization.
+/// Allows capturing photos from the camera, selecting from gallery, and applying cosmetic overlays.
+/// </summary>
 public partial class FaceCustomizationScreen : Control
 {
+    /// <summary>
+    /// Emitted when the customization screen is closed.
+    /// </summary>
     [Signal] public delegate void OnCloseEventHandler();
 
     private TextureRect _cameraPreview;
@@ -194,9 +201,11 @@ public partial class FaceCustomizationScreen : Control
     private void StartCamera()
     {
         // Request permissions for Mobile
-        if (OS.GetName() == "Android" || OS.GetName() == "iOS")
+        if (OS.GetName() == "Android")
         {
-             OS.RequestPermissions();
+             OS.RequestPermission("android.permission.CAMERA");
+             OS.RequestPermission("android.permission.READ_EXTERNAL_STORAGE");
+             OS.RequestPermission("android.permission.WRITE_EXTERNAL_STORAGE");
         }
 
         var feeds = CameraServer.Feeds();

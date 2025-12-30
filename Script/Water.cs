@@ -6,14 +6,14 @@ using Godot;
 /// </summary>
 public partial class Water : Area2D
 {
-	[Export] AudioStreamPlayer2D _splashSound;
+    [Export] AudioStreamPlayer2D _splashSound;
 
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
-	{
-		// Triggers the splash sound.
-		BodyEntered += OnAnimalDied;
-	}
+    // Called when the node enters the scene tree for the first time.
+    public override void _Ready()
+    {
+        // Triggers the splash sound.
+        BodyEntered += OnAnimalDied;
+    }
 
 
     /// <summary>

@@ -6,34 +6,31 @@ using Godot;
 /// </summary>
 public partial class Cup : DestructibleProp
 {
-	public const string GROUP_NAME = "cup";
+    public const string GROUP_NAME = "cup";
 
-	[Export] AnimationPlayer _vanishAnimation;
+    [Export] AnimationPlayer _vanishAnimation;
 
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
-	{
+    // Called when the node enters the scene tree for the first time.
+    public override void _Ready()
+    {
         // Initialize base DestructibleProp
         base._Ready();
         
-        // Ensure some defaults if not set
-        if (MaxHp <= 0) MaxHp = 10; // Default cup HP
-        CurrentHp = MaxHp; // Reset CurrentHp as DestructibleProp._Ready might have run before we set MaxHp if we set it here. 
-        // Actually base._Ready() sets CurrentHp = MaxHp.
-        // If MaxHp was 0 from export defaults, then CurrentHp is 0. 
-        // We should set MaxHp before base._Ready if possible, or reset CurrentHp.
-        // But _Ready order is Base then Derived. So base._Ready() runs first.
+        if (MaxHp <= 0) MaxHp = 10;
+        CurrentHp = MaxHp;
         
-        if (MaxHp == 0 || MaxHp == 100) // If default 100 from base or 0
-        {
-             // Maybe we want specific cup defaults?
-             // Let's rely on Editor values, but ensure it's not 0.
-        }
-
-		//Connects the vanish animation to its destruction event.
+        //Connects the vanish animation to its destruction event.
         if (_vanishAnimation != null)
-		    _vanishAnimation.AnimationFinished += OnAnimationFinished;
-	}
+            _vanishAnimation.AnimationFinished += OnAnimationFinished;
+    }
+
+    public override void _ExitTree()
+    {
+        if (_vanishAnimation != null)
+            _vanishAnimation.AnimationFinished -= OnAnimationFinished;
+            
+        base._ExitTree();
+    }
 
     protected override void Die()
     {
@@ -90,7 +87,7 @@ public partial class Cup : DestructibleProp
     /// </summary>
     /// <param name="animName"></param>
     private void OnAnimationFinished(StringName animName)
-	{
-		QueueFree();
-	}
+    {
+        QueueFree();
+    }
 }

@@ -7,6 +7,10 @@ using Godot;
 /// </summary>
 public partial class RoomSelection : Control
 {
+    /// <summary>
+    /// Emitted when a room is selected.
+    /// </summary>
+    /// <param name="roomIndex">The index of the selected room.</param>
     [Signal] public delegate void RoomSelectedEventHandler(int roomIndex);
 
     [Export] private NodePath _roomsContainerPath;
@@ -116,7 +120,7 @@ public partial class RoomSelection : Control
         if (fullUnlocked)
             return true;
 
-        if (roomIndex >= 20)
+        if (roomIndex >= GameManager.FreeLevels)
             return false;
 
         return PlayerProfile.IsRoomUnlocked(roomIndex);
@@ -158,8 +162,8 @@ public partial class RoomSelection : Control
             lockLabel.Modulate = Colors.Red;
             button.Disabled = true;
 
-            if (roomIndex >= 20)
-                button.TooltipText = "Unlock Full Game to access levels 21-100";
+            if (roomIndex >= GameManager.FreeLevels)
+                button.TooltipText = $"Unlock Full Game to access levels {GameManager.FreeLevels + 1}-{GameManager.TotalLevels}";
             else
                 button.TooltipText = "Complete previous rooms to unlock";
         }
@@ -181,7 +185,7 @@ public partial class RoomSelection : Control
         if (_roomsContainer == null)
             return;
 
-        var showUnlock = !(MonetizationManager.Instance?.IsFullGameUnlocked ?? false) && GameManager.Instance != null && GameManager.Instance.Rooms.Length > 20;
+        var showUnlock = !(MonetizationManager.Instance?.IsFullGameUnlocked ?? false) && GameManager.Instance != null && GameManager.Instance.Rooms.Length > GameManager.FreeLevels;
         if (!showUnlock)
         {
             _unlockFullGameButton = null;

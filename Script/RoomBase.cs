@@ -329,9 +329,14 @@ public partial class RoomBase : Node2D
         {
             var rewardTask = ToSignal(AdsManager.Instance, AdsManager.SignalName.RewardEarned);
             await AdsManager.Instance.ShowRewardedAd();
-
-            if (rewardTask.IsCompleted)
-                ApplyRewardPoints(5);
+            
+            // Wait for reward signal or timeout/failure
+            await rewardTask;
+            ApplyRewardPoints(5);
+        }
+        catch (Exception ex)
+        {
+            GD.PushWarning($"Rewarded ad failed or was cancelled: {ex.Message}");
         }
         finally
         {

@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 /// <summary>
 /// StickClone character that spawns during traversal phase after slingshot destruction.
@@ -6,7 +7,14 @@ using Godot;
 /// </summary>
 public partial class StickClone : CharacterBody2D
 {
+    /// <summary>
+    /// Emitted when the clone reaches the exit area.
+    /// </summary>
     [Signal] public delegate void CloneReachedExitEventHandler();
+
+    /// <summary>
+    /// Emitted when the clone gets stuck.
+    /// </summary>
     [Signal] public delegate void CloneStuckEventHandler();
 
     [Export] private float _moveSpeed = 150f;
@@ -22,7 +30,6 @@ public partial class StickClone : CharacterBody2D
     private Node2D? _glassesNode;
 
     // Movement state
-    private Vector2 _velocity = Vector2.Zero;
     private bool _isGrounded = false;
     private bool _isMoving = false;
 
@@ -184,20 +191,8 @@ public partial class StickClone : CharacterBody2D
 
     private void SetupPhysics()
     {
-        // Set up the physics material for better collision response
-        var physicsMaterial = new PhysicsMaterial();
-        physicsMaterial.Friction = 1.0f;
-        physicsMaterial.Bounce = 0.0f;
-        
-        // Apply to collision shapes if they exist
-        var collisionShapes = GetTree().GetNodesInGroup("collision_shapes");
-        foreach (var shape in collisionShapes)
-        {
-            if (shape is CollisionShape2D collisionShape)
-            {
-                collisionShape.PhysicsMaterialOverride = physicsMaterial;
-            }
-        }
+        // CharacterBody2D handles physics differently than RigidBody2D.
+        // We don't use PhysicsMaterialOverride here.
     }
 
     private void ConnectSignals()
@@ -239,44 +234,50 @@ public partial class StickClone : CharacterBody2D
 
     private void ApplyGravity(double delta)
     {
-        if (!_isGrounded)
+        if (!IsOnFloor())
         {
-            _velocity.Y += _gravity * (float)delta;
+            Vector2 velocity = Velocity;
+            velocity.Y += _gravity * (float)delta;
+            Velocity = velocity;
         }
     }
 
     private void HandleMovement(double delta)
     {
+        Vector2 velocity = Velocity;
+
         // Simple AI for movement towards exit
         if (_exitArea != null && GlobalPosition.DistanceTo(_exitArea.GlobalPosition) > 50)
         {
             Vector2 direction = (_exitArea.GlobalPosition - GlobalPosition).Normalized();
             
             // Move towards exit
-            _velocity.X = direction.X * _moveSpeed;
+            velocity.X = direction.X * _moveSpeed;
             
             // Simple jump logic - jump if there's an obstacle ahead
-            if (_isGrounded && ShouldJump())
+            if (IsOnFloor() && ShouldJump())
             {
-                Jump();
+                velocity.Y = _jumpForce;
             }
         }
         else
         {
             // At exit, stop moving
-            _velocity.X = 0;
-            if (_isGrounded)
+            velocity.X = 0;
+            if (IsOnFloor())
             {
                 // We've reached the exit!
                 OnReachedExit();
             }
         }
 
-        // Apply friction when on ground and not moving
-        if (_isGrounded && Mathf.Abs(_velocity.X) < 10)
+        // Apply friction when on ground and not moving much
+        if (IsOnFloor() && Mathf.Abs(velocity.X) < 10)
         {
-            _velocity.X *= _friction;
+            velocity.X *= _friction;
         }
+
+        Velocity = velocity;
     }
 
     private bool ShouldJump()
@@ -290,21 +291,15 @@ public partial class StickClone : CharacterBody2D
         return result.Count > 0;
     }
 
-    private void Jump()
-    {
-        _velocity.Y = _jumpForce;
-        _isGrounded = false;
-    }
-
     private void UpdateAnimationState()
     {
-        _isMoving = Mathf.Abs(_velocity.X) > 10;
+        _isMoving = Mathf.Abs(Velocity.X) > 10;
         
         // TODO: Update animation based on movement state
         // For now, just flip sprite based on direction
         if (_faceSprite != null)
         {
-            _faceSprite.FlipH = _velocity.X < 0;
+            _faceSprite.FlipH = Velocity.X < 0;
         }
     }
 

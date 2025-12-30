@@ -29,6 +29,13 @@ public partial class Button : TextureButton
         Pressed += OnButtonPressed;
     }
 
+    public override void _ExitTree()
+    {
+        MouseEntered -= OnMouseEntered;
+        MouseExited -= OnMouseExited;
+        Pressed -= OnButtonPressed;
+    }
+
     private void OnButtonPressed()
     {
         GameManager.StartRoomByLevelNumber(LevelNumber);

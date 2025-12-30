@@ -7,7 +7,14 @@ using Godot;
 /// </summary>
 public partial class GameHud : Control
 {
+    /// <summary>
+    /// Emitted when a pause is requested.
+    /// </summary>
     [Signal] public delegate void PauseRequestedEventHandler();
+
+    /// <summary>
+    /// Emitted when a resume is requested.
+    /// </summary>
     [Signal] public delegate void ResumeRequestedEventHandler();
 
     [Export] private NodePath _attemptsLabelPath;
