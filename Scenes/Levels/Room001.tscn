@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://Script/RoomBase.cs" id="1_script"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/Slingshot.tscn" id="2_sling"]
@@ -19,6 +19,11 @@ _slingshotPath = NodePath("Slingshot")
 _exitDoorPath = NodePath("Environment/ExitDoor")
 _projectilesLoaderPath = NodePath("ProjectilesLoader")
 _targetScore = 3
+_enableProceduralGeneration = true
+_cupsContainerPath = NodePath("CupsContainer")
+_backgroundPath = NodePath("Background")
+_floorPath = NodePath("Environment/Floor/ColorRect")
+_cupScene = ExtResource("6_cup")
 
 [node name="Slingshot" parent="." instance=ExtResource("2_sling")]
 position = Vector2(200, 500)
@@ -32,6 +37,11 @@ _slingshot = NodePath("../Slingshot")
 _slingshotPosition = NodePath("../Slingshot")
 
 [node name="GameHud" parent="." instance=ExtResource("5_hud")]
+
+[node name="Background" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(600, 350)
+scale = Vector2(8, 5)
 
 [node name="Environment" type="Node2D" parent="."]
 
@@ -64,13 +74,6 @@ offset_right = 30.0
 offset_bottom = 50.0
 color = Color(0.4, 0.2, 0, 1)
 
+[node name="CupsContainer" type="Node2D" parent="."]
+
 [node name="Obstacles" type="Node2D" parent="."]
-
-[node name="Cup1" parent="Obstacles" instance=ExtResource("6_cup")]
-position = Vector2(800, 550)
-
-[node name="Cup2" parent="Obstacles" instance=ExtResource("6_cup")]
-position = Vector2(850, 550)
-
-[node name="Cup3" parent="Obstacles" instance=ExtResource("6_cup")]
-position = Vector2(825, 510)
