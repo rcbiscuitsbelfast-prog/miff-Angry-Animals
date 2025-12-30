@@ -6,7 +6,7 @@ using Godot;
 /// </summary>
 public partial class SignalManager : Node
 {
-	public static SignalManager Instance { get; private set; } // Singleton for global access as an AutoLoad.
+    public static SignalManager Instance { get; private set; } // Singleton for global access as an AutoLoad.
 
 
     /// <summary>
@@ -25,16 +25,16 @@ public partial class SignalManager : Node
     [Signal] public delegate void OnLevelCompletedEventHandler();
     
     /// <summary>
-	/// Triggered when the player makes an attempt (like shooting or failing).
-	/// </summary>
-	[Signal] public delegate void OnAttemptMadeEventHandler();
-	
+    /// Triggered when the player makes an attempt (like shooting or failing).
+    /// </summary>
+    [Signal] public delegate void OnAttemptMadeEventHandler();
+    
     /// <summary>
-	/// Triggered when the score is updated.
-	/// The score value is passed as a parameter.
-	/// </summary>
-	/// <param name="score">The new score value.</param>
-	[Signal] public delegate void OnScoreUpdatedEventHandler(int score);
+    /// Triggered when the score is updated.
+    /// The score value is passed as a parameter.
+    /// </summary>
+    /// <param name="score">The new score value.</param>
+    [Signal] public delegate void OnScoreUpdatedEventHandler(int score);
 
     /// <summary>
     /// Triggered when a destructible prop is damaged.
@@ -65,12 +65,12 @@ public partial class SignalManager : Node
     /// <summary>
     /// Emits the OnCupDestroyed.
     /// </summary>
-	public static void EmitOnCupDestroyed() => Instance.EmitSignal(SignalName.OnCupDestroyed);
+    public static void EmitOnCupDestroyed() => Instance.EmitSignal(SignalName.OnCupDestroyed);
 
     /// <summary>
     /// Emits the OnLevelCompleted signal.
     /// </summary>
-	public static void EmitOnLevelCompleted() => Instance.EmitSignal(SignalName.OnLevelCompleted);
+    public static void EmitOnLevelCompleted() => Instance.EmitSignal(SignalName.OnLevelCompleted);
 
     /// <summary>
     /// Emits the OnAttemptMade signal.
@@ -83,7 +83,23 @@ public partial class SignalManager : Node
     /// <param name="score">The updated score to send with the signa.</param>
     public static void EmitOnScoreUpdated(int score) => Instance.EmitSignal(SignalName.OnScoreUpdated, score);
 
+    /// <summary>
+    /// Emits the OnPropDamaged signal.
+    /// </summary>
+    /// <param name="prop">The prop that was damaged.</param>
+    /// <param name="damage">The amount of damage dealt.</param>
     public static void EmitOnPropDamaged(Node prop, int damage) => Instance.EmitSignal(SignalName.OnPropDamaged, prop, damage);
+
+    /// <summary>
+    /// Emits the OnPropDestroyed signal.
+    /// </summary>
+    /// <param name="prop">The prop that was destroyed.</param>
+    /// <param name="scoreValue">The score awarded for destroying the prop.</param>
     public static void EmitOnPropDestroyed(Node prop, int scoreValue) => Instance.EmitSignal(SignalName.OnPropDestroyed, prop, scoreValue);
+
+    /// <summary>
+    /// Emits the OnDestructionScoreUpdated signal.
+    /// </summary>
+    /// <param name="score">The new total destruction score.</param>
     public static void EmitOnDestructionScoreUpdated(int score) => Instance.EmitSignal(SignalName.OnDestructionScoreUpdated, score);
 }

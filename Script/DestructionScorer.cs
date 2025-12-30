@@ -6,8 +6,11 @@ namespace AngryAnimals.Scoring;
 /// Handles destruction scoring and score popups for destructible props.
 /// This is separate from the global RageSystem (rage bar + combo signals).
 /// </summary>
-public partial class RageSystem : Node
+public partial class DestructionScorer : Node
 {
+    /// <summary>
+    /// The scene used to instantiate score popups.
+    /// </summary>
     [Export] public PackedScene? ScorePopupScene;
 
     private int _currentDestructionScore;

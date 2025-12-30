@@ -11,8 +11,19 @@ public partial class AdsManager : Node
 {
     public static AdsManager Instance { get; private set; } = null!;
 
+    /// <summary>
+    /// Emitted when an ad is closed.
+    /// </summary>
     [Signal] public delegate void AdClosedEventHandler();
+
+    /// <summary>
+    /// Emitted when an ad is clicked.
+    /// </summary>
     [Signal] public delegate void AdClickedEventHandler();
+
+    /// <summary>
+    /// Emitted when a reward is earned from a rewarded ad.
+    /// </summary>
     [Signal] public delegate void RewardEarnedEventHandler();
 
     /// <summary>
@@ -444,25 +455,41 @@ public partial class AdsManager : Node
 
     private async Task WaitForAdClosedOrTimeoutAsync(double timeoutSeconds)
     {
+        var tcs = new TaskCompletionSource<bool>();
+        
         var timeoutTimer = new Timer
         {
             OneShot = true,
             WaitTime = timeoutSeconds,
             ProcessCallback = Timer.TimerProcessCallback.Idle
         };
-
         AddChild(timeoutTimer);
+        
+        void OnAdClosed() => tcs.TrySetResult(true);
+        void OnTimeout() => tcs.TrySetResult(false);
+        
+        AdClosed += OnAdClosed;
+        timeoutTimer.Timeout += OnTimeout;
+        
         timeoutTimer.Start();
 
-        var closedTask = ToSignal(this, SignalName.AdClosed);
-        var timeoutTask = ToSignal(timeoutTimer, Timer.SignalName.Timeout);
-
-        await Task.WhenAny(closedTask, timeoutTask);
-
-        timeoutTimer.QueueFree();
-
-        // If the ad system never emitted, still emit AdClosed to unblock flow.
-        if (!closedTask.IsCompleted)
-            EmitSignal(SignalName.AdClosed);
+        try 
+        {
+            bool wasClosed = await tcs.Task;
+            if (!wasClosed)
+            {
+                // If it was a timeout, emit AdClosed to unblock flow.
+                EmitSignal(SignalName.AdClosed);
+            }
+        }
+        finally
+        {
+            AdClosed -= OnAdClosed;
+            if (IsInstanceValid(timeoutTimer))
+            {
+                timeoutTimer.Stop();
+                timeoutTimer.QueueFree();
+            }
+        }
     }
 }

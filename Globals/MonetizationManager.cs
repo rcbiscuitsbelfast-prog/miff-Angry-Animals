@@ -10,8 +10,20 @@ public partial class MonetizationManager : Node
 {
     public static MonetizationManager Instance { get; private set; } = null!;
 
+    /// <summary>
+    /// Emitted when a purchase is successful.
+    /// </summary>
     [Signal] public delegate void PurchaseSucceededEventHandler();
+
+    /// <summary>
+    /// Emitted when a purchase fails.
+    /// </summary>
+    /// <param name="reason">The reason for failure.</param>
     [Signal] public delegate void PurchaseFailedEventHandler(string reason);
+
+    /// <summary>
+    /// Emitted when purchases are restored.
+    /// </summary>
     [Signal] public delegate void PurchaseRestoredEventHandler();
 
     /// <summary>
@@ -291,46 +303,84 @@ public partial class MonetizationManager : Node
 
     private async Task WaitForPurchaseResultOrTimeoutAsync(double timeoutSeconds)
     {
+        var tcs = new TaskCompletionSource<bool>();
+        
         var timer = new Timer
         {
             OneShot = true,
             WaitTime = timeoutSeconds,
             ProcessCallback = Timer.TimerProcessCallback.Idle
         };
-
         AddChild(timer);
+        
+        void OnSuccess() => tcs.TrySetResult(true);
+        void OnFail(string reason) => tcs.TrySetResult(false);
+        void OnTimeout() => tcs.TrySetResult(false);
+        
+        PurchaseSucceeded += OnSuccess;
+        PurchaseFailed += OnFail;
+        timer.Timeout += OnTimeout;
+        
         timer.Start();
 
-        var successTask = ToSignal(this, SignalName.PurchaseSucceeded);
-        var failTask = ToSignal(this, SignalName.PurchaseFailed);
-        var timeoutTask = ToSignal(timer, Timer.SignalName.Timeout);
-
-        await Task.WhenAny(successTask, failTask, timeoutTask);
-        timer.QueueFree();
-
-        if (timeoutTask.IsCompleted && !IsFullGameUnlocked)
-            EmitSignal(SignalName.PurchaseFailed, "Purchase timed out. Please try again.");
+        try 
+        {
+            await tcs.Task;
+        }
+        finally
+        {
+            PurchaseSucceeded -= OnSuccess;
+            PurchaseFailed -= OnFail;
+            
+            if (IsInstanceValid(timer))
+            {
+                if (timer.TimeLeft == 0 && !IsFullGameUnlocked)
+                {
+                    EmitSignal(SignalName.PurchaseFailed, "Purchase timed out. Please try again.");
+                }
+                timer.Stop();
+                timer.QueueFree();
+            }
+        }
     }
 
     private async Task WaitForRestoreOrTimeoutAsync(double timeoutSeconds)
     {
+        var tcs = new TaskCompletionSource<bool>();
+        
         var timer = new Timer
         {
             OneShot = true,
             WaitTime = timeoutSeconds,
             ProcessCallback = Timer.TimerProcessCallback.Idle
         };
-
         AddChild(timer);
+        
+        void OnRestored() => tcs.TrySetResult(true);
+        void OnTimeout() => tcs.TrySetResult(false);
+        
+        PurchaseRestored += OnRestored;
+        timer.Timeout += OnTimeout;
+        
         timer.Start();
 
-        var restoredTask = ToSignal(this, SignalName.PurchaseRestored);
-        var timeoutTask = ToSignal(timer, Timer.SignalName.Timeout);
-
-        await Task.WhenAny(restoredTask, timeoutTask);
-        timer.QueueFree();
-
-        if (!restoredTask.IsCompleted)
-            EmitSignal(SignalName.PurchaseRestored);
+        try 
+        {
+            await tcs.Task;
+        }
+        finally
+        {
+            PurchaseRestored -= OnRestored;
+            
+            if (IsInstanceValid(timer))
+            {
+                if (timer.TimeLeft == 0)
+                {
+                    EmitSignal(SignalName.PurchaseRestored);
+                }
+                timer.Stop();
+                timer.QueueFree();
+            }
+        }
     }
 }

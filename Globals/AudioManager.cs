@@ -54,38 +54,38 @@ public partial class AudioManager : Node
         _backgroundMusicPlayer = new AudioStreamPlayer();
         _backgroundMusicPlayer.Name = "BackgroundMusicPlayer";
         _backgroundMusicPlayer.Bus = MUSIC_BUS;
-        _backgroundMusicPlayer.VolumeDb = LinearToDb(MusicVolume);
+        _backgroundMusicPlayer.VolumeDb = Mathf.LinearToDb(MusicVolume);
         AddChild(_backgroundMusicPlayer);
 
         // Initialize SFX players
         _slingshotSfxPlayer = new AudioStreamPlayer();
         _slingshotSfxPlayer.Name = "SlingshotSfxPlayer";
         _slingshotSfxPlayer.Bus = SFX_BUS;
-        _slingshotSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _slingshotSfxPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_slingshotSfxPlayer);
 
         _destructionSfxPlayer = new AudioStreamPlayer();
         _destructionSfxPlayer.Name = "DestructionSfxPlayer";
         _destructionSfxPlayer.Bus = SFX_BUS;
-        _destructionSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _destructionSfxPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_destructionSfxPlayer);
 
         _uiClickPlayer = new AudioStreamPlayer();
         _uiClickPlayer.Name = "UiClickPlayer";
         _uiClickPlayer.Bus = UI_BUS;
-        _uiClickPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _uiClickPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_uiClickPlayer);
 
         _comboPlayer = new AudioStreamPlayer();
         _comboPlayer.Name = "ComboPlayer";
         _comboPlayer.Bus = SFX_BUS;
-        _comboPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _comboPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_comboPlayer);
 
         _ragePlayer = new AudioStreamPlayer();
         _ragePlayer.Name = "RagePlayer";
         _ragePlayer.Bus = SFX_BUS;
-        _ragePlayer.VolumeDb = LinearToDb(SfxVolume);
+        _ragePlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_ragePlayer);
     }
 
@@ -266,85 +266,113 @@ public partial class AudioManager : Node
         }
     }
 
-    // Volume control methods
+    /// <summary>
+    /// Sets the music volume (0.0 to 1.0).
+    /// </summary>
+    /// <param name="volume">Volume level</param>
     public void SetMusicVolume(float volume)
     {
         MusicVolume = Mathf.Clamp(volume, 0f, 1f);
         if (_backgroundMusicPlayer != null)
         {
-            _backgroundMusicPlayer.VolumeDb = LinearToDb(MusicVolume);
+            _backgroundMusicPlayer.VolumeDb = Mathf.LinearToDb(MusicVolume);
         }
         EmitSignal(SignalName.MusicVolumeChanged, MusicVolume);
     }
 
+    /// <summary>
+    /// Sets the SFX volume (0.0 to 1.0).
+    /// </summary>
+    /// <param name="volume">Volume level</param>
     public void SetSfxVolume(float volume)
     {
         SfxVolume = Mathf.Clamp(volume, 0f, 1f);
         
+        float db = Mathf.LinearToDb(SfxVolume);
         if (_slingshotSfxPlayer != null)
-            _slingshotSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _slingshotSfxPlayer.VolumeDb = db;
         if (_destructionSfxPlayer != null)
-            _destructionSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _destructionSfxPlayer.VolumeDb = db;
         if (_uiClickPlayer != null)
-            _uiClickPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _uiClickPlayer.VolumeDb = db;
         if (_comboPlayer != null)
-            _comboPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _comboPlayer.VolumeDb = db;
         if (_ragePlayer != null)
-            _ragePlayer.VolumeDb = LinearToDb(SfxVolume);
+            _ragePlayer.VolumeDb = db;
 
         EmitSignal(SignalName.SfxVolumeChanged, SfxVolume);
     }
 
+    /// <summary>
+    /// Mutes or unmutes the music bus.
+    /// </summary>
+    /// <param name="muted">True to mute, false to unmute</param>
     public void SetMusicMute(bool muted)
     {
         MuteMusic = muted;
-        if (_backgroundMusicPlayer != null)
+        int busIndex = AudioServer.GetBusIndex(MUSIC_BUS);
+        if (busIndex != -1)
         {
-            _backgroundMusicPlayer.Muted = muted;
+            AudioServer.SetBusMute(busIndex, muted);
         }
     }
 
+    /// <summary>
+    /// Mutes or unmutes the SFX and UI buses.
+    /// </summary>
+    /// <param name="muted">True to mute, false to unmute</param>
     public void SetSfxMute(bool muted)
     {
         MuteSfx = muted;
         
-        if (_slingshotSfxPlayer != null)
-            _slingshotSfxPlayer.Muted = muted;
-        if (_destructionSfxPlayer != null)
-            _destructionSfxPlayer.Muted = muted;
-        if (_uiClickPlayer != null)
-            _uiClickPlayer.Muted = muted;
-        if (_comboPlayer != null)
-            _comboPlayer.Muted = muted;
-        if (_ragePlayer != null)
-            _ragePlayer.Muted = muted;
+        int sfxBusIndex = AudioServer.GetBusIndex(SFX_BUS);
+        if (sfxBusIndex != -1)
+            AudioServer.SetBusMute(sfxBusIndex, muted);
+            
+        int uiBusIndex = AudioServer.GetBusIndex(UI_BUS);
+        if (uiBusIndex != -1)
+            AudioServer.SetBusMute(uiBusIndex, muted);
     }
 
-    // Public static API for other scripts
+    /// <summary>
+    /// Plays the slingshot sound effect globally.
+    /// </summary>
     public static void PlaySlingshotSfx()
     {
         if (Instance != null)
             Instance.PlaySlingshotSound();
     }
     
+    /// <summary>
+    /// Plays the destruction sound effect globally.
+    /// </summary>
     public static void PlayDestructionSfx()
     {
         if (Instance != null)
             Instance.PlayDestructionSound();
     }
     
+    /// <summary>
+    /// Plays the UI click sound effect globally.
+    /// </summary>
     public static void PlayUiClickSfx()
     {
         if (Instance != null)
             Instance.PlayUiClickSound();
     }
     
+    /// <summary>
+    /// Plays the combo sound effect globally.
+    /// </summary>
     public static void PlayComboSfx()
     {
         if (Instance != null)
             Instance.PlayComboSound();
     }
     
+    /// <summary>
+    /// Plays the rage sound effect globally.
+    /// </summary>
     public static void PlayRageSfx()
     {
         if (Instance != null)

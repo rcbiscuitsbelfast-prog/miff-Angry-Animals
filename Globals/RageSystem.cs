@@ -1,109 +1,169 @@
 using Godot;
 
+/// <summary>
+/// Global rage and combo system.
+/// Manages the player's rage level and combo multiplier based on gameplay events.
+/// </summary>
 public partial class RageSystem : Node
 {
-	public static RageSystem Instance { get; private set; } = null!;
+    /// <summary>
+    /// Singleton instance of the RageSystem.
+    /// </summary>
+    public static RageSystem Instance { get; private set; } = null!;
 
-	[Signal] public delegate void RageChangedEventHandler(float rage);
-	[Signal] public delegate void ComboChangedEventHandler(int combo);
-	[Signal] public delegate void RageThresholdReachedEventHandler(int thresholdIndex);
+    /// <summary>
+    /// Emitted when the rage level changes.
+    /// </summary>
+    /// <param name="rage">The new rage level.</param>
+    [Signal] public delegate void RageChangedEventHandler(float rage);
 
-	[Export] public float MaxRage { get; set; } = 100f;
-	[Export] public float ComboWindowSeconds { get; set; } = 2.0f;
-	[Export] public float RagePerComboHit { get; set; } = 5f;
-	[Export] public float[] RageThresholds { get; set; } = [25f, 50f, 75f, 100f];
+    /// <summary>
+    /// Emitted when the combo multiplier changes.
+    /// </summary>
+    /// <param name="combo">The new combo multiplier.</param>
+    [Signal] public delegate void ComboChangedEventHandler(int combo);
 
-	public float Rage { get; private set; }
-	public int Combo { get; private set; }
+    /// <summary>
+    /// Emitted when a rage threshold is reached.
+    /// </summary>
+    /// <param name="thresholdIndex">The index of the reached threshold.</param>
+    [Signal] public delegate void RageThresholdReachedEventHandler(int thresholdIndex);
 
-	private int _lastThresholdIndex = -1;
-	private Timer? _comboTimer;
+    /// <summary>
+    /// The maximum rage level.
+    /// </summary>
+    [Export] public float MaxRage { get; set; } = 100f;
 
-	public override void _Ready()
-	{
-		Instance = this;
-		ProcessMode = ProcessModeEnum.Always;
+    /// <summary>
+    /// The duration of the combo window in seconds.
+    /// </summary>
+    [Export] public float ComboWindowSeconds { get; set; } = 2.0f;
 
-		_comboTimer = new Timer
-		{
-			Name = "ComboTimer",
-			OneShot = true,
-			WaitTime = ComboWindowSeconds,
-			Autostart = false,
-			ProcessCallback = Timer.TimerProcessCallback.Idle
-		};
-		_comboTimer.Timeout += OnComboTimeout;
-		AddChild(_comboTimer);
-	}
+    /// <summary>
+    /// The amount of rage gained per combo hit.
+    /// </summary>
+    [Export] public float RagePerComboHit { get; set; } = 5f;
 
-	public static void RegisterComboHit(float? rageGain = null)
-	{
-		Instance.Combo++;
-		Instance.EmitSignal(SignalName.ComboChanged, Instance.Combo);
+    /// <summary>
+    /// The rage thresholds that trigger signals.
+    /// </summary>
+    [Export] public float[] RageThresholds { get; set; } = [25f, 50f, 75f, 100f];
 
-		Instance.RestartComboTimer();
-		AddRage(rageGain ?? Instance.RagePerComboHit);
-	}
+    /// <summary>
+    /// The current rage level.
+    /// </summary>
+    public float Rage { get; private set; }
 
-	public static void AddRage(float amount)
-	{
-		if (amount == 0)
-			return;
+    /// <summary>
+    /// The current combo multiplier.
+    /// </summary>
+    public int Combo { get; private set; }
 
-		var old = Instance.Rage;
-		Instance.Rage = Mathf.Clamp(old + amount, 0f, Instance.MaxRage);
-		Instance.EmitSignal(SignalName.RageChanged, Instance.Rage);
+    private int _lastThresholdIndex = -1;
+    private Timer? _comboTimer;
 
-		Instance.CheckThresholds(old, Instance.Rage);
-	}
+    public override void _Ready()
+    {
+        Instance = this;
+        ProcessMode = ProcessModeEnum.Always;
 
-	public static void ResetRage()
-	{
-		Instance.Rage = 0f;
-		Instance._lastThresholdIndex = -1;
-		Instance.EmitSignal(SignalName.RageChanged, Instance.Rage);
-	}
+        _comboTimer = new Timer
+        {
+            Name = "ComboTimer",
+            OneShot = true,
+            WaitTime = ComboWindowSeconds,
+            Autostart = false,
+            ProcessCallback = Timer.TimerProcessCallback.Idle
+        };
+        _comboTimer.Timeout += OnComboTimeout;
+        AddChild(_comboTimer);
+    }
 
-	public static void ResetCombo()
-	{
-		if (Instance.Combo == 0)
-			return;
+    /// <summary>
+    /// Registers a hit and updates the combo and rage levels.
+    /// </summary>
+    /// <param name="rageGain">Optional specific rage gain amount.</param>
+    public static void RegisterComboHit(float? rageGain = null)
+    {
+        Instance.Combo++;
+        Instance.EmitSignal(SignalName.ComboChanged, Instance.Combo);
 
-		Instance.Combo = 0;
-		Instance.EmitSignal(SignalName.ComboChanged, Instance.Combo);
-	}
+        Instance.RestartComboTimer();
+        AddRage(rageGain ?? Instance.RagePerComboHit);
+    }
 
-	public static void ResetAll()
-	{
-		ResetCombo();
-		ResetRage();
-	}
+    /// <summary>
+    /// Adds a specified amount of rage.
+    /// </summary>
+    /// <param name="amount">The amount of rage to add.</param>
+    public static void AddRage(float amount)
+    {
+        if (amount == 0)
+            return;
 
-	private void RestartComboTimer()
-	{
-		if (_comboTimer == null)
-			return;
+        var old = Instance.Rage;
+        Instance.Rage = Mathf.Clamp(old + amount, 0f, Instance.MaxRage);
+        Instance.EmitSignal(SignalName.RageChanged, Instance.Rage);
 
-		_comboTimer.WaitTime = ComboWindowSeconds;
-		_comboTimer.Stop();
-		_comboTimer.Start();
-	}
+        Instance.CheckThresholds(old, Instance.Rage);
+    }
 
-	private void OnComboTimeout() => ResetCombo();
+    /// <summary>
+    /// Resets the rage level to zero.
+    /// </summary>
+    public static void ResetRage()
+    {
+        Instance.Rage = 0f;
+        Instance._lastThresholdIndex = -1;
+        Instance.EmitSignal(SignalName.RageChanged, Instance.Rage);
+    }
 
-	private void CheckThresholds(float oldRage, float newRage)
-	{
-		for (int i = 0; i < RageThresholds.Length; i++)
-		{
-			if (i <= _lastThresholdIndex)
-				continue;
+    /// <summary>
+    /// Resets the combo multiplier to zero.
+    /// </summary>
+    public static void ResetCombo()
+    {
+        if (Instance.Combo == 0)
+            return;
 
-			float threshold = RageThresholds[i];
-			if (oldRage < threshold && newRage >= threshold)
-			{
-				_lastThresholdIndex = i;
-				EmitSignal(SignalName.RageThresholdReached, i);
-			}
-		}
-	}
+        Instance.Combo = 0;
+        Instance.EmitSignal(SignalName.ComboChanged, Instance.Combo);
+    }
+
+    /// <summary>
+    /// Resets both combo and rage levels.
+    /// </summary>
+    public static void ResetAll()
+    {
+        ResetCombo();
+        ResetRage();
+    }
+
+    private void RestartComboTimer()
+    {
+        if (_comboTimer == null)
+            return;
+
+        _comboTimer.WaitTime = ComboWindowSeconds;
+        _comboTimer.Stop();
+        _comboTimer.Start();
+    }
+
+    private void OnComboTimeout() => ResetCombo();
+
+    private void CheckThresholds(float oldRage, float newRage)
+    {
+        for (int i = 0; i < RageThresholds.Length; i++)
+        {
+            if (i <= _lastThresholdIndex)
+                continue;
+
+            float threshold = RageThresholds[i];
+            if (oldRage < threshold && newRage >= threshold)
+            {
+                _lastThresholdIndex = i;
+                EmitSignal(SignalName.RageThresholdReached, i);
+            }
+        }
+    }
 }

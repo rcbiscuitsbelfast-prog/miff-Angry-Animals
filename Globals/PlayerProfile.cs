@@ -4,8 +4,15 @@ using Godot;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+/// <summary>
+/// Global manager for handling the player's profile, including customization and progression.
+/// Persists data to a JSON file on disk.
+/// </summary>
 public partial class PlayerProfile : Node
 {
+    /// <summary>
+    /// Singleton instance of the PlayerProfile.
+    /// </summary>
     public static PlayerProfile Instance { get; private set; } = null!;
 
     private const string ProfilePath = "user://profile.json";
@@ -40,6 +47,9 @@ public partial class PlayerProfile : Node
         "sad"
     ];
 
+    /// <summary>
+    /// The player's display name.
+    /// </summary>
     public string PlayerName { get; private set; } = "Player";
 
     /// <summary>
@@ -47,16 +57,44 @@ public partial class PlayerProfile : Node
     /// </summary>
     public bool IsFullGameUnlocked { get; set; } = false;
 
+    /// <summary>
+    /// Index of the currently selected hat.
+    /// </summary>
     public int SelectedHatIndex { get; private set; }
+
+    /// <summary>
+    /// Index of the currently selected glasses.
+    /// </summary>
     public int SelectedGlassesIndex { get; private set; }
+
+    /// <summary>
+    /// Index of the currently selected filter.
+    /// </summary>
     public int SelectedFilterIndex { get; private set; }
+
+    /// <summary>
+    /// Index of the currently selected emotion.
+    /// </summary>
     public int SelectedEmotionIndex { get; private set; }
 
+    /// <summary>
+    /// Path to a custom face image, if set.
+    /// </summary>
     public string FaceImagePath { get; private set; } = "";
 
+    /// <summary>
+    /// The index of the highest room the player has unlocked.
+    /// </summary>
     public int HighestUnlockedRoomIndex { get; private set; }
 
+    /// <summary>
+    /// The current rage level from the global RageSystem.
+    /// </summary>
     public float CurrentRage { get; private set; }
+
+    /// <summary>
+    /// The current combo multiplier from the global RageSystem.
+    /// </summary>
     public int CurrentCombo { get; private set; }
 
     private RageSystem? _rageSystem;

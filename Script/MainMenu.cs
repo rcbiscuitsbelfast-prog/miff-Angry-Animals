@@ -7,9 +7,24 @@ using Godot;
 /// </summary>
 public partial class MainMenu : Control
 {
+    /// <summary>
+    /// Emitted when the play button is pressed.
+    /// </summary>
     [Signal] public delegate void PlayButtonPressedEventHandler();
+
+    /// <summary>
+    /// Emitted when the room selection button is pressed.
+    /// </summary>
     [Signal] public delegate void RoomSelectionButtonPressedEventHandler();
+
+    /// <summary>
+    /// Emitted when the settings button is pressed.
+    /// </summary>
     [Signal] public delegate void SettingsButtonPressedEventHandler();
+
+    /// <summary>
+    /// Emitted when the quit button is pressed.
+    /// </summary>
     [Signal] public delegate void QuitButtonPressedEventHandler();
 
     [Export] private NodePath _playButtonPath;

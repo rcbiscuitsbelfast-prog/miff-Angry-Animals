@@ -6,6 +6,10 @@ using Godot;
 /// </summary>
 public partial class Slingshot : Node2D
 {
+    /// <summary>
+    /// Emitted when a projectile is successfully launched from the slingshot.
+    /// </summary>
+    /// <param name="projectile">The projectile that was launched.</param>
     [Signal] public delegate void ProjectileLaunchedEventHandler(Projectile projectile);
     
     [Export] private InputArea _inputArea;
@@ -46,6 +50,15 @@ public partial class Slingshot : Node2D
         {
             _inputArea.DragStarted += OnDragStarted;
             _inputArea.DragEnded += OnDragEnded;
+        }
+    }
+
+    public override void _ExitTree()
+    {
+        if (_inputArea != null)
+        {
+            _inputArea.DragStarted -= OnDragStarted;
+            _inputArea.DragEnded -= OnDragEnded;
         }
     }
     
