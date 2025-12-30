@@ -36,9 +36,12 @@ public partial class ScorePopup : Node2D
         
         // Center alignment
         float totalWidth = offset;
-        foreach (Node2D child in GetChildren())
+        foreach (Node child in GetChildren())
         {
-            child.Position -= new Vector2(totalWidth / 2, 0);
+            if (child is Node2D child2D)
+                child2D.Position -= new Vector2(totalWidth / 2, 0);
+            else if (child is Control childCtrl)
+                childCtrl.Position -= new Vector2(totalWidth / 2, 0);
         }
 
         Animate();

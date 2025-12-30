@@ -57,7 +57,7 @@ public partial class DestructibleProp : StaticBody2D
         }
     }
 
-    protected virtual void Die()
+    public virtual void Die()
     {
         SignalManager.EmitOnPropDestroyed(this, ScoreValue);
 
@@ -97,7 +97,7 @@ public partial class DestructibleProp : StaticBody2D
         {
             var rubble = RubbleScene.Instantiate<RigidBody2D>();
             rubble.GlobalPosition = GlobalPosition + new Vector2(GD.RandfRange(-10, 10), GD.RandfRange(-10, 10));
-            GetTree().CurrentScene.CallDeferred("add_child", rubble);
+            GetTree().CurrentScene.CallDeferred(Node.MethodName.AddChild, rubble);
         }
     }
 

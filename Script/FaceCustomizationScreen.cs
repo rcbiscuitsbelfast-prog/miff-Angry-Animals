@@ -194,9 +194,13 @@ public partial class FaceCustomizationScreen : Control
     private void StartCamera()
     {
         // Request permissions for Mobile
-        if (OS.GetName() == "Android" || OS.GetName() == "iOS")
+        if (OS.GetName() == "Android")
         {
-             OS.RequestPermissions();
+             OS.RequestPermission("android.permission.CAMERA");
+        }
+        else if (OS.GetName() == "iOS")
+        {
+             // iOS permissions are usually handled via Info.plist and requested on first access
         }
 
         var feeds = CameraServer.Feeds();

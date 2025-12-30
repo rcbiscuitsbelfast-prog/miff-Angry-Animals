@@ -54,38 +54,38 @@ public partial class AudioManager : Node
         _backgroundMusicPlayer = new AudioStreamPlayer();
         _backgroundMusicPlayer.Name = "BackgroundMusicPlayer";
         _backgroundMusicPlayer.Bus = MUSIC_BUS;
-        _backgroundMusicPlayer.VolumeDb = LinearToDb(MusicVolume);
+        _backgroundMusicPlayer.VolumeDb = Mathf.LinearToDb(MusicVolume);
         AddChild(_backgroundMusicPlayer);
 
         // Initialize SFX players
         _slingshotSfxPlayer = new AudioStreamPlayer();
         _slingshotSfxPlayer.Name = "SlingshotSfxPlayer";
         _slingshotSfxPlayer.Bus = SFX_BUS;
-        _slingshotSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _slingshotSfxPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_slingshotSfxPlayer);
 
         _destructionSfxPlayer = new AudioStreamPlayer();
         _destructionSfxPlayer.Name = "DestructionSfxPlayer";
         _destructionSfxPlayer.Bus = SFX_BUS;
-        _destructionSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _destructionSfxPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_destructionSfxPlayer);
 
         _uiClickPlayer = new AudioStreamPlayer();
         _uiClickPlayer.Name = "UiClickPlayer";
         _uiClickPlayer.Bus = UI_BUS;
-        _uiClickPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _uiClickPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_uiClickPlayer);
 
         _comboPlayer = new AudioStreamPlayer();
         _comboPlayer.Name = "ComboPlayer";
         _comboPlayer.Bus = SFX_BUS;
-        _comboPlayer.VolumeDb = LinearToDb(SfxVolume);
+        _comboPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_comboPlayer);
 
         _ragePlayer = new AudioStreamPlayer();
         _ragePlayer.Name = "RagePlayer";
         _ragePlayer.Bus = SFX_BUS;
-        _ragePlayer.VolumeDb = LinearToDb(SfxVolume);
+        _ragePlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         AddChild(_ragePlayer);
     }
 
@@ -272,7 +272,7 @@ public partial class AudioManager : Node
         MusicVolume = Mathf.Clamp(volume, 0f, 1f);
         if (_backgroundMusicPlayer != null)
         {
-            _backgroundMusicPlayer.VolumeDb = LinearToDb(MusicVolume);
+            _backgroundMusicPlayer.VolumeDb = Mathf.LinearToDb(MusicVolume);
         }
         EmitSignal(SignalName.MusicVolumeChanged, MusicVolume);
     }
@@ -282,15 +282,15 @@ public partial class AudioManager : Node
         SfxVolume = Mathf.Clamp(volume, 0f, 1f);
         
         if (_slingshotSfxPlayer != null)
-            _slingshotSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _slingshotSfxPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         if (_destructionSfxPlayer != null)
-            _destructionSfxPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _destructionSfxPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         if (_uiClickPlayer != null)
-            _uiClickPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _uiClickPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         if (_comboPlayer != null)
-            _comboPlayer.VolumeDb = LinearToDb(SfxVolume);
+            _comboPlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
         if (_ragePlayer != null)
-            _ragePlayer.VolumeDb = LinearToDb(SfxVolume);
+            _ragePlayer.VolumeDb = Mathf.LinearToDb(SfxVolume);
 
         EmitSignal(SignalName.SfxVolumeChanged, SfxVolume);
     }
@@ -298,9 +298,10 @@ public partial class AudioManager : Node
     public void SetMusicMute(bool muted)
     {
         MuteMusic = muted;
-        if (_backgroundMusicPlayer != null)
+        int busIndex = AudioServer.GetBusIndex(MUSIC_BUS);
+        if (busIndex != -1)
         {
-            _backgroundMusicPlayer.Muted = muted;
+            AudioServer.SetBusMute(busIndex, muted);
         }
     }
 
@@ -308,16 +309,41 @@ public partial class AudioManager : Node
     {
         MuteSfx = muted;
         
-        if (_slingshotSfxPlayer != null)
-            _slingshotSfxPlayer.Muted = muted;
-        if (_destructionSfxPlayer != null)
-            _destructionSfxPlayer.Muted = muted;
-        if (_uiClickPlayer != null)
-            _uiClickPlayer.Muted = muted;
-        if (_comboPlayer != null)
-            _comboPlayer.Muted = muted;
-        if (_ragePlayer != null)
-            _ragePlayer.Muted = muted;
+        string[] sfxBuses = { SFX_BUS, UI_BUS };
+        foreach (var busName in sfxBuses)
+        {
+            int busIndex = AudioServer.GetBusIndex(busName);
+            if (busIndex != -1)
+            {
+                AudioServer.SetBusMute(busIndex, muted);
+            }
+        }
+    }
+
+    public override void _ExitTree()
+    {
+        // Disconnect from SignalManager
+        if (SignalManager.Instance != null)
+        {
+            SignalManager.Instance.OnAttemptMade -= OnAttemptMade;
+            SignalManager.Instance.OnCupDestroyed -= OnCupDestroyed;
+            SignalManager.Instance.OnPropDestroyed -= OnPropDestroyed;
+            SignalManager.Instance.OnAnimalDied -= OnAnimalDied;
+        }
+
+        // Disconnect from RageSystem
+        var rageSystem = GetNodeOrNull<RageSystem>("/root/RageSystem");
+        if (rageSystem != null)
+        {
+            rageSystem.RageThresholdReached -= OnRageThresholdReached;
+            rageSystem.ComboChanged -= OnComboChanged;
+        }
+
+        // Disconnect from GameManager
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameStateChanged -= OnGameStateChanged;
+        }
     }
 
     // Public static API for other scripts
