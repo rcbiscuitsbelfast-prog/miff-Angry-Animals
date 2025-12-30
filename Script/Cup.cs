@@ -6,13 +6,13 @@ using Godot;
 /// </summary>
 public partial class Cup : DestructibleProp
 {
-	public const string GROUP_NAME = "cup";
+    public const string GROUP_NAME = "cup";
 
-	[Export] AnimationPlayer _vanishAnimation;
+    [Export] AnimationPlayer _vanishAnimation;
 
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
-	{
+    // Called when the node enters the scene tree for the first time.
+    public override void _Ready()
+    {
         // Initialize base DestructibleProp
         base._Ready();
         
@@ -30,12 +30,12 @@ public partial class Cup : DestructibleProp
              // Let's rely on Editor values, but ensure it's not 0.
         }
 
-		//Connects the vanish animation to its destruction event.
+        //Connects the vanish animation to its destruction event.
         if (_vanishAnimation != null)
-		    _vanishAnimation.AnimationFinished += OnAnimationFinished;
-	}
+            _vanishAnimation.AnimationFinished += OnAnimationFinished;
+    }
 
-    protected override void Die()
+    public override void Die()
     {
         // Emit legacy signal
         SignalManager.EmitOnCupDestroyed();
@@ -90,7 +90,7 @@ public partial class Cup : DestructibleProp
     /// </summary>
     /// <param name="animName"></param>
     private void OnAnimationFinished(StringName animName)
-	{
-		QueueFree();
-	}
+    {
+        QueueFree();
+    }
 }

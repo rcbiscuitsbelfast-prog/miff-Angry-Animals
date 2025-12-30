@@ -48,10 +48,7 @@ public partial class ProjectilesLoader : Node2D
     {
         if (SignalManager.Instance != null)
         {
-            SignalManager.Instance.Connect(
-                SignalManager.SignalName.OnAnimalDied,
-                Callable.From(OnProjectileDied)
-            );
+            SignalManager.Instance.OnAnimalDied += OnProjectileDied;
         }
 
         if (_slingshot != null)
@@ -62,6 +59,11 @@ public partial class ProjectilesLoader : Node2D
 
     public override void _ExitTree()
     {
+        if (SignalManager.Instance != null)
+        {
+            SignalManager.Instance.OnAnimalDied -= OnProjectileDied;
+        }
+
         if (_slingshot != null)
             _slingshot.ProjectileLaunched -= OnSlingshotProjectileLaunched;
     }

@@ -327,11 +327,23 @@ public partial class RoomBase : Node2D
 
         try
         {
-            var rewardTask = ToSignal(AdsManager.Instance, AdsManager.SignalName.RewardEarned);
-            await AdsManager.Instance.ShowRewardedAd();
+            var tcs = new TaskCompletionSource<bool>();
+            void OnRewardEarned() => tcs.TrySetResult(true);
+            AdsManager.Instance.RewardEarned += OnRewardEarned;
 
-            if (rewardTask.IsCompleted)
-                ApplyRewardPoints(5);
+            try
+            {
+                await AdsManager.Instance.ShowRewardedAd();
+                // We wait a short bit for the signal to propagate if it hasn't already
+                await Task.WhenAny(tcs.Task, Task.Delay(500));
+                
+                if (tcs.Task.IsCompleted)
+                    ApplyRewardPoints(5);
+            }
+            finally
+            {
+                AdsManager.Instance.RewardEarned -= OnRewardEarned;
+            }
         }
         finally
         {

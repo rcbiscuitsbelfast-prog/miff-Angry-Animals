@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 /// <summary>
 /// StickClone character that spawns during traversal phase after slingshot destruction.
@@ -22,7 +23,6 @@ public partial class StickClone : CharacterBody2D
     private Node2D? _glassesNode;
 
     // Movement state
-    private Vector2 _velocity = Vector2.Zero;
     private bool _isGrounded = false;
     private bool _isMoving = false;
 
@@ -39,7 +39,6 @@ public partial class StickClone : CharacterBody2D
     {
         InitializeStickClone();
         LoadFaceCustomization();
-        SetupPhysics();
         ConnectSignals();
     }
 
@@ -182,24 +181,6 @@ public partial class StickClone : CharacterBody2D
         }
     }
 
-    private void SetupPhysics()
-    {
-        // Set up the physics material for better collision response
-        var physicsMaterial = new PhysicsMaterial();
-        physicsMaterial.Friction = 1.0f;
-        physicsMaterial.Bounce = 0.0f;
-        
-        // Apply to collision shapes if they exist
-        var collisionShapes = GetTree().GetNodesInGroup("collision_shapes");
-        foreach (var shape in collisionShapes)
-        {
-            if (shape is CollisionShape2D collisionShape)
-            {
-                collisionShape.PhysicsMaterialOverride = physicsMaterial;
-            }
-        }
-    }
-
     private void ConnectSignals()
     {
         // Connect to exit area if found
@@ -231,6 +212,7 @@ public partial class StickClone : CharacterBody2D
 
     public override void _PhysicsProcess(double delta)
     {
+        _isGrounded = IsOnFloor();
         ApplyGravity(delta);
         HandleMovement(delta);
         MoveAndSlide();
@@ -241,30 +223,35 @@ public partial class StickClone : CharacterBody2D
     {
         if (!_isGrounded)
         {
-            _velocity.Y += _gravity * (float)delta;
+            Vector2 velocity = Velocity;
+            velocity.Y += _gravity * (float)delta;
+            Velocity = velocity;
         }
     }
 
     private void HandleMovement(double delta)
     {
+        Vector2 velocity = Velocity;
+
         // Simple AI for movement towards exit
         if (_exitArea != null && GlobalPosition.DistanceTo(_exitArea.GlobalPosition) > 50)
         {
             Vector2 direction = (_exitArea.GlobalPosition - GlobalPosition).Normalized();
             
             // Move towards exit
-            _velocity.X = direction.X * _moveSpeed;
+            velocity.X = direction.X * _moveSpeed;
             
             // Simple jump logic - jump if there's an obstacle ahead
             if (_isGrounded && ShouldJump())
             {
-                Jump();
+                velocity.Y = _jumpForce;
+                _isGrounded = false;
             }
         }
         else
         {
             // At exit, stop moving
-            _velocity.X = 0;
+            velocity.X = 0;
             if (_isGrounded)
             {
                 // We've reached the exit!
@@ -273,38 +260,35 @@ public partial class StickClone : CharacterBody2D
         }
 
         // Apply friction when on ground and not moving
-        if (_isGrounded && Mathf.Abs(_velocity.X) < 10)
+        if (_isGrounded && Mathf.Abs(velocity.X) < 10)
         {
-            _velocity.X *= _friction;
+            velocity.X *= _friction;
         }
+
+        Velocity = velocity;
     }
 
     private bool ShouldJump()
     {
         // Simple obstacle detection - raycast ahead
         var spaceState = GetWorld2D().DirectSpaceState;
-        var query = PhysicsRayQueryParameters2D.Create(GlobalPosition, GlobalPosition + Vector2.Right * 32);
+        Vector2 rayEnd = GlobalPosition + (Velocity.X >= 0 ? Vector2.Right : Vector2.Left) * 32;
+        var query = PhysicsRayQueryParameters2D.Create(GlobalPosition, rayEnd);
         query.CollisionMask = 2; // Environment layer
         
         var result = spaceState.IntersectRay(query);
         return result.Count > 0;
     }
 
-    private void Jump()
-    {
-        _velocity.Y = _jumpForce;
-        _isGrounded = false;
-    }
-
     private void UpdateAnimationState()
     {
-        _isMoving = Mathf.Abs(_velocity.X) > 10;
+        _isMoving = Mathf.Abs(Velocity.X) > 10;
         
         // TODO: Update animation based on movement state
         // For now, just flip sprite based on direction
-        if (_faceSprite != null)
+        if (_faceSprite != null && _isMoving)
         {
-            _faceSprite.FlipH = _velocity.X < 0;
+            _faceSprite.FlipH = Velocity.X < 0;
         }
     }
 

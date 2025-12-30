@@ -444,25 +444,23 @@ public partial class AdsManager : Node
 
     private async Task WaitForAdClosedOrTimeoutAsync(double timeoutSeconds)
     {
-        var timeoutTimer = new Timer
+        var tcs = new TaskCompletionSource<bool>();
+        
+        void OnAdClosed() => tcs.TrySetResult(true);
+        AdClosed += OnAdClosed;
+
+        try
         {
-            OneShot = true,
-            WaitTime = timeoutSeconds,
-            ProcessCallback = Timer.TimerProcessCallback.Idle
-        };
-
-        AddChild(timeoutTimer);
-        timeoutTimer.Start();
-
-        var closedTask = ToSignal(this, SignalName.AdClosed);
-        var timeoutTask = ToSignal(timeoutTimer, Timer.SignalName.Timeout);
-
-        await Task.WhenAny(closedTask, timeoutTask);
-
-        timeoutTimer.QueueFree();
+            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(timeoutSeconds));
+            await Task.WhenAny(tcs.Task, timeoutTask);
+        }
+        finally
+        {
+            AdClosed -= OnAdClosed;
+        }
 
         // If the ad system never emitted, still emit AdClosed to unblock flow.
-        if (!closedTask.IsCompleted)
+        if (!tcs.Task.IsCompleted)
             EmitSignal(SignalName.AdClosed);
     }
 }

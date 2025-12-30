@@ -8,38 +8,47 @@ public partial class Scorer : Node
 {
     [Export] public int TargetScore = 1000;
 
-	private int _totalCups;
-	private int _cupsDestroyed;
-	private int _attempt = 0;
+    private int _totalCups;
+    private int _cupsDestroyed;
+    private int _attempt = 0;
     private int _currentDestructionScore = 0;
 
 
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
-	{
-		// Listens for when a cup is destroyed.
-		SignalManager.Instance.Connect(SignalManager.SignalName.OnCupDestroyed, Callable.From(OnCupDestroyed));
-		
-		//Listen for when the player makes an attempt.
-		SignalManager.Instance.Connect(SignalManager.SignalName.OnAttemptMade, Callable.From(OnAttemptMade));
+    // Called when the node enters the scene tree for the first time.
+    public override void _Ready()
+    {
+        // Listens for game events
+        if (SignalManager.Instance != null)
+        {
+            SignalManager.Instance.OnCupDestroyed += OnCupDestroyed;
+            SignalManager.Instance.OnAttemptMade += OnAttemptMade;
+            SignalManager.Instance.OnDestructionScoreUpdated += OnDestructionScoreUpdated;
+        }
 
-        // Listen for destruction score updates
-        SignalManager.Instance.Connect(SignalManager.SignalName.OnDestructionScoreUpdated, Callable.From<int>(OnDestructionScoreUpdated));
+        // Count all cups currently in the level (grouped by cup.GROUP_NAME);
+        _totalCups = GetTree().GetNodesInGroup(Cup.GROUP_NAME).Count;
+    }
 
-		// Count all cups currently in the level (grouped by cup.GROUP_NAME);
-		_totalCups = GetTree().GetNodesInGroup(Cup.GROUP_NAME).Count;
-	}
+    public override void _ExitTree()
+    {
+        if (SignalManager.Instance != null)
+        {
+            SignalManager.Instance.OnCupDestroyed -= OnCupDestroyed;
+            SignalManager.Instance.OnAttemptMade -= OnAttemptMade;
+            SignalManager.Instance.OnDestructionScoreUpdated -= OnDestructionScoreUpdated;
+        }
+    }
 
 
-	/// <summary>
-	/// Called when a cup is destroyed.
+    /// <summary>
+    /// Called when a cup is destroyed.
     /// Kept for legacy support or specific cup tracking.
-	/// </summary>
-	private void OnCupDestroyed()
-	{
-		_cupsDestroyed++;
+    /// </summary>
+    private void OnCupDestroyed()
+    {
+        _cupsDestroyed++;
         CheckLevelCompletion();
-	}
+    }
 
     private void OnDestructionScoreUpdated(int score)
     {
@@ -63,19 +72,19 @@ public partial class Scorer : Node
         
         if (_currentDestructionScore >= TargetScore)
         {
-			SignalManager.EmitOnLevelCompleted();
-			ScoreManager.SetLevelScore(ScoreManager.GetLevel(), _attempt);
+            SignalManager.EmitOnLevelCompleted();
+            ScoreManager.SetLevelScore(ScoreManager.GetLevel(), _attempt);
         }
     }
 
 
-	/// <summary>
-	/// Called whenever the player makes an attempt.
-	/// Increments attempt counter and updates the score display.
-	/// </summary>
-	private void OnAttemptMade()
-	{
-		_attempt++;
-		SignalManager.EmitOnScoreUpdated(_attempt);
-	}
+    /// <summary>
+    /// Called whenever the player makes an attempt.
+    /// Increments attempt counter and updates the score display.
+    /// </summary>
+    private void OnAttemptMade()
+    {
+        _attempt++;
+        SignalManager.EmitOnScoreUpdated(_attempt);
+    }
 }

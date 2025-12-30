@@ -291,46 +291,48 @@ public partial class MonetizationManager : Node
 
     private async Task WaitForPurchaseResultOrTimeoutAsync(double timeoutSeconds)
     {
-        var timer = new Timer
+        var tcs = new TaskCompletionSource<bool>();
+        
+        void OnSuccess() => tcs.TrySetResult(true);
+        void OnFail(string reason) => tcs.TrySetResult(false);
+        
+        PurchaseSucceeded += OnSuccess;
+        PurchaseFailed += OnFail;
+
+        try
         {
-            OneShot = true,
-            WaitTime = timeoutSeconds,
-            ProcessCallback = Timer.TimerProcessCallback.Idle
-        };
-
-        AddChild(timer);
-        timer.Start();
-
-        var successTask = ToSignal(this, SignalName.PurchaseSucceeded);
-        var failTask = ToSignal(this, SignalName.PurchaseFailed);
-        var timeoutTask = ToSignal(timer, Timer.SignalName.Timeout);
-
-        await Task.WhenAny(successTask, failTask, timeoutTask);
-        timer.QueueFree();
-
-        if (timeoutTask.IsCompleted && !IsFullGameUnlocked)
-            EmitSignal(SignalName.PurchaseFailed, "Purchase timed out. Please try again.");
+            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(timeoutSeconds));
+            var completedTask = await Task.WhenAny(tcs.Task, timeoutTask);
+            
+            if (completedTask == timeoutTask && !IsFullGameUnlocked)
+            {
+                EmitSignal(SignalName.PurchaseFailed, "Purchase timed out. Please try again.");
+            }
+        }
+        finally
+        {
+            PurchaseSucceeded -= OnSuccess;
+            PurchaseFailed -= OnFail;
+        }
     }
 
     private async Task WaitForRestoreOrTimeoutAsync(double timeoutSeconds)
     {
-        var timer = new Timer
+        var tcs = new TaskCompletionSource<bool>();
+        void OnRestored() => tcs.TrySetResult(true);
+        PurchaseRestored += OnRestored;
+
+        try
         {
-            OneShot = true,
-            WaitTime = timeoutSeconds,
-            ProcessCallback = Timer.TimerProcessCallback.Idle
-        };
+            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(timeoutSeconds));
+            await Task.WhenAny(tcs.Task, timeoutTask);
+        }
+        finally
+        {
+            PurchaseRestored -= OnRestored;
+        }
 
-        AddChild(timer);
-        timer.Start();
-
-        var restoredTask = ToSignal(this, SignalName.PurchaseRestored);
-        var timeoutTask = ToSignal(timer, Timer.SignalName.Timeout);
-
-        await Task.WhenAny(restoredTask, timeoutTask);
-        timer.QueueFree();
-
-        if (!restoredTask.IsCompleted)
+        if (!tcs.Task.IsCompleted)
             EmitSignal(SignalName.PurchaseRestored);
     }
 }
