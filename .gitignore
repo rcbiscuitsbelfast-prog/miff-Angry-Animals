@@ -70,3 +70,21 @@ user://*.data
 # Build outputs
 bin/
 obj/
+build/
+exports/
+
+# Mobile signing / provisioning (DO NOT COMMIT)
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+*.cer
+*.pem
+*.key
+
+# Store build artifacts
+*.aab
+*.apk
+*.ipa
+*.xcarchive
+*.dSYM

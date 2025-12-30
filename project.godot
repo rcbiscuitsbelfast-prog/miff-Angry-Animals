@@ -11,6 +11,8 @@ config_version=5
 [application]
 
 config/name="Angry Animals"
+config/icon="res://icon.svg"
+config/version="1.0"
 run/main_scene="res://Scenes/Main/Main.tscn"
 config/features=PackedStringArray("4.4", "C#")
 
@@ -34,3 +36,12 @@ buses/default_bus_layout="res://default_bus_layout.tres"
 [dotnet]
 
 project/assembly_name="AngryAnimals"
+
+[monetization]
+
+admob/app_id=""
+admob/banner_ad_unit_id=""
+admob/interstitial_ad_unit_id=""
+admob/rewarded_ad_unit_id=""
+iap/ios_product_id="full_game_unlock"
+iap/android_product_id="full_game_unlock"

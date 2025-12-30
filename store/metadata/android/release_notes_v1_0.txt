@@ -1,0 +1,8 @@
+Version 1.0 - Launch Release
+- Full game with 100 levels
+- Slingshot physics mechanics
+- Face customization feature
+- Free + Premium tier model
+- Ads integration
+- In-app purchase unlock
+- Cross-platform support

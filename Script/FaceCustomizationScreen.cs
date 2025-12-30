@@ -227,33 +227,22 @@ public partial class FaceCustomizationScreen : Control
 
     private void OnCaptureButtonPressed()
     {
-        if (_isCameraActive && _cameraPreview.Texture is CameraTexture camTex)
+        Image? captured = null;
+
+        try
         {
-             // Currently getting image from CameraTexture is not trivial in C# instantly
-             // without waiting for the server. 
-             // But let's try assuming the feed is ready.
-             // If this fails, we might need a workaround.
-             // But for this task, the structure is what matters.
-             // In Godot 4, you'd typically capture from the texture.
-             
-             // Workaround: We will just hide the camera preview and show a "captured" state.
-             // For the actual image data, we'll pretend we got it.
-             
-             _capturedImage = GetPlaceholderImage().GetImage();
+            if (_cameraPreview.Texture != null)
+                captured = _cameraPreview.Texture.GetImage();
         }
-        else if (_cameraPreview.Texture != null)
+        catch (Exception ex)
         {
-            _capturedImage = _cameraPreview.Texture.GetImage();
+            GD.PushWarning($"FaceCustomizationScreen: failed to capture image: {ex.Message}");
         }
-        else
-        {
-            _capturedImage = GetPlaceholderImage().GetImage();
-        }
-        
+
+        _capturedImage = captured ?? GetPlaceholderImage().GetImage();
+
         if (_capturedImage != null)
-        {
             ProcessCapturedImage(_capturedImage);
-        }
     }
 
     private void OnGalleryButtonPressed()

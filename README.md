@@ -118,7 +118,7 @@ The premise is simple: Destroy all the *Cups*, with the **least amount of attemp
 ## Technology used
 
 - **Godot Engine 4.4.x**
-- **C# (.NET 6.0)**
+- **C# (.NET 8.0 / net8.0)**
 - **Object-Oriented Programming**
 - **Custom Signals/Events system**
 - **Singleton pattern for global managers**
@@ -164,7 +164,7 @@ Angry-Animals/
 
 ### Prerequisites
 1. **Godot Engine 4.4.x** - Download from [godotengine.org](https://godotengine.org/download)
-2. **.NET 6.0 SDK** - Download from [dotnet.microsoft.com](https://dotnet.microsoft.com/download)
+2. **.NET 8.0 SDK** - Download from [dotnet.microsoft.com](https://dotnet.microsoft.com/download)
 3. Git (to clone the repository)
 
 ### How to Run
