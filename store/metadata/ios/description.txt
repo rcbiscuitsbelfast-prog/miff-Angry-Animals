@@ -1,0 +1,18 @@
+Destroy all the cups with the least attempts possible!
+
+Angry Animals is a physics-based puzzle game where you launch projectiles to destroy all the cups with as few attempts as possible.
+
+Features:
+- 100 challenging levels with increasing difficulty
+- Physics-based slingshot mechanics
+- Face customization (camera capture or gallery)
+- Free to play with optional premium unlock
+- No ads in premium version
+- No network required (except for ads)
+
+Gameplay:
+Launch projectiles using the slingshot to destroy all cups in each level. Earn stars based on your performance and progress through 100 levels of increasing difficulty.
+
+The first 20 levels are free to play with ads. Upgrade to Premium for £1.50 to unlock all 100 levels and remove ads.
+
+Great for casual gamers of all ages!

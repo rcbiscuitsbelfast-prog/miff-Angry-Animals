@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect x="0" y="0" width="1024" height="1024" rx="220" fill="#ff4d4d"/>
+  <circle cx="512" cy="512" r="360" fill="#ff6b6b"/>
+
+  <!-- Eyes -->
+  <ellipse cx="370" cy="460" rx="90" ry="70" fill="#ffffff"/>
+  <ellipse cx="654" cy="460" rx="90" ry="70" fill="#ffffff"/>
+  <circle cx="395" cy="470" r="28" fill="#1a1a1a"/>
+  <circle cx="629" cy="470" r="28" fill="#1a1a1a"/>
+
+  <!-- Angry eyebrows -->
+  <path d="M270 380 L450 330" stroke="#1a1a1a" stroke-width="28" stroke-linecap="round"/>
+  <path d="M574 330 L754 380" stroke="#1a1a1a" stroke-width="28" stroke-linecap="round"/>
+
+  <!-- Mouth -->
+  <path d="M350 680 Q512 610 674 680" stroke="#1a1a1a" stroke-width="36" fill="none" stroke-linecap="round"/>
+</svg>

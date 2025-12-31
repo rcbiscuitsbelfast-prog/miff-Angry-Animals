@@ -1,0 +1,6 @@
+Product Type: Non-Consumable
+Product ID: full_game_unlock
+Reference Name: Full Game Unlock
+Price: £1.50
+Description: Unlock all 100 levels and remove ads
+Review Notes: After purchase, the game immediately unlocks premium levels and disables ads. Restoring purchases will also unlock premium content on a fresh install.
