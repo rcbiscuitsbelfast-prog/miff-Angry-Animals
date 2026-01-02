@@ -48,6 +48,11 @@ All 12 features have been successfully consolidated into the main branch:
 - Godot 4.4 compatible
 - Ready for iOS/Android/Desktop deployment
 
+📊 **Monetization Audit Complete:**
+- See [`MONETIZATION_AUDIT_SUMMARY.md`](MONETIZATION_AUDIT_SUMMARY.md) for quick overview
+- See [`MONETIZATION_AUDIT_REPORT.md`](MONETIZATION_AUDIT_REPORT.md) for full analysis
+- **TL;DR:** Basic freemium (ads + £1.50 unlock) ✅ implemented. Advanced features (shop, currency, quests, battle pass) ❌ not implemented.
+
 ---
 
 ## About
