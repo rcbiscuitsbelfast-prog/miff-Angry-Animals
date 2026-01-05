@@ -29,6 +29,7 @@ AudioManager="*res://Globals/AudioManager.cs"
 AdsManager="*res://Globals/AdsManager.cs"
 MonetizationManager="*res://Globals/MonetizationManager.cs"
 ObjectPool="*res://Globals/ObjectPool.cs"
+LevelGenerator="*res://Globals/LevelGenerator.cs"
 
 [audio]
 

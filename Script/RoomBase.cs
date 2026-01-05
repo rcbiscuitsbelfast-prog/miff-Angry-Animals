@@ -17,7 +17,7 @@ public partial class RoomBase : Node2D
     [Export] private NodePath _slingshotPath;
     [Export] private NodePath _exitDoorPath;
     [Export] private NodePath _projectilesLoaderPath;
-    [Export] private int _targetScore = 3;
+    [Export] protected int _targetScore = 3;
     [Export] private bool _isBonusRoom = false;
     [Export] private NodePath _nextRoomPath; // For bonus room transitions
     [Export] private NodePath _enemySpawnerPath; // For enemy spawning
