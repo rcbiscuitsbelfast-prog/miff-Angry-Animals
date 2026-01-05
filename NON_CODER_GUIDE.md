@@ -57,6 +57,19 @@ Before making changes, understand how the game works:
 - Players can see locked/unlocked levels
 - **File:** `Scenes/Rooms/RoomSelection.tscn`
 
+#### Procedural Levels (New)
+The Room Selection screen now includes a toggle for **Procedural Levels**.
+
+- **Procedural OFF**: Plays the original hand-built `Room001.tscn` → `Room100.tscn`
+- **Procedural ON**: Plays a generated version of the selected room using `ProceduralRoom.tscn`
+
+When Procedural is ON, you’ll also see a **Seed** field:
+- **Seed = 0** (default): deterministic per-level generation (same room number always produces the same layout)
+- **Seed = any number**: forces that exact layout (useful for sharing)
+- The effective seed is copied to clipboard when starting a procedural level.
+
+For more detail, see `PROCEDURAL_LEVELS.md`.
+
 ### 3. **Slingshot Phase** (Gameplay Part 1)
 - Player drags projectile back to aim
 - Shows trajectory arc

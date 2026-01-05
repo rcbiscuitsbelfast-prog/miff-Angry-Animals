@@ -20,6 +20,7 @@ public partial class RoomSelection : Control
 
     private Button? _unlockFullGameButton;
     private AcceptDialog? _purchaseDialog;
+    private CheckButton? _proceduralModeToggle;
 
     public override void _Ready()
     {
@@ -86,7 +87,15 @@ public partial class RoomSelection : Control
 
         if (_unlockFullGameButton != null)
             _unlockFullGameButton.Pressed -= OnUnlockButtonPressed;
+
+        if (_proceduralModeToggle != null)
+            _proceduralModeToggle.Toggled -= OnProceduralModeToggled;
     }
+
+    private LineEdit? _seedInput;
+    private Button? _randomSeedButton;
+    private Button? _deterministicSeedButton;
+    private Button? _useLastSeedButton;
 
     private void PopulateRoomButtons()
     {
@@ -99,6 +108,8 @@ public partial class RoomSelection : Control
             child.QueueFree();
         }
 
+        AddGenerationControls();
+
         for (int i = 0; i < GameManager.Instance.Rooms.Length; i++)
         {
             var roomInfo = GameManager.Instance.Rooms[i];
@@ -108,6 +119,120 @@ public partial class RoomSelection : Control
         }
 
         CreateOrUpdateUnlockButton();
+    }
+
+    private void AddGenerationControls()
+    {
+        if (_roomsContainer == null)
+            return;
+
+        var header = new VBoxContainer
+        {
+            Name = "GenerationControls",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+        };
+
+        bool proceduralEnabled = PlayerProfile.Instance?.UseProceduralLevels ?? false;
+
+        _proceduralModeToggle = new CheckButton
+        {
+            Name = "ProceduralModeToggle",
+            Text = proceduralEnabled ? "Procedural Levels: ON" : "Procedural Levels: OFF",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            ButtonPressed = proceduralEnabled
+        };
+        _proceduralModeToggle.Toggled += OnProceduralModeToggled;
+        header.AddChild(_proceduralModeToggle);
+
+        var seedRow = new HBoxContainer
+        {
+            Name = "SeedRow",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+        };
+
+        var seedLabel = new Label { Text = "Seed:", Modulate = Colors.Yellow };
+
+        _seedInput = new LineEdit
+        {
+            Name = "SeedInput",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            PlaceholderText = "0 = deterministic (per level)",
+            Text = "0"
+        };
+
+        _randomSeedButton = new Button { Name = "RandomSeedButton", Text = "Random" };
+        _randomSeedButton.Pressed += OnRandomSeedPressed;
+
+        _useLastSeedButton = new Button { Name = "UseLastSeedButton", Text = "Use Last" };
+        _useLastSeedButton.Pressed += OnUseLastSeedPressed;
+
+        seedRow.AddChild(seedLabel);
+        seedRow.AddChild(_seedInput);
+        seedRow.AddChild(_randomSeedButton);
+        seedRow.AddChild(_useLastSeedButton);
+
+        _deterministicSeedButton = new Button
+        {
+            Name = "DeterministicSeedButton",
+            Text = "Deterministic",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+        };
+        _deterministicSeedButton.Pressed += OnDeterministicSeedPressed;
+
+        seedRow.Visible = proceduralEnabled;
+        _deterministicSeedButton.Visible = proceduralEnabled;
+
+        header.AddChild(seedRow);
+        header.AddChild(_deterministicSeedButton);
+
+        _roomsContainer.AddChild(header);
+        _roomsContainer.AddChild(new HSeparator());
+    }
+
+    private void OnProceduralModeToggled(bool enabled)
+    {
+        PlayerProfile.SetProceduralMode(enabled);
+        CallDeferred(nameof(PopulateRoomButtons));
+    }
+
+    private void OnRandomSeedPressed()
+    {
+        if (_seedInput == null)
+            return;
+
+        _seedInput.Text = LevelGenerator.CreateRandomSeed().ToString();
+    }
+
+    private void OnDeterministicSeedPressed()
+    {
+        if (_seedInput == null)
+            return;
+
+        _seedInput.Text = "0";
+    }
+
+    private void OnUseLastSeedPressed()
+    {
+        if (_seedInput == null || PlayerProfile.Instance == null)
+            return;
+
+        _seedInput.Text = PlayerProfile.Instance.LastProceduralSeed.ToString();
+    }
+
+    private int GetSeedOverride()
+    {
+        if (_seedInput == null)
+            return 0;
+
+        if (!int.TryParse(_seedInput.Text?.Trim(), out int seed))
+            return 0;
+
+        return seed;
+    }
+
+    private static int GetEffectiveSeedForRoom(int roomNumber, int seedOverride)
+    {
+        return seedOverride == 0 ? LevelGenerator.CalculateSeed(roomNumber) : seedOverride;
     }
 
     private bool IsRoomAccessible(int roomIndex)
@@ -139,10 +264,15 @@ public partial class RoomSelection : Control
             SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
         };
 
+        bool proceduralEnabled = PlayerProfile.Instance?.UseProceduralLevels ?? false;
+        int roomNumber = roomIndex + 1;
+
         var scoreLabel = new Label
         {
-            Text = $"Target: {roomInfo.TargetScore}",
-            Modulate = Colors.Yellow
+            Text = proceduralEnabled
+                ? $"Cups: {LevelGenerator.GetCupCount(roomNumber)}"
+                : $"Target: {roomInfo.TargetScore}",
+            Modulate = proceduralEnabled ? Colors.Cyan : Colors.Yellow
         };
 
         var lockLabel = new Label();
@@ -259,6 +389,25 @@ public partial class RoomSelection : Control
     private void OnRoomButtonPressed(int roomIndex)
     {
         GD.Print($"Room selected: {roomIndex}");
+
+        var proceduralEnabled = PlayerProfile.Instance?.UseProceduralLevels ?? false;
+        if (proceduralEnabled)
+        {
+            int seedOverride = GetSeedOverride();
+            int roomNumber = roomIndex + 1;
+            int effectiveSeed = GetEffectiveSeedForRoom(roomNumber, seedOverride);
+
+            if (PlayerProfile.Instance != null)
+            {
+                PlayerProfile.Instance.LastProceduralSeed = effectiveSeed;
+                PlayerProfile.Instance.LastProceduralLevelNumber = roomNumber;
+                PlayerProfile.Instance.Save();
+
+                DisplayServer.ClipboardSet(effectiveSeed.ToString());
+                GD.Print($"Procedural seed copied to clipboard: {effectiveSeed}");
+            }
+        }
+
         EmitSignal(SignalName.RoomSelected, roomIndex);
         GameManager.StartRoom(roomIndex);
     }

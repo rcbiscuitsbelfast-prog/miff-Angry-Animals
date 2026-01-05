@@ -73,6 +73,21 @@ public partial class PlayerProfile : Node
     /// </summary>
     public bool IsFullGameUnlocked { get; set; } = false;
 
+    /// <summary>
+    /// Whether to use procedurally generated levels instead of manually designed ones.
+    /// </summary>
+    public bool UseProceduralLevels { get; set; } = false;
+
+    /// <summary>
+    /// The last procedural seed used (for quick replay/sharing).
+    /// </summary>
+    public int LastProceduralSeed { get; set; }
+
+    /// <summary>
+    /// The last level number used with procedural generation.
+    /// </summary>
+    public int LastProceduralLevelNumber { get; set; } = 1;
+
     public int SelectedHatIndex { get; private set; }
     public int SelectedGlassesIndex { get; private set; }
     public int SelectedMoustacheIndex { get; private set; }
@@ -168,6 +183,9 @@ public partial class PlayerProfile : Node
             ["version"] = 2,
             ["profile_name"] = PlayerName,
             ["is_full_game_unlocked"] = IsFullGameUnlocked,
+            ["use_procedural_levels"] = UseProceduralLevels,
+            ["last_procedural_seed"] = LastProceduralSeed,
+            ["last_procedural_level_number"] = LastProceduralLevelNumber,
             ["face_image_path"] = FaceImagePath,
             ["highest_unlocked_room_index"] = HighestUnlockedRoomIndex,
             ["cosmetics"] = new JObject
@@ -217,6 +235,18 @@ public partial class PlayerProfile : Node
             IsFullGameUnlocked = ReadBool(root, "is_full_game_unlocked")
                 ?? ReadBool(root, "IsFullGameUnlocked")
                 ?? false;
+
+            UseProceduralLevels = ReadBool(root, "use_procedural_levels")
+                ?? ReadBool(root, "UseProceduralLevels")
+                ?? false;
+
+            LastProceduralSeed = ReadInt(root, "last_procedural_seed")
+                ?? ReadInt(root, "LastProceduralSeed")
+                ?? 0;
+
+            LastProceduralLevelNumber = ReadInt(root, "last_procedural_level_number")
+                ?? ReadInt(root, "LastProceduralLevelNumber")
+                ?? 1;
 
             FaceImagePath = ReadString(root, "face_image_path")
                 ?? ReadString(root, "FaceImagePath")
@@ -271,6 +301,12 @@ public partial class PlayerProfile : Node
 
     public static void SaveCosmetics()
     {
+        Instance.Save();
+    }
+
+    public static void SetProceduralMode(bool enabled)
+    {
+        Instance.UseProceduralLevels = enabled;
         Instance.Save();
     }
 

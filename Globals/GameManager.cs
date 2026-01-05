@@ -30,8 +30,10 @@ public partial class GameManager : Node
 
     public GameState State { get; private set; } = GameState.Boot;
     public int CurrentRoomIndex { get; private set; } = -1;
+    public int CurrentProceduralSeed { get; private set; }
 
     public string MainScenePath { get; set; } = "res://Scenes/Main/Main.tscn";
+    public string ProceduralRoomScenePath { get; set; } = "res://Scenes/Levels/ProceduralRoom.tscn";
 
     private SignalManager? _signalManager;
 
@@ -72,6 +74,7 @@ public partial class GameManager : Node
     private void LoadMainInternal()
     {
         CurrentRoomIndex = -1;
+        CurrentProceduralSeed = 0;
         State = GameState.MainMenu;
         EmitSignal(SignalName.GameStateChanged, State);
         Globals.GotoScene(MainScenePath);
@@ -109,7 +112,30 @@ public partial class GameManager : Node
         EmitSignal(SignalName.RoomStarted, roomIndex);
 
         ScoreManager.SetLevel(roomIndex + 1);
-        Globals.GotoScene(Rooms[roomIndex].ScenePath);
+
+        // Check if we should use procedural generation
+        bool useProceduralLevels = PlayerProfile.Instance?.UseProceduralLevels ?? false;
+
+        if (useProceduralLevels)
+        {
+            int roomNumber = roomIndex + 1;
+            int seed = 0;
+
+            if (PlayerProfile.Instance != null && PlayerProfile.Instance.LastProceduralLevelNumber == roomNumber)
+                seed = PlayerProfile.Instance.LastProceduralSeed;
+
+            if (seed == 0)
+                seed = LevelGenerator.CalculateSeed(roomNumber);
+
+            CurrentProceduralSeed = seed;
+        }
+        else
+        {
+            CurrentProceduralSeed = 0;
+        }
+
+        string scenePath = useProceduralLevels ? ProceduralRoomScenePath : Rooms[roomIndex].ScenePath;
+        Globals.GotoScene(scenePath);
     }
 
     public static void RestartRoom()
