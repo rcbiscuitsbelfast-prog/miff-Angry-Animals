@@ -36,10 +36,38 @@ public partial class MainMenu : Control
     public override void _Ready()
     {
         InitializeMenu();
+        AddDailyChallengeButton();
         AddCustomizeFaceButton();
         AddUnlockFullGameButton();
         ConnectSignals();
         SetupInputMap();
+    }
+
+    private void AddDailyChallengeButton()
+    {
+        if (_playButton != null && _playButton.GetParent() is Control container)
+        {
+            var dailyBtn = new Button
+            {
+                Text = "Daily Challenge",
+                Name = "DailyChallengeButton",
+                Modulate = new Color(0.5f, 1f, 0.5f)
+            };
+            dailyBtn.Pressed += OnDailyChallengeButtonPressed;
+
+            container.AddChild(dailyBtn);
+
+            if (_playButton != null)
+                container.MoveChild(dailyBtn, _playButton.GetIndex() + 1);
+        }
+    }
+
+    private void OnDailyChallengeButtonPressed()
+    {
+        GD.Print("Daily Challenge button pressed");
+        PlayUiClickSound();
+
+        DailyChallengeManager.Instance?.StartDailyChallenge();
     }
 
     private void AddCustomizeFaceButton()

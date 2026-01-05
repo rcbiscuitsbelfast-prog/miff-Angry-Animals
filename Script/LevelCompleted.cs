@@ -169,14 +169,22 @@ public partial class LevelCompleted : Control
         _currentLevel = roomIndex + 1; // Convert to 1-based level number
         _finalScore = ScoreManager.GetScore();
         _bestScore = ScoreManager.GetLevelBestScore(_currentLevel);
-        _isNewRecord = _finalScore < _bestScore;
+        
+        var starCount = CalculateStarCount();
+        bool isNewBest = _finalScore > _bestScore || _bestScore == 0;
+        _isNewRecord = isNewBest;
+
+        if (isNewBest)
+        {
+            _bestScore = _finalScore;
+            ScoreManager.SetLevelScore(_currentLevel, _finalScore, starCount);
+        }
 
         // Update the UI with completion data
         UpdateCompletionUI();
         ShowCompletionPanel();
 
         // Add game feel polish
-        var starCount = CalculateStarCount();
         GameFeelManager.Instance?.OnLevelComplete(starCount);
 
         AnimateStars();
@@ -320,18 +328,17 @@ public partial class LevelCompleted : Control
 
     private int CalculateStarCount()
     {
-        // Simple star calculation - adjust based on your game's scoring system
-        // For now, base it on how close to target score
-        if (_finalScore >= 3 * _bestScore)
-            return 1;
-        else if (_finalScore >= 2 * _bestScore)
-            return 2;
-        else if (_finalScore == _bestScore)
-            return 3;
-        else if (_finalScore <= _bestScore * 0.5)
-            return 3; // Perfect score
+        if (GameManager.Instance == null) return 1;
         
-        return 2; // Default
+        var roomInfo = GameManager.Instance.Rooms[_currentLevel - 1];
+        int optimalScore = roomInfo.OptimalScore;
+
+        if (_finalScore >= optimalScore * 0.9f)
+            return 3;
+        else if (_finalScore >= optimalScore * 0.6f)
+            return 2;
+        
+        return 1;
     }
 
     private void PlayCompletionSound()

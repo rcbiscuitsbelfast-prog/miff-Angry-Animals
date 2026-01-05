@@ -14,7 +14,7 @@ public partial class GameManager : Node
         Paused
     }
 
-    public readonly record struct RoomInfo(string ScenePath, string Description, int TargetScore);
+    public readonly record struct RoomInfo(string ScenePath, string Description, int OptimalScore);
 
     /// <summary>
     /// Total number of levels included in the full game.
@@ -213,10 +213,13 @@ public partial class GameManager : Node
         for (int i = 0; i < TotalLevels; i++)
         {
             int levelNumber = i + 1;
+            // Define optimal scores for star calculation
+            int optimalScore = 1000 + (i * 500); 
+            
             rooms[i] = new RoomInfo(
                 $"res://Scenes/Levels/Room{levelNumber:D3}.tscn",
                 $"Room {levelNumber}",
-                3);
+                optimalScore);
         }
         return rooms;
     }
