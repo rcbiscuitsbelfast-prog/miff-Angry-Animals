@@ -154,18 +154,21 @@ public partial class Slingshot : Node2D
     private void LaunchProjectile()
     {
         if (_currentProjectile == null) return;
-        
+
         Vector2 impulse = CalculateImpulse();
-        
+
         // Use AudioManager for catapult sound
         var audioManager = GetNodeOrNull<AudioManager>("/root/AudioManager");
         audioManager?.PlaySlingshotSound();
-        
+
+        // Add game feel launch feedback
+        GameFeelManager.Instance?.OnProjectileLaunched();
+
         _currentProjectile.Launch(impulse);
-        
+
         EmitSignal(SignalName.ProjectileLaunched, _currentProjectile);
         SignalManager.EmitOnAttemptMade();
-        
+
         _currentProjectile = null;
     }
 }

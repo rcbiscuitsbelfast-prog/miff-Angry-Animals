@@ -240,6 +240,12 @@ public partial class RoomBase : Node2D
 
         GD.Print($"Exit door unlocked! Score: {_destructionScore}/{_targetScore}");
         EmitSignal(SignalName.ExitDoorUnlocked);
+
+        // Add game feel feedback for door unlock
+        if (GameFeelManager.Instance != null && _exitDoor != null)
+        {
+            GameFeelManager.Instance.OnDoorUnlocked(_exitDoor.GlobalPosition);
+        }
     }
 
     private async void CompleteRoom()
