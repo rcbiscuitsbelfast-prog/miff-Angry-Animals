@@ -30,6 +30,9 @@ AdsManager="*res://Globals/AdsManager.cs"
 MonetizationManager="*res://Globals/MonetizationManager.cs"
 ObjectPool="*res://Globals/ObjectPool.cs"
 LevelGenerator="*res://Globals/LevelGenerator.cs"
+EffectsManager="*res://Script/EffectsManager.cs"
+GameFeelManager="*res://Script/GameFeelManager.cs"
+HapticFeedbackManager="*res://Script/HapticFeedbackManager.cs"
 
 [audio]
 

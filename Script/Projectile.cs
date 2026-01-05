@@ -71,6 +71,13 @@ public partial class Projectile : RigidBody2D, IPoolable
             if (_lastCollisionCount == 0 && contactCount > 0 && !_kickWoodSound.Playing)
             {
                 _kickWoodSound.Play();
+
+                // Add game feel impact feedback
+                if (GameFeelManager.Instance != null)
+                {
+                    float impactForce = LinearVelocity.Length();
+                    GameFeelManager.Instance.OnImpact(this, impactForce);
+                }
             }
             _lastCollisionCount = contactCount;
         }

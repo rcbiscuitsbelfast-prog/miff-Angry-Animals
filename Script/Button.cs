@@ -31,6 +31,9 @@ public partial class Button : TextureButton
 
     private void OnButtonPressed()
     {
+        // Add game feel feedback
+        GameFeelManager.Instance?.OnButtonPress(this);
+
         GameManager.StartRoomByLevelNumber(LevelNumber);
     }
 
