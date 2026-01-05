@@ -166,21 +166,32 @@ public partial class ScoreManager : Node
     /// Sets the score for a given level.
     /// If a score already exists, only updates it if the new score is better.
     /// </summary>
-    public static void SetLevelScore(int levelNumber, int score)
+    public static void SetLevelScore(int levelNumber, int score, int stars = 0)
     {
         var levelScore = GetLevelScore(levelNumber);
 
         if (levelScore != null)
         {
-            if (score < levelScore.BestScore)
+            if (score < levelScore.BestScore || levelScore.BestScore == 0)
             {
                 levelScore.BestScore = score;
                 levelScore.DateSet = DateTime.Now;
             }
+            
+            if (stars > levelScore.StarRating)
+            {
+                levelScore.StarRating = stars;
+            }
         }
         else
         {
-            Instance._levelScores.Add(new LevelScore(levelNumber, score));
+            Instance._levelScores.Add(new LevelScore(levelNumber, score, stars));
         }
+    }
+    
+    public static int GetLevelStarRating(int levelNumber)
+    {
+        var levelScore = GetLevelScore(levelNumber);
+        return levelScore != null ? levelScore.StarRating : 0;
     }
 }

@@ -60,7 +60,11 @@ public partial class RoomBase : Node2D
 
         var currentRoomIndex = GameManager.Instance?.CurrentRoomIndex ?? 0;
         if (GameManager.Instance != null && currentRoomIndex >= 0 && currentRoomIndex < GameManager.Instance.Rooms.Length)
-            _targetScore = GameManager.Instance.Rooms[currentRoomIndex].TargetScore;
+        {
+            int optimalScore = GameManager.Instance.Rooms[currentRoomIndex].OptimalScore;
+            // Target to unlock door is 30% of optimal score
+            _targetScore = (int)(optimalScore * 0.3f);
+        }
     }
 
     private void EnsureRewardDialog()

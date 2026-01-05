@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 public partial class PlayerProfile : Node
 {
@@ -94,6 +96,23 @@ public partial class PlayerProfile : Node
     public int SelectedWigIndex { get; private set; }
     public int SelectedFilterIndex { get; private set; }
     public int SelectedEmotionIndex { get; private set; }
+
+    // New Cosmetics
+    public int SelectedSlingshotSkinIndex { get; set; }
+    public int SelectedProjectileSkinIndex { get; set; }
+    public int SelectedTrailEffectIndex { get; set; }
+    public int SelectedHitEffectIndex { get; set; }
+    public int SelectedVictoryEffectIndex { get; set; }
+
+    // Unlocked Cosmetics (via IAP)
+    public HashSet<string> UnlockedCosmetics { get; private set; } = new();
+
+    // Accessibility
+    public bool ColorblindMode { get; set; } = false;
+    public float TextScale { get; set; } = 1.0f;
+    public bool HighContrastMode { get; set; } = false;
+    public bool ReduceMotion { get; set; } = false;
+    public string DifficultyPreset { get; set; } = "Normal";
 
     public string FaceImagePath { get; private set; } = "";
 
@@ -188,6 +207,14 @@ public partial class PlayerProfile : Node
             ["last_procedural_level_number"] = LastProceduralLevelNumber,
             ["face_image_path"] = FaceImagePath,
             ["highest_unlocked_room_index"] = HighestUnlockedRoomIndex,
+            ["accessibility"] = new JObject
+            {
+                ["colorblind_mode"] = ColorblindMode,
+                ["text_scale"] = TextScale,
+                ["high_contrast_mode"] = HighContrastMode,
+                ["reduce_motion"] = ReduceMotion,
+                ["difficulty_preset"] = DifficultyPreset
+            },
             ["cosmetics"] = new JObject
             {
                 ["hat_index"] = SelectedHatIndex,
@@ -195,7 +222,13 @@ public partial class PlayerProfile : Node
                 ["moustache_index"] = SelectedMoustacheIndex,
                 ["wig_index"] = SelectedWigIndex,
                 ["filter_index"] = SelectedFilterIndex,
-                ["emotion_index"] = SelectedEmotionIndex
+                ["emotion_index"] = SelectedEmotionIndex,
+                ["slingshot_skin_index"] = SelectedSlingshotSkinIndex,
+                ["projectile_skin_index"] = SelectedProjectileSkinIndex,
+                ["trail_effect_index"] = SelectedTrailEffectIndex,
+                ["hit_effect_index"] = SelectedHitEffectIndex,
+                ["victory_effect_index"] = SelectedVictoryEffectIndex,
+                ["unlocked_list"] = JArray.FromObject(UnlockedCosmetics.ToList())
             }
         };
 
@@ -257,6 +290,16 @@ public partial class PlayerProfile : Node
                 ?? ReadInt(root, "HighestUnlockedRoomIndex")
                 ?? 0);
 
+            var accessibilityToken = root["accessibility"];
+            if (accessibilityToken is JObject accessibility)
+            {
+                ColorblindMode = ReadBool(accessibility, "colorblind_mode") ?? false;
+                TextScale = (float)(ReadDouble(accessibility, "text_scale") ?? 1.0);
+                HighContrastMode = ReadBool(accessibility, "high_contrast_mode") ?? false;
+                ReduceMotion = ReadBool(accessibility, "reduce_motion") ?? false;
+                DifficultyPreset = ReadString(accessibility, "difficulty_preset") ?? "Normal";
+            }
+
             var cosmeticsToken = root["cosmetics"];
             if (cosmeticsToken is JObject cosmetics)
             {
@@ -264,6 +307,17 @@ public partial class PlayerProfile : Node
                 SelectedGlassesIndex = Mathf.Clamp(ReadInt(cosmetics, "glasses_index") ?? 0, 0, DefaultGlasses.Length - 1);
                 SelectedFilterIndex = Mathf.Clamp(ReadInt(cosmetics, "filter_index") ?? 0, 0, DefaultFilters.Length - 1);
                 SelectedEmotionIndex = Mathf.Clamp(ReadInt(cosmetics, "emotion_index") ?? 0, 0, DefaultEmotions.Length - 1);
+                SelectedSlingshotSkinIndex = ReadInt(cosmetics, "slingshot_skin_index") ?? 0;
+                SelectedProjectileSkinIndex = ReadInt(cosmetics, "projectile_skin_index") ?? 0;
+                SelectedTrailEffectIndex = ReadInt(cosmetics, "trail_effect_index") ?? 0;
+                SelectedHitEffectIndex = ReadInt(cosmetics, "hit_effect_index") ?? 0;
+                SelectedVictoryEffectIndex = ReadInt(cosmetics, "victory_effect_index") ?? 0;
+                
+                var unlockedToken = cosmetics["unlocked_list"];
+                if (unlockedToken is JArray unlockedList)
+                {
+                    UnlockedCosmetics = new HashSet<string>(unlockedList.Select(t => t.ToString()));
+                }
             }
             else
             {
@@ -328,6 +382,20 @@ public partial class PlayerProfile : Node
             return token.Value<int>();
 
         if (int.TryParse(token.ToString(), out int value))
+            return value;
+
+        return null;
+    }
+
+    private static double? ReadDouble(JObject root, string key)
+    {
+        if (!root.TryGetValue(key, out var token))
+            return null;
+
+        if (token.Type == JTokenType.Float || token.Type == JTokenType.Integer)
+            return token.Value<double>();
+
+        if (double.TryParse(token.ToString(), out double value))
             return value;
 
         return null;

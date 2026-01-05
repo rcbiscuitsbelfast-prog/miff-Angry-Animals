@@ -19,6 +19,11 @@ public class LevelScore
     public int BestScore { get; set; }
 
     /// <summary>
+    /// The star rating achieved for this level (1-3).
+    /// </summary>
+    public int StarRating { get; set; }
+
+    /// <summary>
     /// The date and time when the score was set.
     /// </summary>
     public DateTime DateSet { get; set; }
@@ -29,10 +34,12 @@ public class LevelScore
     /// </summary>
     /// <param name="levelNumber">The number of the level.</param>
     /// <param name="bestScore">The best score achieved.</param>
-    public LevelScore(int levelNumber, int bestScore)
+    /// <param name="starRating">The star rating achieved.</param>
+    public LevelScore(int levelNumber, int bestScore, int starRating = 0)
     {
         DateSet = DateTime.Now; // Record the current date and time.
         LevelNumber = levelNumber;
         BestScore = bestScore;
+        StarRating = starRating;
     }
 }
