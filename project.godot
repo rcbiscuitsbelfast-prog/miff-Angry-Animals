@@ -28,6 +28,7 @@ FileManager="*res://Globals/FileManager.cs"
 AudioManager="*res://Globals/AudioManager.cs"
 AdsManager="*res://Globals/AdsManager.cs"
 MonetizationManager="*res://Globals/MonetizationManager.cs"
+ObjectPool="*res://Globals/ObjectPool.cs"
 
 [audio]
 

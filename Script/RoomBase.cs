@@ -20,11 +20,13 @@ public partial class RoomBase : Node2D
     [Export] private int _targetScore = 3;
     [Export] private bool _isBonusRoom = false;
     [Export] private NodePath _nextRoomPath; // For bonus room transitions
+    [Export] private NodePath _enemySpawnerPath; // For enemy spawning
 
     private Slingshot? _slingshot;
     private Node2D? _exitDoor;
     private ProjectilesLoader? _projectilesLoader;
     private Node2D? _nextRoomMarker;
+    private EnemySpawner? _enemySpawner;
 
     private ConfirmationDialog? _rewardedDialog;
 
@@ -49,6 +51,7 @@ public partial class RoomBase : Node2D
         _exitDoor = GetNodeOrNull<Node2D>(_exitDoorPath);
         _projectilesLoader = GetNodeOrNull<ProjectilesLoader>(_projectilesLoaderPath);
         _nextRoomMarker = GetNodeOrNull<Node2D>(_nextRoomPath);
+        _enemySpawner = GetNodeOrNull<EnemySpawner>(_enemySpawnerPath);
 
         if (_exitDoor != null)
         {

@@ -21,6 +21,9 @@ public partial class StickClone : CharacterBody2D
     private Node2D? _hatNode;
     private Node2D? _glassesNode;
 
+    // Animation system
+    private StickCloneAnimator? _animator;
+
     // Movement state
     private Vector2 _velocity = Vector2.Zero;
     private bool _isGrounded = false;
@@ -48,6 +51,11 @@ public partial class StickClone : CharacterBody2D
         _faceSprite = GetNodeOrNull<Sprite2D>(_faceSpritePath);
         _hatNode = GetNodeOrNull<Node2D>(_hatNodePath);
         _glassesNode = GetNodeOrNull<Node2D>(_glassesNodePath);
+
+        // Initialize animation system
+        _animator = new StickCloneAnimator();
+        AddChild(_animator);
+    }
 
         // Get reference to current room
         _currentRoom = GetParent()?.GetParent() as RoomBase;
@@ -299,10 +307,38 @@ public partial class StickClone : CharacterBody2D
     private void UpdateAnimationState()
     {
         _isMoving = Mathf.Abs(_velocity.X) > 10;
-        
-        // TODO: Update animation based on movement state
-        // For now, just flip sprite based on direction
-        if (_faceSprite != null)
+
+        // Update animations based on movement state
+        if (_animator != null)
+        {
+            if (!_isGrounded && _velocity.Y < 0)
+            {
+                // Jumping up
+                _animator.PlayAnimation(StickCloneAnimator.AnimState.JumpUp);
+                _animator.SetFacingDirection(_velocity.X);
+            }
+            else if (!_isGrounded && _velocity.Y > 0)
+            {
+                // Falling down
+                _animator.PlayAnimation(StickCloneAnimator.AnimState.JumpDown);
+                _animator.SetFacingDirection(_velocity.X);
+            }
+            else if (_isMoving)
+            {
+                // Walking
+                _animator.PlayAnimation(StickCloneAnimator.AnimState.Walk);
+                _animator.SetFacingDirection(_velocity.X);
+            }
+            else
+            {
+                // Idle
+                _animator.PlayAnimation(StickCloneAnimator.AnimState.Idle);
+            }
+        }
+    }
+
+    // Fallback: Flip sprite based on direction for basic sprites
+    if (_faceSprite != null)
         {
             _faceSprite.FlipH = _velocity.X < 0;
         }

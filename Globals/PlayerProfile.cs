@@ -15,14 +15,40 @@ public partial class PlayerProfile : Node
         "none",
         "cap",
         "crown",
-        "beanie"
+        "beanie",
+        "tophat",
+        "cowboy",
+        "beret"
     ];
 
     private static readonly string[] DefaultGlasses =
     [
         "none",
         "round",
-        "aviator"
+        "aviator",
+        "sunglasses",
+        "nerd_glasses",
+        "monocle",
+        "3d_glasses"
+    ];
+
+    private static readonly string[] DefaultMoustaches =
+    [
+        "none",
+        "normal",
+        "fancy",
+        "handlebar",
+        "pencil",
+        "walrus"
+    ];
+
+    private static readonly string[] DefaultWigs =
+    [
+        "none",
+        "afro",
+        "long_hair",
+        "ponytail",
+        "mohawk"
     ];
 
     private static readonly string[] DefaultFilters =
@@ -49,6 +75,8 @@ public partial class PlayerProfile : Node
 
     public int SelectedHatIndex { get; private set; }
     public int SelectedGlassesIndex { get; private set; }
+    public int SelectedMoustacheIndex { get; private set; }
+    public int SelectedWigIndex { get; private set; }
     public int SelectedFilterIndex { get; private set; }
     public int SelectedEmotionIndex { get; private set; }
 
@@ -100,13 +128,17 @@ public partial class PlayerProfile : Node
 
     public static string[] GetHats() => DefaultHats;
     public static string[] GetGlasses() => DefaultGlasses;
+    public static string[] GetMoustaches() => DefaultMoustaches;
+    public static string[] GetWigs() => DefaultWigs;
     public static string[] GetFilters() => DefaultFilters;
     public static string[] GetEmotions() => DefaultEmotions;
 
-    public static void SetCosmetics(int hatIndex, int glassesIndex, int filterIndex, int emotionIndex)
+    public static void SetCosmetics(int hatIndex, int glassesIndex, int moustacheIndex, int wigIndex, int filterIndex, int emotionIndex)
     {
         Instance.SelectedHatIndex = Mathf.Clamp(hatIndex, 0, DefaultHats.Length - 1);
         Instance.SelectedGlassesIndex = Mathf.Clamp(glassesIndex, 0, DefaultGlasses.Length - 1);
+        Instance.SelectedMoustacheIndex = Mathf.Clamp(moustacheIndex, 0, DefaultMoustaches.Length - 1);
+        Instance.SelectedWigIndex = Mathf.Clamp(wigIndex, 0, DefaultWigs.Length - 1);
         Instance.SelectedFilterIndex = Mathf.Clamp(filterIndex, 0, DefaultFilters.Length - 1);
         Instance.SelectedEmotionIndex = Mathf.Clamp(emotionIndex, 0, DefaultEmotions.Length - 1);
         Instance.Save();
@@ -142,6 +174,8 @@ public partial class PlayerProfile : Node
             {
                 ["hat_index"] = SelectedHatIndex,
                 ["glasses_index"] = SelectedGlassesIndex,
+                ["moustache_index"] = SelectedMoustacheIndex,
+                ["wig_index"] = SelectedWigIndex,
                 ["filter_index"] = SelectedFilterIndex,
                 ["emotion_index"] = SelectedEmotionIndex
             }
