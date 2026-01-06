@@ -82,6 +82,44 @@ public partial class GameFeelManager : Node
         }
     }
 
+    /// <summary>
+    /// Called when projectile is launched with slingshot type-specific effects
+    /// </summary>
+    public void OnSlingshotLaunched(SlingshotType type, Vector2 position)
+    {
+        if (!_enableParticles) return;
+
+        switch (type)
+        {
+            case SlingshotType.Catapult:
+                // Classic confetti burst
+                EffectsManager.Instance?.SpawnConfetti(position);
+                EffectsManager.Instance?.SpawnDust(position + new Vector2(0, 20));
+                break;
+
+            case SlingshotType.GiantHand:
+                // Sparkle explosion
+                EffectsManager.Instance?.SpawnSparkle(position);
+                EffectsManager.Instance?.SpawnSparkle(position + new Vector2(30, 0));
+                EffectsManager.Instance?.SpawnSparkle(position + new Vector2(-30, 0));
+                EffectsManager.Instance?.SpawnSparkle(position + new Vector2(0, 30));
+                break;
+
+            case SlingshotType.Trebuchet:
+                // Dust cloud with some particles
+                EffectsManager.Instance?.SpawnDust(position);
+                EffectsManager.Instance?.SpawnDust(position + new Vector2(20, 10));
+                EffectsManager.Instance?.SpawnDust(position + new Vector2(-20, 10));
+                break;
+
+            case SlingshotType.Spring:
+                // Bouncy particles - mix of sparkles and dust
+                EffectsManager.Instance?.SpawnSparkle(position);
+                EffectsManager.Instance?.SpawnDust(position + new Vector2(0, 15));
+                break;
+        }
+    }
+
     #endregion
 
     #region Impact Feedback

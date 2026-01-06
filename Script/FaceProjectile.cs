@@ -9,14 +9,16 @@ public partial class FaceProjectile : Projectile
     [Export] private Sprite2D _faceSprite;
     private ExpressionManager _expressionManager;
     private Vector2 _lastVelocity;
-    
+    private ExpressionType _lastExpression = ExpressionType.Neutral;
+    private bool _hasTriggeredLaunchBubble = false;
+
     public override void _Ready()
     {
         base._Ready();
-        
+
         _expressionManager = new ExpressionManager();
         AddChild(_expressionManager);
-        
+
         // If we have a face sprite, center the expressions on it
         if (_faceSprite != null)
         {
@@ -59,28 +61,57 @@ public partial class FaceProjectile : Projectile
         float acceleration = (LinearVelocity - _lastVelocity).Length() / delta;
         _lastVelocity = LinearVelocity;
 
+        ExpressionType newExpression = _lastExpression;
+
         // Logic for expression triggers
         if (speed > 1000f)
         {
-            _expressionManager.SetExpression(ExpressionType.Scared);
+            newExpression = ExpressionType.Scared;
         }
         else if (speed < 50f && speed > 5f)
         {
-            _expressionManager.SetExpression(ExpressionType.Bored);
+            newExpression = ExpressionType.Bored;
         }
         else if (acceleration > 5000f) // Impact or Launch
         {
             if (speed < 500f)
-                _expressionManager.SetExpression(ExpressionType.Dizzy, 1.0f);
+                newExpression = ExpressionType.Dizzy;
             else
-                _expressionManager.SetExpression(ExpressionType.Determined, 0.5f);
+                newExpression = ExpressionType.Determined;
         }
 
         // Random during flight
         if (speed > 100f && GD.Randf() < 0.01f)
         {
-            ExpressionType randomExpr = (ExpressionType)GD.RandRange(0, 13);
-            _expressionManager.SetExpression(randomExpr, 1.0f);
+            newExpression = (ExpressionType)GD.RandRange(0, 13);
+        }
+
+        // Apply expression change and trigger feedback
+        if (newExpression != _lastExpression)
+        {
+            _expressionManager.SetExpression(newExpression, 1.0f);
+
+            // Play expression vocal
+            AudioManager.PlayExpressionVocalSfx(newExpression);
+
+            // Spawn speech bubble on expression change
+            if (SpeechBubbleManager.Instance != null)
+            {
+                SpeechBubbleManager.Instance.OnExpressionChanged(newExpression);
+            }
+
+            _lastExpression = newExpression;
+        }
+    }
+
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+
+        // Clear speech bubble tracking
+        if (SpeechBubbleManager.Instance != null)
+        {
+            SpeechBubbleManager.Instance.SetCurrentProjectile(null);
         }
     }
 

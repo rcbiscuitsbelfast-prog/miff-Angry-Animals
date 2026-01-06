@@ -104,6 +104,12 @@ public partial class PlayerProfile : Node
     public int SelectedHitEffectIndex { get; set; }
     public int SelectedVictoryEffectIndex { get; set; }
 
+    /// <summary>
+    /// The selected slingshot type (Catapult, GiantHand, Trebuchet, Spring).
+    /// Defaults to Catapult.
+    /// </summary>
+    public int SelectedSlingshotType { get; set; } = 0;
+
     // Unlocked Cosmetics (via IAP)
     public HashSet<string> UnlockedCosmetics { get; private set; } = new();
 
@@ -228,6 +234,7 @@ public partial class PlayerProfile : Node
                 ["trail_effect_index"] = SelectedTrailEffectIndex,
                 ["hit_effect_index"] = SelectedHitEffectIndex,
                 ["victory_effect_index"] = SelectedVictoryEffectIndex,
+                ["slingshot_type"] = SelectedSlingshotType,
                 ["unlocked_list"] = JArray.FromObject(UnlockedCosmetics.ToList())
             }
         };
@@ -312,6 +319,7 @@ public partial class PlayerProfile : Node
                 SelectedTrailEffectIndex = ReadInt(cosmetics, "trail_effect_index") ?? 0;
                 SelectedHitEffectIndex = ReadInt(cosmetics, "hit_effect_index") ?? 0;
                 SelectedVictoryEffectIndex = ReadInt(cosmetics, "victory_effect_index") ?? 0;
+                SelectedSlingshotType = ReadInt(cosmetics, "slingshot_type") ?? 0;
                 
                 var unlockedToken = cosmetics["unlocked_list"];
                 if (unlockedToken is JArray unlockedList)
@@ -363,6 +371,14 @@ public partial class PlayerProfile : Node
         Instance.UseProceduralLevels = enabled;
         Instance.Save();
     }
+
+    public static void SetSlingshotType(int typeIndex)
+    {
+        Instance.SelectedSlingshotType = Mathf.Clamp(typeIndex, 0, 3);
+        Instance.Save();
+    }
+
+    public static int GetSlingshotType() => Instance.SelectedSlingshotType;
 
     private static string? ReadString(JObject root, string key)
     {
