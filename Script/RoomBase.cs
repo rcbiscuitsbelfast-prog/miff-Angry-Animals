@@ -291,9 +291,6 @@ public partial class RoomBase : Node2D
     {
         _cupsDestroyed++;
         UpdateObjectiveState();
-
-        if (AreAllObjectivesComplete() && !_exitUnlocked)
-            UnlockExitDoor();
     }
 
     private void OnPropDestroyed(Node prop, int scoreValue)
@@ -305,9 +302,6 @@ public partial class RoomBase : Node2D
     {
         _npcsDestroyed++;
         UpdateObjectiveState();
-
-        if (AreAllObjectivesComplete() && !_exitUnlocked)
-            UnlockExitDoor();
     }
 
     private void OnAnimalDied()
@@ -531,9 +525,6 @@ public partial class RoomBase : Node2D
     {
         _exitReached = true;
         UpdateObjectiveState();
-
-        if (!_exitUnlocked && AreAllObjectivesComplete())
-            UnlockExitDoor();
 
         if (_exitUnlocked)
             CompleteRoom();

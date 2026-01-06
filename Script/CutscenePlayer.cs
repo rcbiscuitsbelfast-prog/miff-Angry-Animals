@@ -16,6 +16,8 @@ public partial class CutscenePlayer : CanvasLayer
     private ColorRect? _fadeRect;
 
     private bool _isSkipping;
+    private bool _hasFinished;
+    private int _returnRoomIndex = -1;
 
     public bool IsSkipping => _isSkipping;
 
@@ -50,6 +52,7 @@ public partial class CutscenePlayer : CanvasLayer
 
         var cutscenePath = StoryEventTrigger.Instance.PendingCutsceneScenePath;
         var roomIndex = StoryEventTrigger.Instance.PendingReturnRoomIndex;
+        _returnRoomIndex = roomIndex;
 
         if (string.IsNullOrWhiteSpace(cutscenePath))
         {
@@ -125,10 +128,33 @@ public partial class CutscenePlayer : CanvasLayer
 
         // Clear any queued dialogue immediately.
         DialogueManager.Instance?.Clear();
+
+        // Stop any cutscene nodes.
+        if (_container != null)
+        {
+            foreach (Node child in _container.GetChildren())
+                child.QueueFree();
+        }
+
+        if (!_hasFinished)
+            CallDeferred(nameof(DeferredFinish));
+    }
+
+    private async void DeferredFinish()
+    {
+        if (_hasFinished)
+            return;
+
+        await FinishAsync(_returnRoomIndex);
     }
 
     public async Task FinishAsync(int roomIndex)
     {
+        if (_hasFinished)
+            return;
+
+        _hasFinished = true;
+
         await FadeToAsync(0f, 0.15f);
 
         // Resume gameplay.
