@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3 uid="uid://bxqw8y5h3k2n1"]
+
+[ext_resource type="Script" path="res://Script/NPC.cs" id="1_npc"]
+[ext_resource type="Script" path="res://Script/CosmeticOverlay.cs" id="2_cosmetic"]
+[ext_resource type="Script" path="res://Script/SpeechBubbleManager.cs" id="3_bubble_mgr"]
+
+[node name="MomNPC" type="Node2D"]
+script = ExtResource("1_npc")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 0)
+
+[node name="ExpressionManager" type="Node" parent="."]
+script = ExtResource("2_npc_expr")
+
+[node name="SpeechBubbleManager" type="Node" parent="."]
+script = ExtResource("3_bubble_mgr")
+
+[node name="CosmeticOverlay" type="Node2D" parent="."]
+# Inspector Settings for MomNPC:
+# npc_type: FAMILY
+# face_source: NPC_UNIQUE
+# cosmetic_overlays: ["moustache"] (ADDED BY DEFAULT)
+# behavior_type: STATIC
+# health: 100
+# dialogue: ["WATCH IT!", "Not MY rules!", "Clean your room!"]
+
+[node name="CosmeticSprite" type="Sprite2D" parent="CosmeticOverlay"]
+position = Vector2(0, -20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CosmeticOverlay"]
+position = Vector2(0, 0)
