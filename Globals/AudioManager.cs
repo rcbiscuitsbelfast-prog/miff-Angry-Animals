@@ -2,8 +2,27 @@ using Godot;
 using Script;
 
 /// <summary>
-/// Audio manager that handles all game audio including background music and sound effects.
-/// Integrates with SignalManager for gameplay events and uses the audio bus layout.
+/// AudioManager.cs - Sound and music control system
+/// 
+/// This script controls ALL audio in the game: music, sound effects, voice lines.
+/// Makes your game feel alive with proper sound design.
+/// 
+/// HOW TO USE (Non-Coders):
+/// 1. To change volume: Open AudioManager node → Inspector → Adjust sliders
+/// 2. To replace music: Replace files in Assets/Audio/ folder
+/// 3. To add sound effects: Add files to Assets/Audio/SoundEffects/
+/// 4. For detailed audio guide: See Docs/GUIDES/AUDIO_CUSTOMIZATION.md
+/// 
+/// SAFE SETTINGS (You can change these in Inspector):
+/// - Master Volume: 0.0-1.0 (overall game volume)
+/// - Music Volume: 0.0-1.0 (background music volume)
+/// - SFX Volume: 0.0-1.0 (sound effects volume)
+/// - Enable/Disable: Toggle audio on/off
+/// 
+/// DO NOT CHANGE (Internal game logic):
+/// - Audio bus names (Music, SFX, UI)
+/// - Signal connections
+/// - Audio loading methods
 /// </summary>
 public partial class AudioManager : Node
 {
