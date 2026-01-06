@@ -38,6 +38,28 @@ GameFeelManager="*res://Script/GameFeelManager.cs"
 HapticFeedbackManager="*res://Script/HapticFeedbackManager.cs"
 SpeechBubbleManager="*res://Script/SpeechBubbleManager.cs"
 
+# Infrastructure Systems
+AssetLoader="*res://Classes/AssetLoader.cs"
+AssetRegistry="*res://Classes/AssetRegistry.cs"
+SpriteSheetLoader="*res://Classes/SpriteSheetLoader.cs"
+AssetValidationTool="*res://Classes/AssetValidationTool.cs"
+AndroidBuildManager="*res://Classes/AndroidBuildManager.cs"
+IosBuildManager="*res://Classes/IosBuildManager.cs"
+DesktopBuildManager="*res://Classes/DesktopBuildManager.cs"
+BuildValidator="*res://Classes/BuildValidator.cs"
+PrivacyPolicyManager="*res://Classes/PrivacyPolicyManager.cs"
+VersionInfo="*res://Classes/VersionInfo.cs"
+StoreListingManager="*res://Classes/StoreListingManager.cs"
+PerformanceMonitor="*res://Classes/PerformanceMonitor.cs"
+MemoryLeakDetector="*res://Classes/MemoryLeakDetector.cs"
+EnhancedAudioSystem="*res://Classes/EnhancedAudioSystem.cs"
+GameFeelTuningSystem="*res://Classes/GameFeelTuningSystem.cs"
+AnalyticsManager="*res://Classes/AnalyticsManager.cs"
+CrashReporter="*res://Classes/CrashReporter.cs"
+TestingFramework="*res://Classes/TestingFramework.cs"
+DifficultyAnalyzer="*res://Classes/DifficultyAnalyzer.cs"
+ReleaseNotesGenerator="*res://Classes/ReleaseNotesGenerator.cs"
+
 [audio]
 
 buses/default_bus_layout="res://default_bus_layout.tres"
