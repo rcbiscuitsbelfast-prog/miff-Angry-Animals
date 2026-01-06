@@ -30,6 +30,9 @@ public partial class GameHud : Control
     private Button? _quitButton;
     private Label? _scoreLabel;
 
+    private Label? _objectiveLabel;
+    private Label? _storyLabel;
+
     private RageSystem? _rageSystem;
 
     public override void _Ready()
@@ -66,6 +69,44 @@ public partial class GameHud : Control
         UpdateRageBar(0f);
         UpdateComboLabel(0);
         UpdateScoreLabel(0);
+
+        EnsureStoryAndObjectiveLabels();
+    }
+
+    private void EnsureStoryAndObjectiveLabels()
+    {
+        if (_storyLabel == null)
+        {
+            _storyLabel = new Label
+            {
+                Name = "StoryLabel",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Text = string.Empty
+            };
+            _storyLabel.SetAnchorsPreset(LayoutPreset.TopWide);
+            _storyLabel.OffsetTop = 80;
+            _storyLabel.OffsetBottom = 120;
+            _storyLabel.AddThemeFontSizeOverride("font_size", 24);
+            AddChild(_storyLabel);
+        }
+
+        if (_objectiveLabel == null)
+        {
+            _objectiveLabel = new Label
+            {
+                Name = "ObjectiveLabel",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Text = string.Empty
+            };
+            _objectiveLabel.SetAnchorsPreset(LayoutPreset.TopWide);
+            _objectiveLabel.OffsetTop = 120;
+            _objectiveLabel.OffsetBottom = 200;
+            _objectiveLabel.AddThemeFontSizeOverride("font_size", 20);
+            _objectiveLabel.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+            AddChild(_objectiveLabel);
+        }
     }
 
     private void ConnectSignals()
@@ -77,6 +118,7 @@ public partial class GameHud : Control
             SignalManager.Instance.OnScoreUpdated += OnScoreUpdated;
             SignalManager.Instance.OnDestructionScoreUpdated += OnDestructionScoreUpdated;
             SignalManager.Instance.OnLevelCompleted += OnLevelCompleted;
+            SignalManager.Instance.OnObjectivesUpdated += OnObjectivesUpdated;
         }
 
         // Connect to RageSystem for rage/combo updates
@@ -126,6 +168,7 @@ public partial class GameHud : Control
             SignalManager.Instance.OnScoreUpdated -= OnScoreUpdated;
             SignalManager.Instance.OnDestructionScoreUpdated -= OnDestructionScoreUpdated;
             SignalManager.Instance.OnLevelCompleted -= OnLevelCompleted;
+            SignalManager.Instance.OnObjectivesUpdated -= OnObjectivesUpdated;
         }
 
         if (_rageSystem != null)
@@ -199,6 +242,15 @@ public partial class GameHud : Control
     private void OnDestructionScoreUpdated(int score)
     {
         UpdateScoreLabel(score);
+    }
+
+    private void OnObjectivesUpdated(string text)
+    {
+        if (_objectiveLabel == null)
+            return;
+
+        _objectiveLabel.Text = text ?? string.Empty;
+        _objectiveLabel.Visible = !string.IsNullOrWhiteSpace(text);
     }
 
     private void OnLevelCompleted()
@@ -368,6 +420,15 @@ public partial class GameHud : Control
     private void OnRoomStarted(int roomIndex)
     {
         OnLevelStarted();
+
+        if (_storyLabel != null)
+        {
+            var chapter = StoryData.GetChapterForRoomIndex(roomIndex);
+            var subtitle = StoryData.GetLevelSubtitle(roomIndex);
+            _storyLabel.Text = string.IsNullOrWhiteSpace(subtitle) ? chapter.Name : subtitle;
+            _storyLabel.Modulate = chapter.ThemeColor;
+            _storyLabel.Visible = true;
+        }
     }
 
     private void OnRoomCompleted(int roomIndex)

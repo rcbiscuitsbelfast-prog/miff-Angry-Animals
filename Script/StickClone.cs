@@ -55,14 +55,13 @@ public partial class StickClone : CharacterBody2D
         // Initialize animation system
         _animator = new StickCloneAnimator();
         AddChild(_animator);
-    }
 
         // Get reference to current room
         _currentRoom = GetParent()?.GetParent() as RoomBase;
-        
+
         // Find exit area in the scene
         _exitArea = GetNodeOrNull<Area2D>("../ExitArea") ?? GetNodeOrNull<Area2D>("ExitArea");
-        
+
         // Set up collision layers
         CollisionLayer = 1; // StickClone layer
         CollisionMask = 2;  // Environment layer
@@ -335,13 +334,10 @@ public partial class StickClone : CharacterBody2D
                 _animator.PlayAnimation(StickCloneAnimator.AnimState.Idle);
             }
         }
-    }
 
-    // Fallback: Flip sprite based on direction for basic sprites
-    if (_faceSprite != null)
-        {
+        // Fallback: Flip sprite based on direction for basic sprites
+        if (_faceSprite != null)
             _faceSprite.FlipH = _velocity.X < 0;
-        }
     }
 
     private void OnExitAreaBodyEntered(Node2D body)

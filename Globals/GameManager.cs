@@ -9,6 +9,7 @@ public partial class GameManager : Node
     {
         Boot,
         MainMenu,
+        Cutscene,
         InRoom,
         RoomComplete,
         Paused
@@ -80,11 +81,13 @@ public partial class GameManager : Node
         Globals.GotoScene(MainScenePath);
     }
 
-    public static void StartRoom(int roomIndex) => Instance.StartRoomInternal(roomIndex);
+    public static void StartRoom(int roomIndex) => Instance.StartRoomInternal(roomIndex, allowCutscenes: true);
 
     public static void StartRoomByLevelNumber(int levelNumber) => StartRoom(levelNumber - 1);
 
-    private void StartRoomInternal(int roomIndex)
+    internal void StartRoomInternalFromCutscene(int roomIndex) => StartRoomInternal(roomIndex, allowCutscenes: false);
+
+    private void StartRoomInternal(int roomIndex, bool allowCutscenes)
     {
         if (roomIndex < 0 || roomIndex >= Rooms.Length)
         {
@@ -103,6 +106,17 @@ public partial class GameManager : Node
         if (!fullUnlocked && !PlayerProfile.IsRoomUnlocked(roomIndex))
         {
             GD.PushWarning($"StartRoom: room locked {roomIndex}");
+            return;
+        }
+
+        if (allowCutscenes && StoryEventTrigger.Instance != null && StoryEventTrigger.Instance.TryQueueChapterStartCutscene(roomIndex))
+        {
+            CurrentRoomIndex = roomIndex;
+            CurrentProceduralSeed = 0;
+            State = GameState.Cutscene;
+            EmitSignal(SignalName.GameStateChanged, State);
+
+            Globals.GotoScene("res://Scenes/Cutscenes/CutscenePlayer.tscn");
             return;
         }
 
@@ -143,7 +157,7 @@ public partial class GameManager : Node
         if (Instance.CurrentRoomIndex < 0)
             return;
 
-        StartRoom(Instance.CurrentRoomIndex);
+        Instance.StartRoomInternal(Instance.CurrentRoomIndex, allowCutscenes: false);
     }
 
     public static void CompleteRoom() => Instance.CompleteRoomInternal();
@@ -158,6 +172,7 @@ public partial class GameManager : Node
         EmitSignal(SignalName.RoomCompleted, CurrentRoomIndex);
 
         UnlockNextRoom();
+        StoryData.MarkRoomCompleted(CurrentRoomIndex);
         ShowRoomComplete();
     }
 

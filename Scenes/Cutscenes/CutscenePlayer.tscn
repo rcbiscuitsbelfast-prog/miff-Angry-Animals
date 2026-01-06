@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Script/CutscenePlayer.cs" id="1_script"]
+
+[node name="CutscenePlayer" type="CanvasLayer"]
+script = ExtResource("1_script")
+
+[node name="FadeRect" type="ColorRect" parent="."]
+anchors_fill_parent = true
+color = Color(0, 0, 0, 0)
+
+[node name="CutsceneContainer" type="Node" parent="."]
