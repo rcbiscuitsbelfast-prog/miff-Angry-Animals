@@ -97,6 +97,10 @@ public partial class RoomSelection : Control
     private Button? _deterministicSeedButton;
     private Button? _useLastSeedButton;
 
+    // Slingshot type selection UI
+    private OptionButton? _slingshotTypeSelector;
+    private HBoxContainer? _slingshotTypeContainer;
+
     private void PopulateRoomButtons()
     {
         if (_roomsContainer == null || GameManager.Instance == null)
@@ -143,6 +147,9 @@ public partial class RoomSelection : Control
         };
         _proceduralModeToggle.Toggled += OnProceduralModeToggled;
         header.AddChild(_proceduralModeToggle);
+
+        // Add slingshot type selector
+        AddSlingshotTypeSelector(header);
 
         var seedRow = new HBoxContainer
         {
@@ -193,6 +200,57 @@ public partial class RoomSelection : Control
     {
         PlayerProfile.SetProceduralMode(enabled);
         CallDeferred(nameof(PopulateRoomButtons));
+    }
+
+    private void AddSlingshotTypeSelector(VBoxContainer parent)
+    {
+        _slingshotTypeContainer = new HBoxContainer
+        {
+            Name = "SlingshotTypeRow",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+        };
+
+        var typeLabel = new Label
+        {
+            Text = "Slingshot:",
+            Modulate = Colors.Cyan,
+            CustomMinimumSize = new Vector2(100, 0)
+        };
+
+        _slingshotTypeSelector = new OptionButton
+        {
+            Name = "SlingshotTypeSelector",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            CustomMinimumSize = new Vector2(200, 0)
+        };
+
+        // Add slingshot type options
+        _slingshotTypeSelector.AddItem("Catapult", (int)SlingshotType.Catapult);
+        _slingshotTypeSelector.AddItem("Giant Hand", (int)SlingshotType.GiantHand);
+        _slingshotTypeSelector.AddItem("Trebuchet", (int)SlingshotType.Trebuchet);
+        _slingshotTypeSelector.AddItem("Spring", (int)SlingshotType.Spring);
+
+        // Set current selection from PlayerProfile
+        int currentType = PlayerProfile.GetSlingshotType();
+        _slingshotTypeSelector.Selected = Mathf.Clamp(currentType, 0, 3);
+        _slingshotTypeSelector.ItemSelected += OnSlingshotTypeSelected;
+
+        _slingshotTypeContainer.AddChild(typeLabel);
+        _slingshotTypeContainer.AddChild(_slingshotTypeSelector);
+
+        parent.AddChild(_slingshotTypeContainer);
+        parent.AddChild(new HSeparator());
+    }
+
+    private void OnSlingshotTypeSelected(int index)
+    {
+        PlayerProfile.SetSlingshotType(index);
+
+        // Update label if needed
+        if (_slingshotTypeSelector != null)
+        {
+            GD.Print($"Slingshot type changed to: {(SlingshotType)index}");
+        }
     }
 
     private void OnRandomSeedPressed()

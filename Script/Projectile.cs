@@ -72,6 +72,15 @@ public partial class Projectile : RigidBody2D, IPoolable
             {
                 _kickWoodSound.Play();
 
+                // Play impact vocal
+                AudioManager.PlayImpactVocalSfx();
+
+                // Spawn speech bubble for impact
+                if (SpeechBubbleManager.Instance != null)
+                {
+                    SpeechBubbleManager.Instance.OnImpact(LinearVelocity.Length());
+                }
+
                 // Add game feel impact feedback
                 if (GameFeelManager.Instance != null)
                 {

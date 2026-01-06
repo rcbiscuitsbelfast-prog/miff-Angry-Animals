@@ -7,11 +7,22 @@ using Godot;
 public partial class Slingshot : Node2D
 {
     [Signal] public delegate void ProjectileLaunchedEventHandler(Projectile projectile);
-    
+
+    [ExportGroup("Slingshot Configuration")]
     [Export] private InputArea _inputArea;
     [Export] private TrajectoryDrawer _trajectoryDrawer;
     [Export] private Marker2D _projectileHolder;
     [Export] private Marker2D _restPosition;
+    [Export] private Node2D? _visualMesh;
+
+    [ExportGroup("Slingshot Type Settings")]
+    [Export] private SlingshotType _slingshotType = SlingshotType.Catapult;
+
+    [ExportGroup("Animation Settings")]
+    [Export] private float _launchAnimationDuration = 0.3f;
+    [Export] private float _squishScale = 0.7f;
+    [Export] private float _stretchScale = 1.3f;
+
     // Audio now managed by AudioManager globally
     
     private const float IMPULSE_MULT = 20.0f;
@@ -29,8 +40,28 @@ public partial class Slingshot : Node2D
     
     public override void _Ready()
     {
+        // Load slingshot type from PlayerProfile
+        if (PlayerProfile.Instance != null)
+        {
+            _slingshotType = (SlingshotType)PlayerProfile.GetSlingshotType();
+        }
+
         ConnectSignals();
     }
+
+    /// <summary>
+    /// Sets the slingshot type for visual variations.
+    /// Each type has unique particle effects and animations.
+    /// </summary>
+    public void SetSlingshotType(SlingshotType type)
+    {
+        _slingshotType = type;
+    }
+
+    /// <summary>
+    /// Gets the current slingshot type.
+    /// </summary>
+    public SlingshotType GetSlingshotType() => _slingshotType;
     
     public override void _PhysicsProcess(double delta)
     {
@@ -161,8 +192,27 @@ public partial class Slingshot : Node2D
         var audioManager = GetNodeOrNull<AudioManager>("/root/AudioManager");
         audioManager?.PlaySlingshotSound();
 
+        // Play launch vocal
+        AudioManager.PlayLaunchVocalSfx();
+
+        // Trigger slingshot type-specific launch animation
+        PlayLaunchAnimation();
+
+        // Trigger slingshot type-specific particle effects via GameFeelManager
+        if (GameFeelManager.Instance != null)
+        {
+            GameFeelManager.Instance.OnSlingshotLaunched(_slingshotType, _projectileHolder?.GlobalPosition ?? GlobalPosition);
+        }
+
         // Add game feel launch feedback
         GameFeelManager.Instance?.OnProjectileLaunched();
+
+        // Spawn speech bubble on launch if we have a FaceProjectile
+        if (SpeechBubbleManager.Instance != null && _currentProjectile is FaceProjectile faceProjectile)
+        {
+            SpeechBubbleManager.Instance.SetCurrentProjectile(faceProjectile);
+            SpeechBubbleManager.Instance.OnLaunch();
+        }
 
         _currentProjectile.Launch(impulse);
 
@@ -170,5 +220,54 @@ public partial class Slingshot : Node2D
         SignalManager.EmitOnAttemptMade();
 
         _currentProjectile = null;
+    }
+
+    private void PlayLaunchAnimation()
+    {
+        if (_visualMesh == null) return;
+
+        var tween = CreateTween();
+        tween.SetParallel(true);
+
+        // Different animations based on slingshot type
+        switch (_slingshotType)
+        {
+            case SlingshotType.GiantHand:
+                // Giant hand squishes down then bounces back
+                tween.TweenProperty(_visualMesh, "scale", new Vector2(_squishScale, _squishScale), _launchAnimationDuration * 0.3f)
+                    .SetTrans(Tween.TransitionType.Elastic);
+                tween.TweenProperty(_visualMesh, "scale", Vector2.One, _launchAnimationDuration * 0.7f)
+                    .SetTrans(Tween.TransitionType.Elastic)
+                    .SetDelay(_launchAnimationDuration * 0.3f);
+                break;
+
+            case SlingshotType.Trebuchet:
+                // Trebuchet spins/rotates slightly
+                tween.TweenProperty(_visualMesh, "rotation", Mathf.DegToRad(-15f), _launchAnimationDuration * 0.4f)
+                    .SetTrans(Tween.TransitionType.Back);
+                tween.TweenProperty(_visualMesh, "rotation", 0f, _launchAnimationDuration * 0.6f)
+                    .SetTrans(Tween.TransitionType.Bounce)
+                    .SetDelay(_launchAnimationDuration * 0.4f);
+                break;
+
+            case SlingshotType.Spring:
+                // Spring compresses and releases
+                tween.TweenProperty(_visualMesh, "scale", new Vector2(_stretchScale, _squishScale), _launchAnimationDuration * 0.25f)
+                    .SetTrans(Tween.TransitionType.Quad);
+                tween.TweenProperty(_visualMesh, "scale", Vector2.One, _launchAnimationDuration * 0.75f)
+                    .SetTrans(Tween.TransitionType.Bounce)
+                    .SetDelay(_launchAnimationDuration * 0.25f);
+                break;
+
+            case SlingshotType.Catapult:
+            default:
+                // Classic catapult - slight stretch then bounce back
+                tween.TweenProperty(_visualMesh, "scale", new Vector2(_stretchScale, _squishScale), _launchAnimationDuration * 0.2f)
+                    .SetTrans(Tween.TransitionType.Quad);
+                tween.TweenProperty(_visualMesh, "scale", Vector2.One, _launchAnimationDuration * 0.8f)
+                    .SetTrans(Tween.TransitionType.Elastic)
+                    .SetDelay(_launchAnimationDuration * 0.2f);
+                break;
+        }
     }
 }
