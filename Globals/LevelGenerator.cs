@@ -30,7 +30,7 @@ public partial class LevelGenerator : Node
     }
 
     /// <summary>
-    /// Cup configuration for procedural spawning.
+    /// Cup configuration for procedural spawning with material properties.
     /// </summary>
     public readonly struct CupConfig
     {
@@ -38,13 +38,15 @@ public partial class LevelGenerator : Node
         public readonly float Rotation;
         public readonly float Scale;
         public readonly bool IsPremium;
+        public readonly MaterialProperties Material;
 
-        public CupConfig(Vector2 position, float rotation, float scale, bool isPremium)
+        public CupConfig(Vector2 position, float rotation, float scale, bool isPremium, MaterialProperties material)
         {
             Position = position;
             Rotation = rotation;
             Scale = scale;
             IsPremium = isPremium;
+            Material = material;
         }
     }
 
@@ -166,6 +168,7 @@ public partial class LevelGenerator : Node
     /// <summary>
     /// Generates cup configurations for procedural spawning.
     /// Uses the provided seed to ensure deterministic replay.
+    /// Now includes material assignment based on difficulty progression.
     /// </summary>
     public static CupConfig[] GenerateCups(int roomNumber, int targetCupCount, int seed)
     {
@@ -200,7 +203,16 @@ public partial class LevelGenerator : Node
             position.X = Mathf.Clamp(position.X, SlingshotSafeX + 50f, ExitDoorSafeX - 100f);
 
             bool isPremium = roomNumber > 20;
-            cups[i] = new CupConfig(position, rotation, scale, isPremium);
+            
+            // Get material appropriate for difficulty level
+            MaterialProperties material = MaterialProperties.GetMaterialForDifficulty(roomNumber, random);
+            
+            cups[i] = new CupConfig(position, rotation, scale, isPremium, material);
+            
+            // Debug logging for material assignment
+            GD.Print($"Generated cup {i + 1}/{targetCupCount} for room {roomNumber}: " +
+                    $"Position={position}, Material={material.Material}, Hardness={material.Hardness}, " +
+                    $"HitsToDestroy={material.HitsToDestroy}");
         }
 
         return cups;
@@ -214,6 +226,52 @@ public partial class LevelGenerator : Node
     {
         int seed = seedOverride ?? CalculateSeed(roomNumber);
         return GenerateCups(roomNumber, targetCupCount, seed);
+    }
+
+    /// <summary>
+    /// Gets a material appropriate for the given difficulty level.
+    /// Easier levels favor softer materials, harder levels include harder materials.
+    /// </summary>
+    /// <param name="roomNumber">The room/level number for difficulty scaling.</param>
+    /// <param name="random">Random number generator to use.</param>
+    /// <returns>Material appropriate for the difficulty level.</returns>
+    public static MaterialProperties GetMaterialForDifficulty(int roomNumber, Random random)
+    {
+        // Define difficulty tiers based on room progression
+        MaterialType[] easyMaterials = { MaterialType.Wood, MaterialType.Stone };
+        MaterialType[] mediumMaterials = { MaterialType.Stone, MaterialType.Brick };
+        MaterialType[] hardMaterials = { MaterialType.Brick, MaterialType.Iron };
+        MaterialType[] extremeMaterials = { MaterialType.Iron, MaterialType.Diamond };
+
+        MaterialType[] availableMaterials;
+
+        if (roomNumber <= 20)
+        {
+            // Early levels (1-20): Mostly wood and stone for gentle introduction
+            // Distribution: 70% Wood, 30% Stone
+            availableMaterials = (random.NextDouble() < 0.7) ? easyMaterials : new[] { MaterialType.Stone };
+        }
+        else if (roomNumber <= 50)
+        {
+            // Mid-early levels (21-50): Stone and brick for skill progression
+            // Distribution: 40% Stone, 60% Brick
+            availableMaterials = (random.NextDouble() < 0.4) ? new[] { MaterialType.Stone } : mediumMaterials;
+        }
+        else if (roomNumber <= 80)
+        {
+            // Mid-late levels (51-80): Brick and iron for challenge
+            // Distribution: 30% Brick, 70% Iron
+            availableMaterials = (random.NextDouble() < 0.3) ? new[] { MaterialType.Brick } : hardMaterials;
+        }
+        else
+        {
+            // Late levels (81+): Iron and diamond for expert players
+            // Distribution: 50% Iron, 50% Diamond
+            availableMaterials = extremeMaterials;
+        }
+
+        // Randomly select from available materials for this difficulty
+        return MaterialProperties.GetMaterialProperties(availableMaterials[random.Next(availableMaterials.Length)]);
     }
 
     private static (Vector2 Center, float Spread, int Count)[] DefineSpawnZones(int cupCount)

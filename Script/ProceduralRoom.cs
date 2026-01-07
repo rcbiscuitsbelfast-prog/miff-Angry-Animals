@@ -87,6 +87,13 @@ public partial class ProceduralRoom : RoomBase
         cupInstance.Rotation = config.Rotation;
         cupInstance.Scale = new Vector2(config.Scale, config.Scale);
 
+        // Apply material properties to the cup
+        if (cupInstance is BreakableObstacle breakableObstacle)
+        {
+            breakableObstacle.SetMaterial(config.Material);
+            GD.Print($"Applied material {config.Material.Material} to cup {index + 1} at position {config.Position}");
+        }
+
         _obstaclesParent!.AddChild(cupInstance);
     }
 }
