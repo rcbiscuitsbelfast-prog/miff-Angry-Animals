@@ -30,9 +30,9 @@ public partial class GameHud : Control
     private Button? _quitButton;
     private Label? _scoreLabel;
 
+<<<<<<< HEAD
     private Label? _objectiveLabel;
     private Label? _storyLabel;
-
     private RageSystem? _rageSystem;
 
     public override void _Ready()
@@ -107,6 +107,8 @@ public partial class GameHud : Control
             _objectiveLabel.AutowrapMode = TextServer.AutowrapMode.WordSmart;
             AddChild(_objectiveLabel);
         }
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     }
 
     private void ConnectSignals()
@@ -118,7 +120,10 @@ public partial class GameHud : Control
             SignalManager.Instance.OnScoreUpdated += OnScoreUpdated;
             SignalManager.Instance.OnDestructionScoreUpdated += OnDestructionScoreUpdated;
             SignalManager.Instance.OnLevelCompleted += OnLevelCompleted;
+<<<<<<< HEAD
             SignalManager.Instance.OnObjectivesUpdated += OnObjectivesUpdated;
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
         }
 
         // Connect to RageSystem for rage/combo updates
@@ -168,7 +173,10 @@ public partial class GameHud : Control
             SignalManager.Instance.OnScoreUpdated -= OnScoreUpdated;
             SignalManager.Instance.OnDestructionScoreUpdated -= OnDestructionScoreUpdated;
             SignalManager.Instance.OnLevelCompleted -= OnLevelCompleted;
+<<<<<<< HEAD
             SignalManager.Instance.OnObjectivesUpdated -= OnObjectivesUpdated;
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
         }
 
         if (_rageSystem != null)
@@ -244,6 +252,7 @@ public partial class GameHud : Control
         UpdateScoreLabel(score);
     }
 
+<<<<<<< HEAD
     private void OnObjectivesUpdated(string text)
     {
         if (_objectiveLabel == null)
@@ -253,6 +262,8 @@ public partial class GameHud : Control
         _objectiveLabel.Visible = !string.IsNullOrWhiteSpace(text);
     }
 
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     private void OnLevelCompleted()
     {
         HideBannerAd();
@@ -420,6 +431,7 @@ public partial class GameHud : Control
     private void OnRoomStarted(int roomIndex)
     {
         OnLevelStarted();
+<<<<<<< HEAD
 
         if (_storyLabel != null)
         {
@@ -429,6 +441,8 @@ public partial class GameHud : Control
             _storyLabel.Modulate = chapter.ThemeColor;
             _storyLabel.Visible = true;
         }
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     }
 
     private void OnRoomCompleted(int roomIndex)

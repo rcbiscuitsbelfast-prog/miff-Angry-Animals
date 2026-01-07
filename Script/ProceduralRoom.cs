@@ -87,6 +87,7 @@ public partial class ProceduralRoom : RoomBase
         cupInstance.Rotation = config.Rotation;
         cupInstance.Scale = new Vector2(config.Scale, config.Scale);
 
+<<<<<<< HEAD
         // Apply material properties to the cup
         if (cupInstance is BreakableObstacle breakableObstacle)
         {
@@ -94,6 +95,8 @@ public partial class ProceduralRoom : RoomBase
             GD.Print($"Applied material {config.Material.Material} to cup {index + 1} at position {config.Position}");
         }
 
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
         _obstaclesParent!.AddChild(cupInstance);
     }
 }

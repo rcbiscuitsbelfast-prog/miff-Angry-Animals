@@ -66,7 +66,6 @@ public partial class SignalManager : Node
     /// </summary>
     [Signal] public delegate void OnObjectivesUpdatedEventHandler(string text);
 
-
     // Called when the node enters the scene tree for the first time.
     public override void _Ready() => Instance = this;
 

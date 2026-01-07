@@ -273,7 +273,6 @@ public partial class LevelGenerator : Node
         // Randomly select from available materials for this difficulty
         return MaterialProperties.GetMaterialProperties(availableMaterials[random.Next(availableMaterials.Length)]);
     }
-
     private static (Vector2 Center, float Spread, int Count)[] DefineSpawnZones(int cupCount)
     {
         return cupCount switch
