@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://Script/SixToSevenMinigame.cs" id="1_script"]
+[ext_resource type="Script" path="res://Scripts/SixToSevenMinigame.cs" id="1_script"]
 
 [node name="SixToSevenMinigame" type="Control"]
 layout_mode = 3

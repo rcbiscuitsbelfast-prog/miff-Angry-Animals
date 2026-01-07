@@ -5,7 +5,7 @@ NPCs are optional story actors you can place directly inside level scenes (`Scen
 ## Placing an NPC
 1. Open a level scene (example: `Scenes/Levels/Room010.tscn`).
 2. Add a new node (recommended: **Node2D**).
-3. Attach the script: `res://Script/NPC.cs`
+3. Attach the script: `res://Scripts/NPC.cs`
 4. Add a face sprite under the NPC:
    - Add a **Sprite2D** named anything you like
    - In the NPC inspector, set **FaceSpritePath** to that sprite

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://Script/StickClone.cs" id="1_script"]
+[ext_resource type="Script" path="res://Scripts/StickClone.cs" id="1_script"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 15.0

@@ -487,7 +487,7 @@
    ```
    Problem: Scene file references missing resources at top
    
-   [ext_resource type="Script" path="res://Script/Missing.cs"]
+   [ext_resource type="Script" path="res://Scripts/Missing.cs"]
    
    Solution:
    - Delete that ext_resource line

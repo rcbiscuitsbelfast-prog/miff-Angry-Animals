@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3]
 
-[ext_resource type="Script" path="res://Script/ProceduralRoom.cs" id="1_script"]
+[ext_resource type="Script" path="res://Scripts/ProceduralRoom.cs" id="1_script"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/Slingshot.tscn" id="2_sling"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/ProjectilesLoader.tscn" id="3_loader"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/CameraFocus.tscn" id="4_cam"]
