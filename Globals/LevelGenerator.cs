@@ -38,17 +38,23 @@ public partial class LevelGenerator : Node
         public readonly float Rotation;
         public readonly float Scale;
         public readonly bool IsPremium;
-        public readonly MaterialProperties Material;
+        public readonly MaterialType Material;
+        public readonly ObstaclePattern Pattern;
+        public readonly float DifficultyCoefficient;
 
-        public CupConfig(Vector2 position, float rotation, float scale, bool isPremium, MaterialProperties material)
+        public CupConfig(Vector2 position, float rotation, float scale, bool isPremium, MaterialType material, ObstaclePattern pattern, float difficultyCoefficient)
         {
             Position = position;
             Rotation = rotation;
             Scale = scale;
             IsPremium = isPremium;
             Material = material;
+            Pattern = pattern;
+            DifficultyCoefficient = difficultyCoefficient;
         }
     }
+
+    public enum ObstaclePattern { Tower, Wall, Scattered }
 
     // Safe zone boundaries (keep clear for gameplay)
     private const float SlingshotSafeX = 300f;
@@ -66,9 +72,54 @@ public partial class LevelGenerator : Node
     /// </summary>
     public static int CalculateSeed(int roomNumber)
     {
-        // Simple hash: room number * prime + offset
-        // This ensures the same room always generates the same layout
-        return roomNumber * 73856093 ^ 19349663;
+        return CreateSeedFromParameters(roomNumber);
+    }
+
+    /// <summary>
+    /// Creates a deterministic seed from parameters.
+    /// </summary>
+    public static int CreateSeedFromParameters(int roomNumber, int customLayout = -1, int materialVariant = -1)
+    {
+        int layout = customLayout != -1 ? customLayout : (roomNumber % 3);
+        int variant = materialVariant != -1 ? materialVariant : (roomNumber % 100);
+        
+        // Encode into 32-bit int
+        // Bits 0-15: Room Number
+        // Bits 16-17: Layout (Pattern)
+        // Bits 18-27: Variant
+        int seed = (roomNumber & 0xFFFF) | ((layout & 0x3) << 16) | ((variant & 0x3FF) << 18);
+        return seed;
+    }
+
+    /// <summary>
+    /// Decodes a seed into its component parameters.
+    /// </summary>
+    public static bool TryDecodeSeedToParameters(int seed, out int roomNumber, out int layout, out int variant)
+    {
+        roomNumber = seed & 0xFFFF;
+        layout = (seed >> 16) & 0x3;
+        variant = (seed >> 18) & 0x3FF;
+        return true;
+    }
+
+    /// <summary>
+    /// Encodes a room as a shareable code (Base64 preparation).
+    /// </summary>
+    public static string EncodeRoomAsShareCode(int roomNumber)
+    {
+        int seed = CreateSeedFromParameters(roomNumber);
+        byte[] bytes = BitConverter.GetBytes(seed);
+        return Convert.ToBase64String(bytes).Replace("=", "");
+    }
+
+    /// <summary>
+    /// Gets the obstacle pattern for a room based on its seed.
+    /// </summary>
+    public static ObstaclePattern GetPatternForRoom(int roomNumber)
+    {
+        int seed = CreateSeedFromParameters(roomNumber);
+        TryDecodeSeedToParameters(seed, out _, out int layout, out _);
+        return (ObstaclePattern)layout;
     }
 
     /// <summary>
@@ -149,73 +200,119 @@ public partial class LevelGenerator : Node
     }
 
     /// <summary>
-    /// Gets the number of cups for the specified room.
+    /// Gets the number of cups for the specified room, balanced by material hardness.
     /// </summary>
     public static int GetCupCountForRoom(int roomNumber)
     {
-        if (roomNumber <= 20)
-            return 3; // Free tier
+        int maxObstacles = DifficultyBalancer.GetRecommendedMaxObstacles(roomNumber);
+        
+        // Base count scales with room progression
+        int baseCount = 3 + (roomNumber / 10);
+        
+        // Ensure it doesn't exceed recommended max for hardness
+        return Math.Clamp(baseCount, 1, maxObstacles);
+    }
 
-        if (roomNumber <= 50)
-            return 4; // Early premium
+    /// <summary>
+    /// Generates cup configurations with materials and difficulty balancing.
+    /// </summary>
+    public static CupConfig[] GenerateCupsWithMaterials(int roomNumber, int cupCount, int seed)
+    {
+        var random = new Random(seed);
+        TryDecodeSeedToParameters(seed, out _, out int layoutIndex, out int variant);
+        
+        ObstaclePattern pattern = (ObstaclePattern)layoutIndex;
+        MaterialType[] materials = MaterialDistributor.GetMaterialsForRoom(roomNumber, cupCount);
+        
+        // Sort materials by hardness for patterns that benefit from it
+        var sortedByHardness = materials.OrderBy(m => (int)m).ToArray();
+        
+        var cups = new CupConfig[cupCount];
+        float difficultyCoeff = DifficultyBalancer.CalculateRoomDifficulty(roomNumber).OverallScore;
 
-        if (roomNumber <= 75)
-            return 5; // Mid premium
+        switch (pattern)
+        {
+            case ObstaclePattern.Tower:
+                GenerateTowerPattern(cups, roomNumber, cupCount, sortedByHardness, random, difficultyCoeff);
+                break;
+            case ObstaclePattern.Wall:
+                GenerateWallPattern(cups, roomNumber, cupCount, materials, random, difficultyCoeff);
+                break;
+            case ObstaclePattern.Scattered:
+                GenerateScatteredPattern(cups, roomNumber, cupCount, materials, random, difficultyCoeff);
+                break;
+        }
 
-        return 6; // Late premium (challenge)
+        return cups;
+    }
+
+    private static void GenerateTowerPattern(CupConfig[] cups, int roomNumber, int cupCount, MaterialType[] materials, Random random, float difficulty)
+    {
+        float centerX = (SlingshotSafeX + ExitDoorSafeX) / 2f + (float)(random.NextDouble() - 0.5) * 100f;
+        float baseY = FloorY - 40f;
+        float verticalSpacing = 60f;
+
+        for (int i = 0; i < cupCount; i++)
+        {
+            // Tower pattern: single tall stack, mostly soft materials at bottom (if sorted)
+            // Note: materials here are sorted by hardness, so materials[0] is softest.
+            Vector2 pos = new Vector2(centerX + (float)(random.NextDouble() - 0.5) * 20f, baseY - (i * verticalSpacing));
+            cups[i] = new CupConfig(pos, (float)(random.NextDouble() * 0.1 - 0.05), 1.0f, roomNumber > 20, materials[i], ObstaclePattern.Tower, difficulty);
+        }
+    }
+
+    private static void GenerateWallPattern(CupConfig[] cups, int roomNumber, int cupCount, MaterialType[] materials, Random random, float difficulty)
+    {
+        float startX = SlingshotSafeX + 100f;
+        float endX = ExitDoorSafeX - 100f;
+        float width = endX - startX;
+        float spacing = width / (cupCount + 1);
+
+        for (int i = 0; i < cupCount; i++)
+        {
+            // Wall pattern: horizontal barrier, mixed hardness
+            float x = startX + (i + 1) * spacing + (float)(random.NextDouble() - 0.5) * 30f;
+            float softness = MaterialDistributor.GetDifficultySoftness(roomNumber);
+            float y = FloorY - 40f - (1.0f - softness) * 50f + (float)(random.NextDouble() - 0.5) * 40f;
+            
+            cups[i] = new CupConfig(new Vector2(x, y), (float)(random.NextDouble() * 0.2 - 0.1), 1.0f, roomNumber > 20, materials[i], ObstaclePattern.Wall, difficulty);
+        }
+    }
+
+    private static void GenerateScatteredPattern(CupConfig[] cups, int roomNumber, int cupCount, MaterialType[] materials, Random random, float difficulty)
+    {
+        for (int i = 0; i < cupCount; i++)
+        {
+            MaterialType mat = materials[i];
+            Vector2 pos;
+            bool isHard = (int)mat >= (int)MaterialType.Iron;
+            
+            if (isHard)
+            {
+                // Hard materials: cluster near center, slightly elevated
+                float centerX = (SlingshotSafeX + ExitDoorSafeX) / 2f;
+                pos = new Vector2(centerX + (float)(random.NextDouble() - 0.5) * 200f, FloorY - 150f - (float)random.NextDouble() * 100f);
+            }
+            else
+            {
+                // Soft materials: spread across room, varied heights
+                pos = new Vector2(
+                    Mathf.Clamp(SlingshotSafeX + 50f + (float)random.NextDouble() * (ExitDoorSafeX - SlingshotSafeX - 150f), SlingshotSafeX + 50f, ExitDoorSafeX - 100f),
+                    FloorY - 80f - (float)random.NextDouble() * 200f
+                );
+            }
+            
+            cups[i] = new CupConfig(pos, (float)(random.NextDouble() * 0.4 - 0.2), 1.0f, roomNumber > 20, mat, ObstaclePattern.Scattered, difficulty);
+        }
     }
 
     /// <summary>
     /// Generates cup configurations for procedural spawning.
     /// Uses the provided seed to ensure deterministic replay.
-    /// Now includes material assignment based on difficulty progression.
     /// </summary>
     public static CupConfig[] GenerateCups(int roomNumber, int targetCupCount, int seed)
     {
-        var random = new Random(seed);
-        var cups = new CupConfig[targetCupCount];
-
-        var spawnZones = DefineSpawnZones(targetCupCount);
-
-        for (int i = 0; i < targetCupCount; i++)
-        {
-            var zone = spawnZones[i];
-            Vector2 position;
-            float rotation;
-            float scale;
-
-            float offsetX = (float)(random.NextDouble() - 0.5) * zone.Spread;
-            float offsetY = (float)(random.NextDouble() - 0.5) * zone.Spread;
-            position = zone.Center + new Vector2(offsetX, offsetY);
-
-            if (zone.Count > 1)
-            {
-                rotation = (float)(random.NextDouble() * 0.3 - 0.15);
-                scale = 0.9f + (float)random.NextDouble() * 0.2f;
-            }
-            else
-            {
-                rotation = (float)(random.NextDouble() * 0.2 - 0.1);
-                scale = 0.95f + (float)random.NextDouble() * 0.1f;
-            }
-
-            position.Y = Mathf.Max(position.Y, FloorY - 80f);
-            position.X = Mathf.Clamp(position.X, SlingshotSafeX + 50f, ExitDoorSafeX - 100f);
-
-            bool isPremium = roomNumber > 20;
-            
-            // Get material appropriate for difficulty level
-            MaterialProperties material = MaterialProperties.GetMaterialForDifficulty(roomNumber, random);
-            
-            cups[i] = new CupConfig(position, rotation, scale, isPremium, material);
-            
-            // Debug logging for material assignment
-            GD.Print($"Generated cup {i + 1}/{targetCupCount} for room {roomNumber}: " +
-                    $"Position={position}, Material={material.Material}, Hardness={material.Hardness}, " +
-                    $"HitsToDestroy={material.HitsToDestroy}");
-        }
-
-        return cups;
+        return GenerateCupsWithMaterials(roomNumber, targetCupCount, seed);
     }
 
     /// <summary>
@@ -226,100 +323,6 @@ public partial class LevelGenerator : Node
     {
         int seed = seedOverride ?? CalculateSeed(roomNumber);
         return GenerateCups(roomNumber, targetCupCount, seed);
-    }
-
-    /// <summary>
-    /// Gets a material appropriate for the given difficulty level.
-    /// Easier levels favor softer materials, harder levels include harder materials.
-    /// </summary>
-    /// <param name="roomNumber">The room/level number for difficulty scaling.</param>
-    /// <param name="random">Random number generator to use.</param>
-    /// <returns>Material appropriate for the difficulty level.</returns>
-    public static MaterialProperties GetMaterialForDifficulty(int roomNumber, Random random)
-    {
-        // Define difficulty tiers based on room progression
-        MaterialType[] easyMaterials = { MaterialType.Wood, MaterialType.Stone };
-        MaterialType[] mediumMaterials = { MaterialType.Stone, MaterialType.Brick };
-        MaterialType[] hardMaterials = { MaterialType.Brick, MaterialType.Iron };
-        MaterialType[] extremeMaterials = { MaterialType.Iron, MaterialType.Diamond };
-
-        MaterialType[] availableMaterials;
-
-        if (roomNumber <= 20)
-        {
-            // Early levels (1-20): Mostly wood and stone for gentle introduction
-            // Distribution: 70% Wood, 30% Stone
-            availableMaterials = (random.NextDouble() < 0.7) ? easyMaterials : new[] { MaterialType.Stone };
-        }
-        else if (roomNumber <= 50)
-        {
-            // Mid-early levels (21-50): Stone and brick for skill progression
-            // Distribution: 40% Stone, 60% Brick
-            availableMaterials = (random.NextDouble() < 0.4) ? new[] { MaterialType.Stone } : mediumMaterials;
-        }
-        else if (roomNumber <= 80)
-        {
-            // Mid-late levels (51-80): Brick and iron for challenge
-            // Distribution: 30% Brick, 70% Iron
-            availableMaterials = (random.NextDouble() < 0.3) ? new[] { MaterialType.Brick } : hardMaterials;
-        }
-        else
-        {
-            // Late levels (81+): Iron and diamond for expert players
-            // Distribution: 50% Iron, 50% Diamond
-            availableMaterials = extremeMaterials;
-        }
-
-        // Randomly select from available materials for this difficulty
-        return MaterialProperties.GetMaterialProperties(availableMaterials[random.Next(availableMaterials.Length)]);
-    }
-
-    private static (Vector2 Center, float Spread, int Count)[] DefineSpawnZones(int cupCount)
-    {
-        return cupCount switch
-        {
-            3 =>
-            [
-                (new Vector2(450f, 480f), 40f, 1),
-                (new Vector2(600f, 480f), 40f, 1),
-                (new Vector2(750f, 480f), 40f, 1)
-            ],
-            4 =>
-            [
-                (new Vector2(450f, 480f), 35f, 1),
-                (new Vector2(550f, 480f), 35f, 1),
-                (new Vector2(650f, 480f), 35f, 1),
-                (new Vector2(750f, 480f), 35f, 1)
-            ],
-            5 =>
-            [
-                (new Vector2(400f, 480f), 30f, 1),
-                (new Vector2(500f, 480f), 30f, 1),
-                (new Vector2(600f, 480f), 30f, 1),
-                (new Vector2(700f, 480f), 30f, 1),
-                (new Vector2(800f, 480f), 30f, 1)
-            ],
-            6 =>
-            [
-                (new Vector2(400f, 480f), 50f, 2),
-                (new Vector2(550f, 480f), 30f, 1),
-                (new Vector2(650f, 480f), 30f, 1),
-                (new Vector2(800f, 480f), 50f, 2)
-            ],
-            _ => GenerateDynamicZones(cupCount)
-        };
-    }
-
-    private static (Vector2 Center, float Spread, int Count)[] GenerateDynamicZones(int cupCount)
-    {
-        var zones = new (Vector2, float, int)[cupCount];
-        float spacing = 300f / cupCount;
-        float startX = 450f;
-
-        for (int i = 0; i < cupCount; i++)
-            zones[i] = (new Vector2(startX + i * spacing, 480f), 30f, 1);
-
-        return zones;
     }
 
     /// <summary>
