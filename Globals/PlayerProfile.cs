@@ -124,13 +124,10 @@ public partial class PlayerProfile : Node
 
     public int HighestUnlockedRoomIndex { get; private set; }
 
-<<<<<<< HEAD
     public int HighestUnlockedChapterIndex { get; private set; }
     private HashSet<int> _completedChapters = new();
     private HashSet<string> _storyFlagsSeen = new();
 
-=======
->>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     public float CurrentRage { get; private set; }
     public int CurrentCombo { get; private set; }
 
@@ -208,7 +205,6 @@ public partial class PlayerProfile : Node
 
     public static bool IsRoomUnlocked(int roomIndex) => roomIndex <= Instance.HighestUnlockedRoomIndex;
 
-<<<<<<< HEAD
     public void UnlockChapter(int chapterIndex)
     {
         if (chapterIndex <= HighestUnlockedChapterIndex)
@@ -244,17 +240,11 @@ public partial class PlayerProfile : Node
             Save();
     }
 
-=======
->>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     public void Save()
     {
         var root = new JObject
         {
-<<<<<<< HEAD
             ["version"] = 3,
-=======
-            ["version"] = 2,
->>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
             ["profile_name"] = PlayerName,
             ["is_full_game_unlocked"] = IsFullGameUnlocked,
             ["use_procedural_levels"] = UseProceduralLevels,
@@ -262,15 +252,12 @@ public partial class PlayerProfile : Node
             ["last_procedural_level_number"] = LastProceduralLevelNumber,
             ["face_image_path"] = FaceImagePath,
             ["highest_unlocked_room_index"] = HighestUnlockedRoomIndex,
-<<<<<<< HEAD
             ["story"] = new JObject
             {
                 ["highest_unlocked_chapter_index"] = HighestUnlockedChapterIndex,
                 ["completed_chapters"] = JArray.FromObject(_completedChapters.ToList()),
                 ["seen_flags"] = JArray.FromObject(_storyFlagsSeen.ToList())
             },
-=======
->>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
             ["accessibility"] = new JObject
             {
                 ["colorblind_mode"] = ColorblindMode,
@@ -315,12 +302,9 @@ public partial class PlayerProfile : Node
             if (!FileAccess.FileExists(ProfilePath))
             {
                 HighestUnlockedRoomIndex = 0;
-<<<<<<< HEAD
                 HighestUnlockedChapterIndex = 0;
                 _completedChapters = new HashSet<int>();
                 _storyFlagsSeen = new HashSet<string>();
-=======
->>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
                 Save();
                 return;
             }
@@ -361,7 +345,6 @@ public partial class PlayerProfile : Node
                 ?? ReadInt(root, "HighestUnlockedRoomIndex")
                 ?? 0);
 
-<<<<<<< HEAD
             var storyToken = root["story"];
             if (storyToken is JObject story)
             {
@@ -383,8 +366,6 @@ public partial class PlayerProfile : Node
                 _storyFlagsSeen = new HashSet<string>();
             }
 
-=======
->>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
             var accessibilityToken = root["accessibility"];
             if (accessibilityToken is JObject accessibility)
             {
