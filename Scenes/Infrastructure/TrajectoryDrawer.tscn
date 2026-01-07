@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://Script/TrajectoryDrawer.cs" id="1_script"]
+[ext_resource type="Script" path="res://Scripts/TrajectoryDrawer.cs" id="1_script"]
 
 [sub_resource type="Gradient" id="Gradient_1"]
 colors = PackedColorArray(1, 0, 0, 1, 1, 1, 0, 1)

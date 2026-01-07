@@ -69,7 +69,7 @@ All 100 room files are **identical in structure** - only the `_targetScore` para
 
 #### 3. **Missing Cup Scene Details**
 The Cup.tscn references:
-- `res://Script/Cup.cs` ✅
+- `res://Scripts/Cup.cs` ✅
 - Vanish animation ✅
 - AudioStreamPlayer2D (no audio file specified) ⚠️
 

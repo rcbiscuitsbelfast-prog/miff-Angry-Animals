@@ -284,7 +284,7 @@ res:// = project folder root
 res://Assets/Audio/ = audio files
 res://Assets/Sprites/ = graphics
 res://Scenes/Levels/ = level scenes
-res://Script/ = C# scripts
+res://Scripts/ = C# scripts
 user:// = user data (save files, per device)
 ```
 
