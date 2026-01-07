@@ -2,9 +2,10 @@ using Godot;
 
 /// <summary>
 /// Represents a destructible cup object in the level.
+/// Uses the new BreakableObstacle system for material-based damage.
 /// Plays an animation before being destroyed.
 /// </summary>
-public partial class Cup : DestructibleProp
+public partial class Cup : BreakableObstacle
 {
     public const string GROUP_NAME = "cup";
 
@@ -13,24 +14,13 @@ public partial class Cup : DestructibleProp
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
-        // Initialize base DestructibleProp
+        // Initialize base BreakableObstacle (which includes DestructibleProp)
         base._Ready();
         
         // Ensure some defaults if not set
-        if (MaxHp <= 0) MaxHp = 10; // Default cup HP
-        CurrentHp = MaxHp; // Reset CurrentHp as DestructibleProp._Ready might have run before we set MaxHp if we set it here. 
-        // Actually base._Ready() sets CurrentHp = MaxHp.
-        // If MaxHp was 0 from export defaults, then CurrentHp is 0. 
-        // We should set MaxHp before base._Ready if possible, or reset CurrentHp.
-        // But _Ready order is Base then Derived. So base._Ready() runs first.
+        if (MaxHp <= 0) MaxHp = Material.HitsToDestroy * 10; // Use material-based HP
         
-        if (MaxHp == 0 || MaxHp == 100) // If default 100 from base or 0
-        {
-             // Maybe we want specific cup defaults?
-             // Let's rely on Editor values, but ensure it's not 0.
-        }
-
-        //Connects the vanish animation to its destruction event.
+        // Connects the vanish animation to its destruction event.
         if (_vanishAnimation != null)
             _vanishAnimation.AnimationFinished += OnAnimationFinished;
     }
@@ -40,48 +30,70 @@ public partial class Cup : DestructibleProp
         // Emit legacy signal
         SignalManager.EmitOnCupDestroyed();
         
-        // Base Die() emits PropDestroyed, spawns rubble, plays sound, and QueueFrees.
-        // We want to delay QueueFree until animation finishes.
-        
+        // Emit material-specific destruction information
+        GD.Print($"Cup destroyed! Material: {Material.Material}, Total hits taken: {CurrentHitsTaken}");
+
+        // Signal other systems about the destruction with material info
         SignalManager.EmitOnPropDestroyed(this, ScoreValue);
         ScoreManager.AddScore(ScoreValue);
-        SpawnRubble(); // Use base helper
         
-        // Play sound if available (handled by helper or manually?)
-        // DestructibleProp.Die has complex logic for sound/effect.
-        // Let's duplicate some or call a helper?
-        // DestructibleProp.Die() is:
-        /*
-        SignalManager.EmitOnPropDestroyed(this, ScoreValue);
-        if (DestructionEffectScene != null) ...
-        else { SpawnRubble(); if (DestructionSound != null) ... }
-        QueueFree();
-        */
-        
-        // We want to override the visual part (Animation instead of EffectScene) but keep score/rubble.
-        
-        // We already emitted score and spawned rubble above.
-        
+        // Spawn material-appropriate rubble
+        SpawnMaterialRubble();
+
+        // Play destruction sound
+        if (DestructionSound != null)
+        {
+            var audio = GetNodeOrNull<AudioStreamPlayer2D>("AudioStreamPlayer2D");
+            if (audio != null)
+            {
+                audio.Stream = DestructionSound;
+                audio.Play();
+            }
+        }
+
+        // Play vanish animation if available
         if (_vanishAnimation != null)
         {
-             _vanishAnimation.Play("vanish");
-             // Sound?
-             if (DestructionSound != null)
-             {
-                 // Play sound attached or temp
-                 // We can use the base's audio player if available
-                 var audio = GetNodeOrNull<AudioStreamPlayer2D>("AudioStreamPlayer2D");
-                 if (audio != null)
-                 {
-                     audio.Stream = DestructionSound;
-                     audio.Play();
-                 }
-             }
+            _vanishAnimation.Play("vanish");
         }
         else
         {
-             // Fallback to base Die behavior if no animation
-             base.Die();
+            // Fallback: queue free immediately if no animation
+            QueueFree();
+        }
+    }
+
+    /// <summary>
+    /// Spawns rubble appropriate to the material type.
+    /// Harder materials spawn fewer, smaller rubble pieces.
+    /// </summary>
+    private void SpawnMaterialRubble()
+    {
+        if (RubbleScene == null) return;
+
+        // Calculate rubble amount based on material hardness
+        // Harder materials = less rubble
+        int baseRubbleCount = GD.RandRange(MinRubbleCount, MaxRubbleCount);
+        int adjustedRubbleCount = Mathf.RoundToInt(baseRubbleCount * (2.0f / Material.Hardness));
+        adjustedRubbleCount = Mathf.Clamp(adjustedRubbleCount, 1, baseRubbleCount);
+
+        for (int i = 0; i < adjustedRubbleCount; i++)
+        {
+            var rubble = RubbleScene.Instantiate<RigidBody2D>();
+            rubble.GlobalPosition = GlobalPosition + new Vector2(GD.RandfRange(-10, 10), GD.RandfRange(-10, 10));
+            
+            // Apply material-specific modifications to rubble
+            if (rubble is RigidBody2D body)
+            {
+                // Scale rubble size based on material
+                float sizeModifier = 1.0f - ((Material.Hardness - 1) * 0.1f);
+                body.Scale = body.Scale * sizeModifier;
+                
+                // Adjust mass based on material density
+                body.Mass *= Material.Hardness * 0.5f;
+            }
+            
+            GetTree().CurrentScene.CallDeferred("add_child", rubble);
         }
     }
 
