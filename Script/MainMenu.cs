@@ -5,26 +5,26 @@ using Godot;
 /// Main menu controller that handles the main menu interface.
 /// Provides navigation to room selection, settings, and other menu options.
 /// </summary>
-public partial class MainMenu : Control
+public partial class MainMenu : CanvasLayer
 {
     [Signal] public delegate void PlayButtonPressedEventHandler();
     [Signal] public delegate void RoomSelectionButtonPressedEventHandler();
     [Signal] public delegate void SettingsButtonPressedEventHandler();
     [Signal] public delegate void QuitButtonPressedEventHandler();
 
-    [Export] private NodePath _playButtonPath;
-    [Export] private NodePath _roomSelectionButtonPath;
-    [Export] private NodePath _settingsButtonPath;
-    [Export] private NodePath _quitButtonPath;
-    [Export] private NodePath _titleLabelPath;
-    [Export] private NodePath _versionLabelPath;
+    [Export] private NodePath _playButton;
+    [Export] private NodePath _roomSelectionButton;
+    [Export] private NodePath _settingsButton;
+    [Export] private NodePath _quitButton;
+    [Export] private NodePath _titleLabel;
+    [Export] private NodePath _versionLabel;
 
-    private Button? _playButton;
-    private Button? _roomSelectionButton;
-    private Button? _settingsButton;
-    private Button? _quitButton;
-    private Label? _titleLabel;
-    private Label? _versionLabel;
+    private Button? _playButtonNode;
+    private Button? _roomSelectionButtonNode;
+    private Button? _settingsButtonNode;
+    private Button? _quitButtonNode;
+    private Label? _titleLabelNode;
+    private Label? _versionLabelNode;
 
     private Button? _unlockFullGameButton;
     private ConfirmationDialog? _unlockConfirmation;
@@ -45,7 +45,7 @@ public partial class MainMenu : Control
 
     private void AddDailyChallengeButton()
     {
-        if (_playButton != null && _playButton.GetParent() is Control container)
+        if (_playButtonNode != null && _playButtonNode.GetParent() is Control container)
         {
             var dailyBtn = new Button
             {
@@ -57,8 +57,8 @@ public partial class MainMenu : Control
 
             container.AddChild(dailyBtn);
 
-            if (_playButton != null)
-                container.MoveChild(dailyBtn, _playButton.GetIndex() + 1);
+            if (_playButtonNode != null)
+                container.MoveChild(dailyBtn, _playButtonNode.GetIndex() + 1);
         }
     }
 
@@ -72,7 +72,7 @@ public partial class MainMenu : Control
 
     private void AddCustomizeFaceButton()
     {
-        if (_playButton != null && _playButton.GetParent() is Control container)
+        if (_playButtonNode != null && _playButtonNode.GetParent() is Control container)
         {
             var customizeBtn = new Button
             {
@@ -83,14 +83,14 @@ public partial class MainMenu : Control
 
             container.AddChild(customizeBtn);
 
-            if (_roomSelectionButton != null)
-                container.MoveChild(customizeBtn, _roomSelectionButton.GetIndex() + 1);
+            if (_roomSelectionButtonNode != null)
+                container.MoveChild(customizeBtn, _roomSelectionButtonNode.GetIndex() + 1);
         }
     }
 
     private void AddUnlockFullGameButton()
     {
-        if (_playButton == null || _playButton.GetParent() is not Control container)
+        if (_playButtonNode == null || _playButtonNode.GetParent() is not Control container)
             return;
 
         if (MonetizationManager.Instance?.IsFullGameUnlocked ?? false)
@@ -108,8 +108,8 @@ public partial class MainMenu : Control
         container.AddChild(_unlockFullGameButton);
 
         // Put it near the Play/Room Selection actions.
-        if (_roomSelectionButton != null)
-            container.MoveChild(_unlockFullGameButton, _roomSelectionButton.GetIndex() + 1);
+        if (_roomSelectionButtonNode != null)
+            container.MoveChild(_unlockFullGameButton, _roomSelectionButtonNode.GetIndex() + 1);
     }
 
     private void OnCustomizeFaceButtonPressed()
@@ -123,30 +123,30 @@ public partial class MainMenu : Control
 
     private void InitializeMenu()
     {
-        _playButton = GetNodeOrNull<Button>(_playButtonPath);
-        _roomSelectionButton = GetNodeOrNull<Button>(_roomSelectionButtonPath);
-        _settingsButton = GetNodeOrNull<Button>(_settingsButtonPath);
-        _quitButton = GetNodeOrNull<Button>(_quitButtonPath);
-        _titleLabel = GetNodeOrNull<Label>(_titleLabelPath);
-        _versionLabel = GetNodeOrNull<Label>(_versionLabelPath);
+        _playButtonNode = GetNodeOrNull<Button>(_playButton);
+        _roomSelectionButtonNode = GetNodeOrNull<Button>(_roomSelectionButton);
+        _settingsButtonNode = GetNodeOrNull<Button>(_settingsButton);
+        _quitButtonNode = GetNodeOrNull<Button>(_quitButton);
+        _titleLabelNode = GetNodeOrNull<Label>(_titleLabel);
+        _versionLabelNode = GetNodeOrNull<Label>(_versionLabel);
 
-        if (_titleLabel != null)
-            _titleLabel.Text = "Angry Animals";
+        if (_titleLabelNode != null)
+            _titleLabelNode.Text = "Angry Animals";
 
-        if (_versionLabel != null)
-            _versionLabel.Text = "Version 1.0.0";
+        if (_versionLabelNode != null)
+            _versionLabelNode.Text = "Version 1.0.0";
 
-        if (_playButton != null)
-            _playButton.Pressed += OnPlayButtonPressed;
+        if (_playButtonNode != null)
+            _playButtonNode.Pressed += OnPlayButtonPressed;
 
-        if (_roomSelectionButton != null)
-            _roomSelectionButton.Pressed += OnRoomSelectionButtonPressed;
+        if (_roomSelectionButtonNode != null)
+            _roomSelectionButtonNode.Pressed += OnRoomSelectionButtonPressed;
 
-        if (_settingsButton != null)
-            _settingsButton.Pressed += OnSettingsButtonPressed;
+        if (_settingsButtonNode != null)
+            _settingsButtonNode.Pressed += OnSettingsButtonPressed;
 
-        if (_quitButton != null)
-            _quitButton.Pressed += OnQuitButtonPressed;
+        if (_quitButtonNode != null)
+            _quitButtonNode.Pressed += OnQuitButtonPressed;
 
         EnsureDialogs();
     }
@@ -211,17 +211,17 @@ public partial class MainMenu : Control
             MonetizationManager.Instance.PurchaseFailed -= OnPurchaseFailed;
         }
 
-        if (_playButton != null)
-            _playButton.Pressed -= OnPlayButtonPressed;
+        if (_playButtonNode != null)
+            _playButtonNode.Pressed -= OnPlayButtonPressed;
 
-        if (_roomSelectionButton != null)
-            _roomSelectionButton.Pressed -= OnRoomSelectionButtonPressed;
+        if (_roomSelectionButtonNode != null)
+            _roomSelectionButtonNode.Pressed -= OnRoomSelectionButtonPressed;
 
-        if (_settingsButton != null)
-            _settingsButton.Pressed -= OnSettingsButtonPressed;
+        if (_settingsButtonNode != null)
+            _settingsButtonNode.Pressed -= OnSettingsButtonPressed;
 
-        if (_quitButton != null)
-            _quitButton.Pressed -= OnQuitButtonPressed;
+        if (_quitButtonNode != null)
+            _quitButtonNode.Pressed -= OnQuitButtonPressed;
 
         if (_unlockFullGameButton != null)
             _unlockFullGameButton.Pressed -= OnUnlockButtonPressed;
