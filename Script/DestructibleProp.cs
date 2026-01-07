@@ -60,6 +60,7 @@ public partial class DestructibleProp : StaticBody2D
     protected virtual void Die()
     {
         SignalManager.EmitOnPropDestroyed(this, ScoreValue);
+        ScoreManager.AddScore(ScoreValue);
 
         if (DestructionEffectScene != null)
         {

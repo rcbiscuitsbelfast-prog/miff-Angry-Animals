@@ -37,6 +37,9 @@ EffectsManager="*res://Script/EffectsManager.cs"
 GameFeelManager="*res://Script/GameFeelManager.cs"
 HapticFeedbackManager="*res://Script/HapticFeedbackManager.cs"
 SpeechBubbleManager="*res://Script/SpeechBubbleManager.cs"
+DialogueManager="*res://Script/DialogueManager.cs"
+StoryEventTrigger="*res://Script/StoryEventTrigger.cs"
+MemeGateway="*res://Script/MemeGateway.cs"
 
 # Infrastructure Systems
 AssetLoader="*res://Classes/AssetLoader.cs"

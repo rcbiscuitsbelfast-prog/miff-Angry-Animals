@@ -340,7 +340,7 @@ public partial class FaceCustomizationScreen : Control
         }
 
         // Save Cosmetics
-        PlayerProfile.SetCosmetics(_selectedHatIndex, _selectedGlassesIndex, 0, _selectedEmotionIndex);
+        PlayerProfile.SetCosmetics(_selectedHatIndex, _selectedGlassesIndex, moustacheIndex: 0, wigIndex: 0, filterIndex: 0, emotionIndex: _selectedEmotionIndex);
         
         GD.Print($"Saved: Hat={_selectedHatIndex}, Glasses={_selectedGlassesIndex}, Face saved.");
         EmitSignal(SignalName.OnClose);

@@ -51,6 +51,21 @@ public partial class SignalManager : Node
     /// </summary>
     [Signal] public delegate void OnDestructionScoreUpdatedEventHandler(int score);
 
+    /// <summary>
+    /// Triggered when an NPC is hit.
+    /// </summary>
+    [Signal] public delegate void OnNpcHitEventHandler(Node npc);
+
+    /// <summary>
+    /// Triggered when an NPC is destroyed.
+    /// </summary>
+    [Signal] public delegate void OnNpcDestroyedEventHandler(Node npc);
+
+    /// <summary>
+    /// Triggered when objective text should be refreshed.
+    /// </summary>
+    [Signal] public delegate void OnObjectivesUpdatedEventHandler(string text);
+
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready() => Instance = this;
@@ -86,4 +101,8 @@ public partial class SignalManager : Node
     public static void EmitOnPropDamaged(Node prop, int damage) => Instance.EmitSignal(SignalName.OnPropDamaged, prop, damage);
     public static void EmitOnPropDestroyed(Node prop, int scoreValue) => Instance.EmitSignal(SignalName.OnPropDestroyed, prop, scoreValue);
     public static void EmitOnDestructionScoreUpdated(int score) => Instance.EmitSignal(SignalName.OnDestructionScoreUpdated, score);
+
+    public static void EmitOnNpcHit(Node npc) => Instance.EmitSignal(SignalName.OnNpcHit, npc);
+    public static void EmitOnNpcDestroyed(Node npc) => Instance.EmitSignal(SignalName.OnNpcDestroyed, npc);
+    public static void EmitOnObjectivesUpdated(string text) => Instance.EmitSignal(SignalName.OnObjectivesUpdated, text);
 }

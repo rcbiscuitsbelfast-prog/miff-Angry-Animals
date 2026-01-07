@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Script/CutsceneScene.cs" id="1_script"]
+
+[node name="Chapter2Intro" type="Node2D"]
+script = ExtResource("1_script")
+FallbackDuration = 2.5
+AnimatedSpritePath = NodePath("StickFigure")
+Speakers = PackedStringArray("STICK")
+Lines = PackedStringArray("House Takeover: time to spread the chaos...")
+Durations = PackedFloat32Array(2.2)
+PortraitVariants = PackedStringArray("")
+SpriteAnimations = PackedStringArray("")
+
+[node name="StickFigure" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 0)

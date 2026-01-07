@@ -358,6 +358,9 @@ public partial class LevelCompleted : Control
         var currentRoomIndex = _currentLevel - 1;
         if (currentRoomIndex + 1 < GameManager.Instance.Rooms.Length)
         {
+            if (MemeGateway.Instance != null && MemeGateway.Instance.TryPlayMinigameThenLoadNext(_currentLevel))
+                return;
+
             GameManager.StartRoom(currentRoomIndex + 1);
         }
     }

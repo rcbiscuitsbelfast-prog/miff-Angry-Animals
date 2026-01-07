@@ -124,6 +124,10 @@ public partial class PlayerProfile : Node
 
     public int HighestUnlockedRoomIndex { get; private set; }
 
+    public int HighestUnlockedChapterIndex { get; private set; }
+    private HashSet<int> _completedChapters = new();
+    private HashSet<string> _storyFlagsSeen = new();
+
     public float CurrentRage { get; private set; }
     public int CurrentCombo { get; private set; }
 
@@ -201,11 +205,46 @@ public partial class PlayerProfile : Node
 
     public static bool IsRoomUnlocked(int roomIndex) => roomIndex <= Instance.HighestUnlockedRoomIndex;
 
+    public void UnlockChapter(int chapterIndex)
+    {
+        if (chapterIndex <= HighestUnlockedChapterIndex)
+            return;
+
+        HighestUnlockedChapterIndex = chapterIndex;
+    }
+
+    public void MarkChapterCompleted(int chapterIndex)
+    {
+        _completedChapters.Add(chapterIndex);
+    }
+
+    public bool IsChapterCompleted(int chapterIndex) => _completedChapters.Contains(chapterIndex);
+
+    public bool HasSeenStoryFlag(string flagId) => _storyFlagsSeen.Contains(flagId);
+
+    public void MarkStoryFlagSeen(string flagId)
+    {
+        if (string.IsNullOrWhiteSpace(flagId))
+            return;
+
+        _storyFlagsSeen.Add(flagId);
+        Save();
+    }
+
+    public void UnlockCosmetic(string cosmeticId)
+    {
+        if (string.IsNullOrWhiteSpace(cosmeticId))
+            return;
+
+        if (UnlockedCosmetics.Add(cosmeticId))
+            Save();
+    }
+
     public void Save()
     {
         var root = new JObject
         {
-            ["version"] = 2,
+            ["version"] = 3,
             ["profile_name"] = PlayerName,
             ["is_full_game_unlocked"] = IsFullGameUnlocked,
             ["use_procedural_levels"] = UseProceduralLevels,
@@ -213,6 +252,12 @@ public partial class PlayerProfile : Node
             ["last_procedural_level_number"] = LastProceduralLevelNumber,
             ["face_image_path"] = FaceImagePath,
             ["highest_unlocked_room_index"] = HighestUnlockedRoomIndex,
+            ["story"] = new JObject
+            {
+                ["highest_unlocked_chapter_index"] = HighestUnlockedChapterIndex,
+                ["completed_chapters"] = JArray.FromObject(_completedChapters.ToList()),
+                ["seen_flags"] = JArray.FromObject(_storyFlagsSeen.ToList())
+            },
             ["accessibility"] = new JObject
             {
                 ["colorblind_mode"] = ColorblindMode,
@@ -257,6 +302,9 @@ public partial class PlayerProfile : Node
             if (!FileAccess.FileExists(ProfilePath))
             {
                 HighestUnlockedRoomIndex = 0;
+                HighestUnlockedChapterIndex = 0;
+                _completedChapters = new HashSet<int>();
+                _storyFlagsSeen = new HashSet<string>();
                 Save();
                 return;
             }
@@ -296,6 +344,27 @@ public partial class PlayerProfile : Node
                 ReadInt(root, "highest_unlocked_room_index")
                 ?? ReadInt(root, "HighestUnlockedRoomIndex")
                 ?? 0);
+
+            var storyToken = root["story"];
+            if (storyToken is JObject story)
+            {
+                HighestUnlockedChapterIndex = Math.Max(0, ReadInt(story, "highest_unlocked_chapter_index") ?? 0);
+
+                var completedToken = story["completed_chapters"];
+                if (completedToken is JArray completed)
+                    _completedChapters = new HashSet<int>(completed.Select(t => (int)(t.Type == JTokenType.Integer ? t.Value<int>() : int.TryParse(t.ToString(), out var v) ? v : 0)));
+
+                var flagsToken = story["seen_flags"];
+                if (flagsToken is JArray flags)
+                    _storyFlagsSeen = new HashSet<string>(flags.Select(t => t.ToString()));
+            }
+            else
+            {
+                // Back-compat: derive chapter unlock from level progression.
+                HighestUnlockedChapterIndex = StoryData.GetChapterIndexForRoomIndex(HighestUnlockedRoomIndex);
+                _completedChapters = new HashSet<int>();
+                _storyFlagsSeen = new HashSet<string>();
+            }
 
             var accessibilityToken = root["accessibility"];
             if (accessibilityToken is JObject accessibility)

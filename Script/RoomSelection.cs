@@ -316,10 +316,15 @@ public partial class RoomSelection : Control
 
         var container = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
 
+        var chapter = StoryData.GetChapterForRoomIndex(roomIndex);
+        var subtitle = StoryData.GetLevelSubtitle(roomIndex);
+        var displayName = string.IsNullOrWhiteSpace(subtitle) ? roomInfo.Description : subtitle;
+
         var roomLabel = new Label
         {
-            Text = $"{roomIndex + 1}. {roomInfo.Description}",
-            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+            Text = $"{roomIndex + 1}. {displayName}",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+            Modulate = chapter.ThemeColor
         };
 
         bool proceduralEnabled = PlayerProfile.Instance?.UseProceduralLevels ?? false;
@@ -329,7 +334,7 @@ public partial class RoomSelection : Control
         {
             Text = proceduralEnabled
                 ? $"Cups: {LevelGenerator.GetCupCount(roomNumber)}"
-                : $"Target: {roomInfo.TargetScore}",
+                : $"Optimal: {roomInfo.OptimalScore}",
             Modulate = proceduralEnabled ? Colors.Cyan : Colors.Yellow
         };
 

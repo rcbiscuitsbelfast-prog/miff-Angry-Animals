@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
 
@@ -22,6 +23,9 @@ public partial class RoomBase : Node2D
     [Export] private NodePath _nextRoomPath; // For bonus room transitions
     [Export] private NodePath _enemySpawnerPath; // For enemy spawning
 
+    [ExportGroup("Objectives")]
+    [Export] private Godot.Collections.Array<LevelObjective> _objectives = new();
+
     private Slingshot? _slingshot;
     private Node2D? _exitDoor;
     private ProjectilesLoader? _projectilesLoader;
@@ -38,11 +42,22 @@ public partial class RoomBase : Node2D
 
     private bool _handlingFailure;
 
+    // Objective tracking
+    private readonly List<LevelObjective> _activeObjectives = new();
+    private readonly List<int> _objectiveProgress = new();
+    private readonly List<bool> _objectiveCompleted = new();
+    private int _cupsDestroyed;
+    private int _totalCups;
+    private int _npcsDestroyed;
+    private bool _exitReached;
+
     public override void _Ready()
     {
         InitializeRoom();
         EnsureRewardDialog();
+        InitializeObjectives();
         ConnectSignals();
+        EmitObjectivesToHud();
     }
 
     private void InitializeRoom()
@@ -83,6 +98,125 @@ public partial class RoomBase : Node2D
         AddChild(_rewardedDialog);
     }
 
+    private void InitializeObjectives()
+    {
+        _cupsDestroyed = 0;
+        _npcsDestroyed = 0;
+        _exitReached = false;
+
+        _totalCups = GetTree().GetNodesInGroup(Cup.GROUP_NAME).Count;
+
+        _activeObjectives.Clear();
+        _objectiveProgress.Clear();
+        _objectiveCompleted.Clear();
+
+        if (_objectives != null && _objectives.Count > 0)
+        {
+            foreach (var obj in _objectives)
+            {
+                if (obj == null)
+                    continue;
+
+                _activeObjectives.Add(obj);
+                _objectiveProgress.Add(0);
+                _objectiveCompleted.Add(false);
+            }
+        }
+        else
+        {
+            // Default objective: destroy all cups if present, otherwise reach the exit.
+            var defaultObj = new LevelObjective
+            {
+                Type = _totalCups > 0 ? LevelObjective.ObjectiveType.DestroyXCups : LevelObjective.ObjectiveType.ReachExit,
+                Count = _totalCups
+            };
+
+            _activeObjectives.Add(defaultObj);
+            _objectiveProgress.Add(0);
+            _objectiveCompleted.Add(false);
+        }
+
+        UpdateObjectiveState();
+    }
+
+    private void EmitObjectivesToHud()
+    {
+        SignalManager.EmitOnObjectivesUpdated(BuildObjectivesText());
+    }
+
+    private string BuildObjectivesText()
+    {
+        if (_activeObjectives.Count == 0)
+            return string.Empty;
+
+        string text = "";
+        for (int i = 0; i < _activeObjectives.Count; i++)
+        {
+            var obj = _activeObjectives[i];
+            var done = _objectiveCompleted[i];
+            var progress = _objectiveProgress[i];
+
+            var line = obj.GetDisplayText(progress);
+            if (done)
+                line = $"✓ {line}";
+
+            text += (i == 0 ? "" : "\n") + line;
+        }
+
+        return text;
+    }
+
+    private void UpdateObjectiveState()
+    {
+        for (int i = 0; i < _activeObjectives.Count; i++)
+        {
+            var obj = _activeObjectives[i];
+            bool complete = false;
+            int progress = 0;
+
+            switch (obj.Type)
+            {
+                case LevelObjective.ObjectiveType.DestroyXCups:
+                    int required = obj.Count > 0 ? obj.Count : _totalCups;
+                    progress = _cupsDestroyed;
+                    complete = required > 0 && _cupsDestroyed >= required;
+                    break;
+
+                case LevelObjective.ObjectiveType.ReachExit:
+                    progress = _exitReached ? 1 : 0;
+                    complete = _exitReached;
+                    break;
+
+                case LevelObjective.ObjectiveType.DestroySpecificNpcs:
+                    progress = _npcsDestroyed;
+                    complete = obj.Count > 0 ? _npcsDestroyed >= obj.Count : _npcsDestroyed > 0;
+                    break;
+
+                default:
+                    // Framework placeholder.
+                    progress = 0;
+                    complete = false;
+                    break;
+            }
+
+            _objectiveProgress[i] = progress;
+            _objectiveCompleted[i] = complete;
+        }
+
+        EmitObjectivesToHud();
+    }
+
+    private bool AreAllObjectivesComplete()
+    {
+        for (int i = 0; i < _objectiveCompleted.Count; i++)
+        {
+            if (!_objectiveCompleted[i])
+                return false;
+        }
+
+        return _objectiveCompleted.Count > 0;
+    }
+
     private void ConnectSignals()
     {
         if (SignalManager.Instance != null)
@@ -91,6 +225,7 @@ public partial class RoomBase : Node2D
             SignalManager.Instance.OnCupDestroyed += OnCupDestroyed;
             SignalManager.Instance.OnPropDestroyed += OnPropDestroyed;
             SignalManager.Instance.OnAnimalDied += OnAnimalDied;
+            SignalManager.Instance.OnNpcDestroyed += OnNpcDestroyed;
         }
 
         if (_projectilesLoader != null)
@@ -118,6 +253,7 @@ public partial class RoomBase : Node2D
             SignalManager.Instance.OnCupDestroyed -= OnCupDestroyed;
             SignalManager.Instance.OnPropDestroyed -= OnPropDestroyed;
             SignalManager.Instance.OnAnimalDied -= OnAnimalDied;
+            SignalManager.Instance.OnNpcDestroyed -= OnNpcDestroyed;
         }
 
         if (_projectilesLoader != null)
@@ -153,12 +289,19 @@ public partial class RoomBase : Node2D
 
     private void OnCupDestroyed()
     {
-        GD.Print("Cup destroyed in room");
+        _cupsDestroyed++;
+        UpdateObjectiveState();
     }
 
     private void OnPropDestroyed(Node prop, int scoreValue)
     {
         GD.Print($"Prop destroyed with score value: {scoreValue}");
+    }
+
+    private void OnNpcDestroyed(Node npc)
+    {
+        _npcsDestroyed++;
+        UpdateObjectiveState();
     }
 
     private void OnAnimalDied()
@@ -380,7 +523,8 @@ public partial class RoomBase : Node2D
     /// </summary>
     public void OnExitReached()
     {
-        GD.Print("Player reached exit door");
+        _exitReached = true;
+        UpdateObjectiveState();
 
         if (_exitUnlocked)
             CompleteRoom();
