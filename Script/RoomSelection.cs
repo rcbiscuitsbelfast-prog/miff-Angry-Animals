@@ -316,6 +316,7 @@ public partial class RoomSelection : Control
 
         var container = new HBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
 
+<<<<<<< HEAD
         var chapter = StoryData.GetChapterForRoomIndex(roomIndex);
         var subtitle = StoryData.GetLevelSubtitle(roomIndex);
         var displayName = string.IsNullOrWhiteSpace(subtitle) ? roomInfo.Description : subtitle;
@@ -325,6 +326,12 @@ public partial class RoomSelection : Control
             Text = $"{roomIndex + 1}. {displayName}",
             SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
             Modulate = chapter.ThemeColor
+=======
+        var roomLabel = new Label
+        {
+            Text = $"{roomIndex + 1}. {roomInfo.Description}",
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
         };
 
         bool proceduralEnabled = PlayerProfile.Instance?.UseProceduralLevels ?? false;
@@ -334,7 +341,11 @@ public partial class RoomSelection : Control
         {
             Text = proceduralEnabled
                 ? $"Cups: {LevelGenerator.GetCupCount(roomNumber)}"
+<<<<<<< HEAD
                 : $"Optimal: {roomInfo.OptimalScore}",
+=======
+                : $"Target: {roomInfo.TargetScore}",
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
             Modulate = proceduralEnabled ? Colors.Cyan : Colors.Yellow
         };
 

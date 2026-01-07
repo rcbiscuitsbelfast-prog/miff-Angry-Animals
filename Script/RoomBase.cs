@@ -1,5 +1,8 @@
 using System;
+<<<<<<< HEAD
 using System.Collections.Generic;
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
 using System.Threading.Tasks;
 using Godot;
 
@@ -23,9 +26,12 @@ public partial class RoomBase : Node2D
     [Export] private NodePath _nextRoomPath; // For bonus room transitions
     [Export] private NodePath _enemySpawnerPath; // For enemy spawning
 
+<<<<<<< HEAD
     [ExportGroup("Objectives")]
     [Export] private Godot.Collections.Array<LevelObjective> _objectives = new();
 
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     private Slingshot? _slingshot;
     private Node2D? _exitDoor;
     private ProjectilesLoader? _projectilesLoader;
@@ -42,6 +48,7 @@ public partial class RoomBase : Node2D
 
     private bool _handlingFailure;
 
+<<<<<<< HEAD
     // Objective tracking
     private readonly List<LevelObjective> _activeObjectives = new();
     private readonly List<int> _objectiveProgress = new();
@@ -51,13 +58,19 @@ public partial class RoomBase : Node2D
     private int _npcsDestroyed;
     private bool _exitReached;
 
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     public override void _Ready()
     {
         InitializeRoom();
         EnsureRewardDialog();
+<<<<<<< HEAD
         InitializeObjectives();
         ConnectSignals();
         EmitObjectivesToHud();
+=======
+        ConnectSignals();
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     }
 
     private void InitializeRoom()
@@ -98,6 +111,7 @@ public partial class RoomBase : Node2D
         AddChild(_rewardedDialog);
     }
 
+<<<<<<< HEAD
     private void InitializeObjectives()
     {
         _cupsDestroyed = 0;
@@ -217,6 +231,8 @@ public partial class RoomBase : Node2D
         return _objectiveCompleted.Count > 0;
     }
 
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     private void ConnectSignals()
     {
         if (SignalManager.Instance != null)
@@ -225,7 +241,10 @@ public partial class RoomBase : Node2D
             SignalManager.Instance.OnCupDestroyed += OnCupDestroyed;
             SignalManager.Instance.OnPropDestroyed += OnPropDestroyed;
             SignalManager.Instance.OnAnimalDied += OnAnimalDied;
+<<<<<<< HEAD
             SignalManager.Instance.OnNpcDestroyed += OnNpcDestroyed;
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
         }
 
         if (_projectilesLoader != null)
@@ -253,7 +272,10 @@ public partial class RoomBase : Node2D
             SignalManager.Instance.OnCupDestroyed -= OnCupDestroyed;
             SignalManager.Instance.OnPropDestroyed -= OnPropDestroyed;
             SignalManager.Instance.OnAnimalDied -= OnAnimalDied;
+<<<<<<< HEAD
             SignalManager.Instance.OnNpcDestroyed -= OnNpcDestroyed;
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
         }
 
         if (_projectilesLoader != null)
@@ -289,8 +311,12 @@ public partial class RoomBase : Node2D
 
     private void OnCupDestroyed()
     {
+<<<<<<< HEAD
         _cupsDestroyed++;
         UpdateObjectiveState();
+=======
+        GD.Print("Cup destroyed in room");
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     }
 
     private void OnPropDestroyed(Node prop, int scoreValue)
@@ -298,12 +324,15 @@ public partial class RoomBase : Node2D
         GD.Print($"Prop destroyed with score value: {scoreValue}");
     }
 
+<<<<<<< HEAD
     private void OnNpcDestroyed(Node npc)
     {
         _npcsDestroyed++;
         UpdateObjectiveState();
     }
 
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
     private void OnAnimalDied()
     {
         if (_currentPhase == RoomPhase.SLINGSHOT && _projectilesLoader != null)
@@ -523,8 +552,12 @@ public partial class RoomBase : Node2D
     /// </summary>
     public void OnExitReached()
     {
+<<<<<<< HEAD
         _exitReached = true;
         UpdateObjectiveState();
+=======
+        GD.Print("Player reached exit door");
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
 
         if (_exitUnlocked)
             CompleteRoom();

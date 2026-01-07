@@ -358,9 +358,12 @@ public partial class LevelCompleted : Control
         var currentRoomIndex = _currentLevel - 1;
         if (currentRoomIndex + 1 < GameManager.Instance.Rooms.Length)
         {
+<<<<<<< HEAD
             if (MemeGateway.Instance != null && MemeGateway.Instance.TryPlayMinigameThenLoadNext(_currentLevel))
                 return;
 
+=======
+>>>>>>> origin/feat/launch-readiness-repo-docs-non-coder-cms-npc-prefabs
             GameManager.StartRoom(currentRoomIndex + 1);
         }
     }

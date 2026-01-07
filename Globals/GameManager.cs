@@ -1,6 +1,21 @@
 using Godot;
 using System.Linq;
 
+/// <summary>
+/// GameManager.cs - Master game controller
+/// 
+/// This script controls everything: level loading, game flow, score tracking.
+/// The brain of your Yeet Face game that makes all decisions.
+/// 
+/// HOW TO USE (Non-Coders):
+/// 1. Don't touch this file - it's the core engine
+/// 2. To change game settings, use Inspector on GameManager node
+/// 3. To add levels, see GameManager.Rooms array below
+/// 4. For level management, see Docs/GUIDES/LEVEL_DESIGN_GUIDE.md
+/// 
+/// WARNING: This file controls game flow - editing it incorrectly can break everything!
+/// For customization, use the Inspector settings below instead of editing code.
+/// </summary>
 public partial class GameManager : Node
 {
     public static GameManager Instance { get; private set; } = null!;
