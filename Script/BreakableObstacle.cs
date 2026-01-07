@@ -84,6 +84,9 @@ public partial class BreakableObstacle : DestructibleProp
         CurrentHp = MaxHp;
         CurrentHitsTaken = 0;
 
+        // Scale score value by material hardness
+        ScoreValue = Material.Hardness * 50;
+
         // Apply material visuals
         ApplyMaterialVisuals();
 

@@ -1,4 +1,5 @@
 using Godot;
+using System;
 
 /// <summary>
 /// Procedurally generated room that uses LevelGenerator to create cup layouts dynamically.
@@ -15,8 +16,8 @@ public partial class ProceduralRoom : RoomBase
 
     public override void _Ready()
     {
-        base._Ready();
         GenerateProceduralLevel();
+        base._Ready();
     }
 
     private void GenerateProceduralLevel()
@@ -66,14 +67,17 @@ public partial class ProceduralRoom : RoomBase
             child.QueueFree();
 
         int cupCount = LevelGenerator.GetCupCount(roomNumber);
-        int targetScore = cupCount;
-
-        // Ensure the gameplay target matches the difficulty.
-        // RoomBase reads its target score from GameManager on _Ready, so we update after base._Ready.
-        // This keeps manual rooms unchanged while making procedural rooms scale.
-        _targetScore = targetScore;
-
+        
         var cupConfigs = LevelGenerator.GenerateCups(roomNumber, cupCount, seed);
+
+        int totalPossibleScore = 0;
+        foreach (var config in cupConfigs)
+        {
+            totalPossibleScore += (int)config.Material * 50;
+        }
+
+        // Target 40% of total possible score to unlock door, minimum 50
+        _targetScore = Math.Max(50, (int)(totalPossibleScore * 0.4f));
 
         for (int i = 0; i < cupConfigs.Length; i++)
             SpawnCup(cupConfigs[i], i);
@@ -87,11 +91,15 @@ public partial class ProceduralRoom : RoomBase
         cupInstance.Rotation = config.Rotation;
         cupInstance.Scale = new Vector2(config.Scale, config.Scale);
 
+        // Ensure it's in the cup group if it's not already
+        if (!cupInstance.IsInGroup(Cup.GROUP_NAME))
+            cupInstance.AddToGroup(Cup.GROUP_NAME);
+
         // Apply material properties to the cup
         if (cupInstance is BreakableObstacle breakableObstacle)
         {
             breakableObstacle.SetMaterial(config.Material);
-            GD.Print($"Applied material {config.Material.Material} to cup {index + 1} at position {config.Position}");
+            GD.Print($"Applied material {config.Material} to cup {index + 1} at position {config.Position}");
         }
 
         _obstaclesParent!.AddChild(cupInstance);

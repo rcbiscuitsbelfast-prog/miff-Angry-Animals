@@ -51,6 +51,8 @@ public partial class RoomBase : Node2D
     private int _npcsDestroyed;
     private bool _exitReached;
 
+    protected DifficultyBalancer.RoomDifficulty _currentDifficulty;
+
     public override void _Ready()
     {
         InitializeRoom();
@@ -58,6 +60,19 @@ public partial class RoomBase : Node2D
         InitializeObjectives();
         ConnectSignals();
         EmitObjectivesToHud();
+
+        // Phase 2: Difficulty Balancing
+        CalculateDifficulty();
+    }
+
+    private void CalculateDifficulty()
+    {
+        var currentRoomIndex = GameManager.Instance?.CurrentRoomIndex ?? 0;
+        _currentDifficulty = DifficultyBalancer.CalculateRoomDifficulty(currentRoomIndex + 1);
+
+        // Log for non-coder debugging
+        GD.Print($"Room {currentRoomIndex + 1}: {_currentDifficulty.Description} " +
+                 $"(Score: {_currentDifficulty.OverallScore:F2})");
     }
 
     private void InitializeRoom()
