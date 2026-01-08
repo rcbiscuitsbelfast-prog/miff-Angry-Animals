@@ -10,7 +10,10 @@ public partial class StickClone : CharacterBody2D
     [Signal] public delegate void CloneStuckEventHandler();
     [Signal] public delegate void AboutToEnterExplosionEventHandler(Vector2 explosionPosition);
 
-    [Export] private float _moveSpeed = 150f;
+    // Settings reference for inspector-tweakable movement values
+    private GameSettingsManager? _settings;
+    private const float DEFAULT_MOVE_SPEED = 150f; // Fallback if GameSettingsManager not available
+    
     [Export] private float _jumpForce = -400f;
     [Export] private float _gravity = 980f;
     [Export] private float _friction = 0.8f;
@@ -46,6 +49,9 @@ public partial class StickClone : CharacterBody2D
         SetupPhysics();
         SetupExplosionDetection();
         ConnectSignals();
+        
+        // Get settings manager for inspector-tweakable values
+        _settings = GameSettingsManager.Instance;
     }
 
     private void InitializeStickClone()
@@ -330,8 +336,9 @@ public partial class StickClone : CharacterBody2D
         {
             Vector2 direction = (_exitArea.GlobalPosition - GlobalPosition).Normalized();
             
-            // Move towards exit
-            _velocity.X = direction.X * _moveSpeed;
+            // Move towards exit using settings for tweakable speed
+            float moveSpeed = _settings?.CharacterMoveSpeed ?? DEFAULT_MOVE_SPEED;
+            _velocity.X = direction.X * moveSpeed;
             
             // Simple jump logic - jump if there's an obstacle ahead
             if (_isGrounded && ShouldJump())

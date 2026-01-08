@@ -3,7 +3,7 @@ using Godot;
 /// <summary>
 /// Base class for all projectiles launched from the slingshot.
 /// Handles physics interactions, collision detection, sound effects, and lifecycle management.
-/// Now uses object pooling for performance optimization.
+/// Now uses GameSettingsManager for all physics values to allow non-coder tweaking.
 /// </summary>
 public partial class Projectile : RigidBody2D, IPoolable
 {
@@ -13,7 +13,10 @@ public partial class Projectile : RigidBody2D, IPoolable
     [Export] private AudioStreamPlayer2D _kickWoodSound;
     [Export] private VisibleOnScreenNotifier2D _onScreenNotifier;
 
-    private const float STOPPED_THRESHOLD = 0.1f;
+    // Settings reference for inspector-tweakable physics values
+    private GameSettingsManager? _settings;
+    private const float DEFAULT_STOPPED_THRESHOLD = 0.1f; // Fallback if GameSettingsManager not available
+    
     private bool _hasBeenLaunched = false;
     private bool _almostStoppedEmitted = false;
     private int _lastCollisionCount = 0;
@@ -32,6 +35,9 @@ public partial class Projectile : RigidBody2D, IPoolable
         // Try to get object pool reference
         _pool = GetNode<ObjectPool>("/root/ObjectPool");
         _isPooled = _pool != null;
+
+        // Get settings manager for inspector-tweakable physics values
+        _settings = GameSettingsManager.Instance;
 
         ConnectSignals();
     }
@@ -62,7 +68,8 @@ public partial class Projectile : RigidBody2D, IPoolable
     {
         if (!_hasBeenLaunched || _almostStoppedEmitted) return;
         
-        if (LinearVelocity.Length() < STOPPED_THRESHOLD)
+        float stoppedThreshold = _settings?.ProjectileStoppedThreshold ?? DEFAULT_STOPPED_THRESHOLD;
+        if (LinearVelocity.Length() < stoppedThreshold)
         {
             _almostStoppedEmitted = true;
             EmitSignal(SignalName.AlmostStopped);
