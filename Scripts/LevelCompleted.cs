@@ -180,6 +180,9 @@ public partial class LevelCompleted : Control
             ScoreManager.SetLevelScore(_currentLevel, _finalScore, starCount);
         }
 
+        // Check for cosmetic loot drop on perfect score
+        TryAwardCosmeticLoot(starCount);
+
         // Update the UI with completion data
         UpdateCompletionUI();
         ShowCompletionPanel();
@@ -196,6 +199,41 @@ public partial class LevelCompleted : Control
     {
         // This is called when all projectiles are used up
         // Room completion is handled by GameManager.RoomCompleted signal
+    }
+
+    /// <summary>
+    /// Attempts to award a cosmetic loot drop if perfect score was achieved.
+    /// </summary>
+    private void TryAwardCosmeticLoot(int starCount)
+    {
+        var lootTable = CosmeticLootTable.Instance;
+        if (lootTable == null)
+            return;
+
+        bool dropAwarded = lootTable.TryAwardCosmeticDrop(starCount, _finalScore, _currentLevel);
+        
+        if (dropAwarded)
+        {
+            // Show special loot drop UI
+            ShowLootDropNotification();
+        }
+    }
+
+    /// <summary>
+    /// Shows a notification when cosmetic loot is earned.
+    /// </summary>
+    private void ShowLootDropNotification()
+    {
+        // TODO: Create actual UI notification
+        GD.Print("🎁 You earned a new cosmetic!");
+        
+        // For now, just update the completion UI to show loot drop message
+        if (_newRecordLabel != null && !_isNewRecord)
+        {
+            _newRecordLabel.Visible = true;
+            _newRecordLabel.Text = "🎁 NEW COSMETIC EARNED! 🎁";
+            _newRecordLabel.Modulate = Colors.Gold;
+        }
     }
 
     private void OnScoreChanged(int score)
@@ -333,9 +371,14 @@ public partial class LevelCompleted : Control
         var roomInfo = GameManager.Instance.Rooms[_currentLevel - 1];
         int optimalScore = roomInfo.OptimalScore;
 
-        if (_finalScore >= optimalScore * 0.9f)
+        // Use GameSettingsManager for configurable thresholds
+        var settings = GameSettingsManager.Instance;
+        float perfectThreshold = settings?.PerfectScoreThreshold ?? 0.9f;
+        float goodThreshold = settings?.GoodScoreThreshold ?? 0.6f;
+
+        if (_finalScore >= optimalScore * perfectThreshold)
             return 3;
-        else if (_finalScore >= optimalScore * 0.6f)
+        else if (_finalScore >= optimalScore * goodThreshold)
             return 2;
         
         return 1;
