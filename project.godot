@@ -18,6 +18,7 @@ config/features=PackedStringArray("4.4", "C#")
 
 [autoload]
 
+GameSettingsManager="*res://Globals/GameSettingsManager.cs"
 GameManager="*res://Globals/GameManager.cs"
 Globals="*res://Globals/Globals.cs"
 PlayerProfile="*res://Globals/PlayerProfile.cs"
@@ -42,6 +43,9 @@ SpeechBubbleManager="*res://Scripts/SpeechBubbleManager.cs"
 DialogueManager="*res://Scripts/DialogueManager.cs"
 StoryEventTrigger="*res://Scripts/StoryEventTrigger.cs"
 MemeGateway="*res://Scripts/MemeGateway.cs"
+CosmeticLootTable="*res://Globals/CosmeticLootTable.cs"
+UnlockablesManager="*res://Globals/UnlockablesManager.cs"
+TransitionManager="*res://Globals/TransitionManager.cs"
 
 # Infrastructure Systems
 AssetLoader="*res://Classes/AssetLoader.cs"

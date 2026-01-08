@@ -13,14 +13,7 @@ public partial class RagdollStickClone : Node2D
     [Signal] public delegate void RagdollDespawnedEventHandler();
 
     [ExportGroup("Ragdoll Physics Settings")]
-    [Export] private float _jointStiffness = 0.5f;
-    [Export] private float _limbMass = 1.0f;
-    [Export] private float _linearDamping = 3.0f;
-    [Export] private float _angularDamping = 5.0f;
-    [Export] private float _explosionForceMultiplier = 2.0f;
-    [Export] private float _lifetime = 8.0f;
-
-    [ExportGroup("Ragdoll Visuals")]
+    // Physics settings now read from GameSettingsManager instead of hardcoded
     [Export] private NodePath _limbContainerPath;
     [Export] private NodePath _connectorNodePath;
 
@@ -30,6 +23,9 @@ public partial class RagdollStickClone : Node2D
     [Export] private PackedScene _armScene;
     [Export] private PackedScene _legScene;
 
+    // Settings reference for inspector-tweakable ragdoll physics
+    private GameSettingsManager? _settings;
+    
     private Node2D? _limbContainer;
     private RagdollLimbConnector? _connector;
     private RagdollLimb? _head;
