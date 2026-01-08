@@ -1,0 +1,79 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://Scripts/RagdollSpawner.cs" id="1"]
+[ext_resource type="PackedScene" path="res://Scenes/RagdollStickClone.tscn" id="2"]
+[ext_resource type="Script" path="res://Scripts/Slingshot.cs" id="3"]
+[ext_resource type="Script" path="res://Scripts/Projectile.cs" id="4"]
+
+[node name="RagdollTestScene" type="Node2D"]
+
+[node name="RagdollSystem" type="Node" parent="."]
+script = ExtResource("1")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(640, 360)
+zoom = Vector2(1, 1)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(640, 680)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+shape = SubResource("1")
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(1280, 40)
+
+[node name="ColorRect" type="ColorRect" parent="StaticBody2D"]
+offset_left = -640.0
+offset_top = -20.0
+offset_right = 640.0
+offset_bottom = 20.0
+color = Color(0.4, 0.4, 0.4, 1)
+
+[node name="StickClone" type="CharacterBody2D" parent="."]
+position = Vector2(400, 600)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StickClone"]
+shape = SubResource("2")
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(20, 60)
+
+[node name="FaceSprite" type="Sprite2D" parent="StickClone"]
+position = Vector2(0, -20)
+
+[node name="TestSlingshot" type="Node2D" parent="."]
+position = Vector2(200, 600)
+script = ExtResource("3")
+
+[node name="TestProjectile" type="RigidBody2D" parent="."]
+position = Vector2(200, 580)
+mass = 1.0
+script = ExtResource("4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TestProjectile"]
+shape = SubResource("3")
+
+[sub_resource type="CircleShape2D" id="3"]
+radius = 15.0
+
+[node name="Sprite2D" type="ColorRect" parent="TestProjectile"]
+offset_left = -15.0
+offset_top = -15.0
+offset_right = 15.0
+offset_bottom = 15.0
+color = Color(0.8, 0.2, 0.2, 1)
+
+[node name="Instructions" type="Label" parent="."]
+position = Vector2(50, 50)
+text = "Ragdoll System Test
+1. The red projectile will explode when it hits something
+2. The StickClone will detect the explosion 
+3. A ragdoll will spawn with physics
+4. Check console for debug messages"
+
+[connection signal="ready" from="." to="RagdollSystem" method="_ready"]
+
+[editable path="RagdollSystem"]
+[editable path="StickClone"]
+[editable path="TestProjectile"]
