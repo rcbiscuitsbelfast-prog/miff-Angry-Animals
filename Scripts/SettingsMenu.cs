@@ -154,42 +154,63 @@ public partial class SettingsMenu : Control
 
     private void LoadCurrentSettings()
     {
-        // Load from AudioManager
-        if (AudioManager.Instance != null)
+        // Get settings manager
+        var settings = GameSettingsManager.Instance;
+        
+        if (settings != null)
         {
+            // Load from GameSettingsManager
             if (_masterVolumeSlider != null)
-                _masterVolumeSlider.Value = AudioManager.Instance.MasterVolume;
+                _masterVolumeSlider.Value = settings.MasterVolume;
 
             if (_musicVolumeSlider != null)
-                _musicVolumeSlider.Value = AudioManager.Instance.MusicVolume;
+                _musicVolumeSlider.Value = settings.MusicVolume;
 
             if (_sfxVolumeSlider != null)
-                _sfxVolumeSlider.Value = AudioManager.Instance.SfxVolume;
-        }
+                _sfxVolumeSlider.Value = settings.SfxVolume;
 
-        // Load from GameFeelManager
-        if (GameFeelManager.Instance != null)
-        {
-            // These would need to be exposed as properties to read
-            // For now, use defaults or read from PlayerProfile
+            // Load game feel settings
             if (_screenShakeToggle != null)
-                _screenShakeToggle.ButtonPressed = true; // Default to on
+                _screenShakeToggle.ButtonPressed = true; // TODO: Connect to actual settings
 
             if (_particlesToggle != null)
-                _particlesToggle.ButtonPressed = true; // Default to on
+                _particlesToggle.ButtonPressed = true; // TODO: Connect to actual settings
+                
+            // Load difficulty presets
+            LoadDifficultyPreset(settings.DifficultyPreset);
+        }
+        else
+        {
+            // Fallback to existing systems
+            if (AudioManager.Instance != null)
+            {
+                if (_masterVolumeSlider != null)
+                    _masterVolumeSlider.Value = AudioManager.Instance.MasterVolume;
+
+                if (_musicVolumeSlider != null)
+                    _musicVolumeSlider.Value = AudioManager.Instance.MusicVolume;
+
+                if (_sfxVolumeSlider != null)
+                    _sfxVolumeSlider.Value = AudioManager.Instance.SfxVolume;
+            }
         }
 
-        // Load from HapticFeedbackManager
-        // Similar approach - would need to expose properties
-        if (_hapticsToggle != null)
-            _hapticsToggle.ButtonPressed = true; // Default to on
+        // Load from PlayerProfile
+        if (_hapticsToggle != null && PlayerProfile.Instance != null)
+            _hapticsToggle.ButtonPressed = PlayerProfile.Instance.HighContrastMode; // Placeholder
     }
 
     #region Volume Controls
 
     private void OnMasterVolumeChanged(double value)
     {
-        if (AudioManager.Instance != null)
+        // Update GameSettingsManager if available
+        if (GameSettingsManager.Instance != null)
+        {
+            GameSettingsManager.Instance.MasterVolume = (float)value;
+        }
+        // Fallback to AudioManager
+        else if (AudioManager.Instance != null)
         {
             AudioManager.Instance.MasterVolume = (float)value;
         }
@@ -199,7 +220,13 @@ public partial class SettingsMenu : Control
 
     private void OnMusicVolumeChanged(double value)
     {
-        if (AudioManager.Instance != null)
+        // Update GameSettingsManager if available
+        if (GameSettingsManager.Instance != null)
+        {
+            GameSettingsManager.Instance.MusicVolume = (float)value;
+        }
+        // Fallback to AudioManager
+        else if (AudioManager.Instance != null)
         {
             AudioManager.Instance.MusicVolume = (float)value;
         }
@@ -209,7 +236,13 @@ public partial class SettingsMenu : Control
 
     private void OnSfxVolumeChanged(double value)
     {
-        if (AudioManager.Instance != null)
+        // Update GameSettingsManager if available
+        if (GameSettingsManager.Instance != null)
+        {
+            GameSettingsManager.Instance.SfxVolume = (float)value;
+        }
+        // Fallback to AudioManager
+        else if (AudioManager.Instance != null)
         {
             AudioManager.Instance.SfxVolume = (float)value;
         }

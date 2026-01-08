@@ -25,10 +25,11 @@ public partial class Slingshot : Node2D
 
     // Audio now managed by AudioManager globally
     
-    private const float IMPULSE_MULT = 20.0f;
-    private const float IMPULSE_MAX = 1200.0f;
-    private static readonly Vector2 DRAG_LIM_MAX = new Vector2(0, 60);
-    private static readonly Vector2 DRAG_LIM_MIN = new Vector2(-60, 0);
+    private GameSettingsManager? _settings;
+    private const float DEFAULT_IMPULSE_MULT = 20.0f; // Fallback if GameSettingsManager not available
+    private const float DEFAULT_IMPULSE_MAX = 1200.0f; // Fallback if GameSettingsManager not available
+    private static readonly Vector2 DEFAULT_DRAG_LIM_MAX = new Vector2(0, 60);
+    private static readonly Vector2 DEFAULT_DRAG_LIM_MIN = new Vector2(-60, 0);
     
     private enum State { IDLE, DRAGGING }
     
@@ -45,6 +46,9 @@ public partial class Slingshot : Node2D
         {
             _slingshotType = (SlingshotType)PlayerProfile.GetSlingshotType();
         }
+
+        // Get settings manager
+        _settings = GameSettingsManager.Instance;
 
         ConnectSignals();
     }
@@ -153,18 +157,27 @@ public partial class Slingshot : Node2D
         if (_currentProjectile == null) return;
         
         _lastDraggedVector = _draggedVector;
-        _draggedVector = _draggedVector.Clamp(DRAG_LIM_MIN, DRAG_LIM_MAX);
+        
+        // Use settings for drag limits, with fallbacks
+        Vector2 dragMax = _settings?.SlingshotDragMax != null ? new Vector2(0, _settings.SlingshotDragMax) : DEFAULT_DRAG_LIM_MAX;
+        Vector2 dragMin = _settings?.SlingshotDragMin != null ? new Vector2(-_settings.SlingshotDragMin, 0) : DEFAULT_DRAG_LIM_MIN;
+        
+        _draggedVector = _draggedVector.Clamp(dragMin, dragMax);
         
         _currentProjectile.GlobalPosition = _dragStart + _draggedVector;
     }
     
     private Vector2 CalculateImpulse()
     {
-        Vector2 impulse = _draggedVector * -IMPULSE_MULT;
+        // Use settings for impulse calculation, with fallbacks
+        float impulseMultiplier = _settings?.SlingshotImpulseMultiplier ?? DEFAULT_IMPULSE_MULT;
+        float impulseMax = _settings?.SlingshotImpulseMax ?? DEFAULT_IMPULSE_MAX;
         
-        if (impulse.Length() > IMPULSE_MAX)
+        Vector2 impulse = _draggedVector * -impulseMultiplier;
+        
+        if (impulse.Length() > impulseMax)
         {
-            impulse = impulse.Normalized() * IMPULSE_MAX;
+            impulse = impulse.Normalized() * impulseMax;
         }
         
         return impulse;
