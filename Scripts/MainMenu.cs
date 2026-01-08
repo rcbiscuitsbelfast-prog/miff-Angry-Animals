@@ -38,6 +38,7 @@ public partial class MainMenu : CanvasLayer
         InitializeMenu();
         AddDailyChallengeButton();
         AddCustomizeFaceButton();
+        AddLevelEditorButtons();
         AddUnlockFullGameButton();
         ConnectSignals();
         SetupInputMap();
@@ -86,6 +87,52 @@ public partial class MainMenu : CanvasLayer
             if (_roomSelectionButtonNode != null)
                 container.MoveChild(customizeBtn, _roomSelectionButtonNode.GetIndex() + 1);
         }
+    }
+
+    private void AddLevelEditorButtons()
+    {
+        if (_playButtonNode != null && _playButtonNode.GetParent() is Control container)
+        {
+            var createLevelBtn = new Button
+            {
+                Text = "Create Level",
+                Name = "CreateLevelButton",
+                Modulate = new Color(0.5f, 0.8f, 1f)
+            };
+            createLevelBtn.Pressed += OnCreateLevelButtonPressed;
+            container.AddChild(createLevelBtn);
+
+            var playCustomBtn = new Button
+            {
+                Text = "Play Custom Level",
+                Name = "PlayCustomLevelButton",
+                Modulate = new Color(0.7f, 0.5f, 1f)
+            };
+            playCustomBtn.Pressed += OnPlayCustomLevelButtonPressed;
+            container.AddChild(playCustomBtn);
+
+            if (_roomSelectionButtonNode != null)
+            {
+                container.MoveChild(createLevelBtn, _roomSelectionButtonNode.GetIndex() + 1);
+                container.MoveChild(playCustomBtn, _roomSelectionButtonNode.GetIndex() + 2);
+            }
+        }
+    }
+
+    private void OnCreateLevelButtonPressed()
+    {
+        GD.Print("Create Level button pressed");
+        PlayUiClickSound();
+
+        GetTree().ChangeSceneToFile("res://Scenes/LevelEditor/LevelEditor.tscn");
+    }
+
+    private void OnPlayCustomLevelButtonPressed()
+    {
+        GD.Print("Play Custom Level button pressed");
+        PlayUiClickSound();
+
+        CustomLevelInputDialog.ShowDialog(this);
     }
 
     private void AddUnlockFullGameButton()

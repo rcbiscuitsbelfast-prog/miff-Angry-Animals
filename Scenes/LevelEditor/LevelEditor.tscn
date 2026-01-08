@@ -1,0 +1,152 @@
+[gd_scene load_steps=2 format=3 uid="uid://custom_level_editor"]
+
+[ext_resource type="Script" path="res://Scripts/UI/LevelEditor.cs" id="1"]
+
+[node name="LevelEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.2, 0.25, 1)
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+
+[node name="TopBar" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="LevelNameLabel" type="Label" parent="MainContainer/TopBar"]
+layout_mode = 2
+text = "Level Name:"
+
+[node name="LevelNameInput" type="LineEdit" parent="MainContainer/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "My Custom Level"
+
+[node name="CreatorNameLabel" type="Label" parent="MainContainer/TopBar"]
+layout_mode = 2
+text = "Creator:"
+
+[node name="CreatorNameInput" type="LineEdit" parent="MainContainer/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Your Name"
+
+[node name="BackButton" type="Button" parent="MainContainer/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back"
+
+[node name="ContentContainer" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainContainer/ContentContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 0)
+
+[node name="MaterialLabel" type="Label" parent="MainContainer/ContentContainer/LeftPanel"]
+layout_mode = 2
+text = "Materials:"
+horizontal_alignment = 1
+
+[node name="MaterialSelector" type="VBoxContainer" parent="MainContainer/ContentContainer/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Spacer" type="Control" parent="MainContainer/ContentContainer/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonsContainer" type="VBoxContainer" parent="MainContainer/ContentContainer/LeftPanel"]
+layout_mode = 2
+
+[node name="ClearButton" type="Button" parent="MainContainer/ContentContainer/LeftPanel/ButtonsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Clear All"
+
+[node name="ValidateButton" type="Button" parent="MainContainer/ContentContainer/LeftPanel/ButtonsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Validate Level"
+
+[node name="SaveButton" type="Button" parent="MainContainer/ContentContainer/LeftPanel/ButtonsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save & Share"
+
+[node name="CenterPanel" type="VBoxContainer" parent="MainContainer/ContentContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlacementLabel" type="Label" parent="MainContainer/ContentContainer/CenterPanel"]
+layout_mode = 2
+text = "Placement Area (Click to place, Right-click to delete, Drag to move)"
+horizontal_alignment = 1
+
+[node name="PlacementArea" type="Control" parent="MainContainer/ContentContainer/CenterPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlacementBackground" type="ColorRect" parent="MainContainer/ContentContainer/CenterPanel/PlacementArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.3, 0.5, 0.7, 1)
+
+[node name="GridLines" type="Control" parent="MainContainer/ContentContainer/CenterPanel/PlacementArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="RightPanel" type="VBoxContainer" parent="MainContainer/ContentContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 0)
+
+[node name="ObstaclesLabel" type="Label" parent="MainContainer/ContentContainer/RightPanel"]
+layout_mode = 2
+text = "Obstacles:"
+horizontal_alignment = 1
+
+[node name="ObstacleList" type="ItemList" parent="MainContainer/ContentContainer/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomBar" type="HBoxContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="DifficultyLabel" type="Label" parent="MainContainer/BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Difficulty: N/A"
+
+[node name="ObstacleCount" type="Label" parent="MainContainer/BottomBar"]
+layout_mode = 2
+text = "Obstacles: 0/20"
