@@ -8,6 +8,7 @@ public partial class StickClone : CharacterBody2D
 {
     [Signal] public delegate void CloneReachedExitEventHandler();
     [Signal] public delegate void CloneStuckEventHandler();
+    [Signal] public delegate void AboutToEnterExplosionEventHandler(Vector2 explosionPosition);
 
     [Export] private float _moveSpeed = 150f;
     [Export] private float _jumpForce = -400f;
@@ -43,6 +44,7 @@ public partial class StickClone : CharacterBody2D
         InitializeStickClone();
         LoadFaceCustomization();
         SetupPhysics();
+        SetupExplosionDetection();
         ConnectSignals();
     }
 
@@ -205,6 +207,75 @@ public partial class StickClone : CharacterBody2D
                 collisionShape.PhysicsMaterialOverride = physicsMaterial;
             }
         }
+    }
+
+    /// <summary>
+    /// Sets up explosion detection area around the StickClone
+    /// This allows the ragdoll spawner to detect when this clone is in explosion range
+    /// </summary>
+    private void SetupExplosionDetection()
+    {
+        // Create an Area2D to detect nearby explosions
+        var explosionArea = new Area2D
+        {
+            Name = "ExplosionDetection",
+            CollisionLayer = 0, // Don't collide with anything
+            CollisionMask = 1 << 3 // Detect objects on layer 4 (explosions)
+        };
+
+        // Add collision shape for explosion detection
+        var explosionShape = new CollisionShape2D();
+        var circleShape = new CircleShape2D
+        {
+            Radius = 60.0f // Detection radius for explosions
+        };
+        explosionShape.Shape = circleShape;
+        explosionArea.AddChild(explosionShape);
+
+        // Connect to explosion detection
+        explosionArea.BodyEntered += OnPotentialExplosionDetected;
+        AddChild(explosionArea);
+
+        GD.Print("Explosion detection area set up for StickClone");
+    }
+
+    /// <summary>
+    /// Called when a potential explosion source enters the detection area
+    /// Emits signal to allow ragdoll spawner to handle the explosion
+    /// </summary>
+    /// <param name="body">The body that entered the explosion area</param>
+    private void OnPotentialExplosionDetected(Node body)
+    {
+        // Only react to actual explosion sources (projectiles, explosive objects, etc.)
+        if (body is Projectile projectile)
+        {
+            // Check if this is a high-impact projectile that should trigger ragdoll
+            if (projectile.LinearVelocity.Length() > 100.0f)
+            {
+                Vector2 explosionPosition = projectile.GlobalPosition;
+                GD.Print($"StickClone detected nearby explosion at {explosionPosition}");
+                
+                // Emit signal to allow ragdoll spawner to handle this
+                EmitSignal(SignalName.AboutToEnterExplosion, explosionPosition);
+                
+                // Give ragdoll spawner 0.1 seconds to react before destroying
+                var timer = GetTree().CreateTimer(0.1f);
+                timer.Timeout += () => DelayedExplosionResponse(explosionPosition);
+            }
+        }
+        // Add other explosion sources as needed (grenades, explosive props, etc.)
+    }
+
+    /// <summary>
+    /// Delayed response to explosion - allows ragdoll spawner time to react
+    /// </summary>
+    /// <param name="explosionPosition">Position of the explosion</param>
+    private void DelayedExplosionResponse(Vector2 explosionPosition)
+    {
+        // Small delay to let ragdoll spawner set up
+        // If no ragdoll spawned after this delay, continue with normal destruction
+        // The ragdoll spawner will handle transforming us if it catches the explosion
+        GD.Print("Explosion response timer elapsed");
     }
 
     private void ConnectSignals()

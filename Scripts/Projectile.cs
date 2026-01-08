@@ -8,6 +8,7 @@ using Godot;
 public partial class Projectile : RigidBody2D, IPoolable
 {
     [Signal] public delegate void AlmostStoppedEventHandler();
+    [Signal] public delegate void ExplosionOccurredEventHandler(Vector2 epicenter, float force, float radius);
 
     [Export] private AudioStreamPlayer2D _kickWoodSound;
     [Export] private VisibleOnScreenNotifier2D _onScreenNotifier;
@@ -20,6 +21,11 @@ public partial class Projectile : RigidBody2D, IPoolable
     // Object pooling support
     private ObjectPool _pool;
     private bool _isPooled = false;
+    
+    /// <summary>
+    /// Gets whether this projectile has been launched
+    /// </summary>
+    public bool HasBeenLaunched => _hasBeenLaunched;
     
     public override void _Ready()
     {
@@ -118,6 +124,13 @@ public partial class Projectile : RigidBody2D, IPoolable
     
     private void Die()
     {
+        // Emit explosion signal before dying
+        float force = LinearVelocity.Length();
+        Vector2 explosionPosition = GlobalPosition;
+        float radius = GetExplosionRadius();
+        
+        EmitSignal(SignalName.ExplosionOccurred, explosionPosition, force, radius);
+
         SignalManager.EmitOnAnimalDied();
 
         // Use object pooling if available
@@ -129,6 +142,19 @@ public partial class Projectile : RigidBody2D, IPoolable
         {
             QueueFree();
         }
+    }
+
+    /// <summary>
+    /// Gets the explosion radius based on projectile type and velocity
+    /// This determines how far the explosion effects reach
+    /// </summary>
+    /// <returns>Explosion radius in pixels</returns>
+    public float GetExplosionRadius()
+    {
+        // Base radius + scaling with velocity for more realistic explosions
+        float baseRadius = 80.0f;
+        float velocityScale = LinearVelocity.Length() * 0.1f;
+        return Mathf.Clamp(baseRadius + velocityScale, 80.0f, 200.0f);
     }
 
     public void ResetForPool()
