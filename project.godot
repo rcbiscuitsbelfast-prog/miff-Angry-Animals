@@ -72,6 +72,13 @@ TestingFramework="*res://Classes/TestingFramework.cs"
 DifficultyAnalyzer="*res://Classes/DifficultyAnalyzer.cs"
 ReleaseNotesGenerator="*res://Classes/ReleaseNotesGenerator.cs"
 
+# Analytics & Telemetry Systems
+FirebaseManager="*res://Classes/FirebaseManager.cs"
+AnalyticsEventTracker="*res://Classes/AnalyticsEventTracker.cs"
+DifficultyHeatmapTracker="*res://Classes/DifficultyHeatmapTracker.cs"
+TelemetryDebugPanel="*res://Classes/TelemetryDebugPanel.cs"
+AnalyticsTestingFramework="*res://Classes/AnalyticsTestingFramework.cs"
+
 [audio]
 
 buses/default_bus_layout="res://default_bus_layout.tres"
