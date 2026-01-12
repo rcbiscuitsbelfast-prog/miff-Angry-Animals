@@ -32,8 +32,6 @@ public partial class RoomBase : Node2D
     private Node2D? _nextRoomMarker;
     private EnemySpawner? _enemySpawner;
 
-    private ConfirmationDialog? _rewardedDialog;
-
     private enum RoomPhase { SLINGSHOT, TRAVERSAL, COMPLETE }
     private RoomPhase _currentPhase = RoomPhase.SLINGSHOT;
 
@@ -56,7 +54,6 @@ public partial class RoomBase : Node2D
     public override void _Ready()
     {
         InitializeRoom();
-        EnsureRewardDialog();
         InitializeObjectives();
         ConnectSignals();
         EmitObjectivesToHud();
@@ -95,22 +92,20 @@ public partial class RoomBase : Node2D
             // Target to unlock door is 30% of optimal score
             _targetScore = (int)(optimalScore * 0.3f);
         }
-    }
 
-    private void EnsureRewardDialog()
-    {
-        _rewardedDialog = new ConfirmationDialog
+        // Check for pending reward from second chance
+        if (PurchaseStateManager.Instance != null && PurchaseStateManager.Instance.HasPendingReward())
         {
-            Name = "RewardedDialog",
-            Title = "Bonus",
-            DialogText = "Watch an ad to get 5 bonus points?",
-            ProcessMode = ProcessModeEnum.Always
-        };
-        _rewardedDialog.GetOkButton().Text = "Watch";
-        _rewardedDialog.GetCancelButton().Text = "Retry";
-        _rewardedDialog.Confirmed += OnRewardedAccepted;
-        _rewardedDialog.Canceled += OnRewardedCanceled;
-        AddChild(_rewardedDialog);
+            GD.Print("RoomBase: Applying pending reward (+2 extra heads)");
+            // We use CallDeferred because ProjectilesLoader might not be ready yet
+            _projectilesLoader?.CallDeferred("AddExtraProjectiles", 2);
+            PurchaseStateManager.Instance.ClearPendingReward();
+            
+            AnalyticsManager.Instance?.TrackFeatureUsage("second_chance_used", new Dictionary<string, object> {
+                { "room_index", currentRoomIndex },
+                { "heads_added", 2 }
+            });
+        }
     }
 
     private void InitializeObjectives()
@@ -253,11 +248,6 @@ public partial class RoomBase : Node2D
         {
             _slingshot.ProjectileLaunched += OnSlingshotProjectileLaunched;
         }
-
-        if (AdsManager.Instance != null)
-        {
-            AdsManager.Instance.RewardEarned += OnRewardEarned;
-        }
     }
 
     public override void _ExitTree()
@@ -280,17 +270,6 @@ public partial class RoomBase : Node2D
         if (_slingshot != null)
         {
             _slingshot.ProjectileLaunched -= OnSlingshotProjectileLaunched;
-        }
-
-        if (AdsManager.Instance != null)
-        {
-            AdsManager.Instance.RewardEarned -= OnRewardEarned;
-        }
-
-        if (_rewardedDialog != null)
-        {
-            _rewardedDialog.Confirmed -= OnRewardedAccepted;
-            _rewardedDialog.Canceled -= OnRewardedCanceled;
         }
     }
 
@@ -464,73 +443,25 @@ public partial class RoomBase : Node2D
             return;
 
         _handlingFailure = true;
-        OnAttemptsFailed();
+        ShowGameOverScreen();
     }
 
-    /// <summary>
-    /// Called when the player runs out of attempts / all projectiles are used without meeting the target.
-    /// Offers an optional rewarded ad for a small score boost.
-    /// </summary>
-    private void OnAttemptsFailed()
+    private void ShowGameOverScreen()
     {
-        if (_rewardedDialog == null)
+        var gameOverScene = ResourceLoader.Load<PackedScene>("res://Scenes/UI/GameOverScreen.tscn");
+        if (gameOverScene == null)
         {
+            GD.PushError("GameOverScreen scene not found!");
             GameManager.RestartRoom();
             return;
         }
 
-        if (MonetizationManager.Instance?.ShowAds != true || AdsManager.Instance == null)
-        {
-            GameManager.RestartRoom();
-            return;
-        }
-
-        _rewardedDialog.PopupCentered();
-    }
-
-    private async void OnRewardedAccepted()
-    {
-        if (AdsManager.Instance == null)
-        {
-            GameManager.RestartRoom();
-            return;
-        }
-
-        try
-        {
-            var rewardTask = ToSignal(AdsManager.Instance, AdsManager.SignalName.RewardEarned);
-            await AdsManager.Instance.ShowRewardedAd();
-
-            if (rewardTask.IsCompleted)
-                ApplyRewardPoints(5);
-        }
-        finally
-        {
-            _handlingFailure = false;
-
-            if (_exitUnlocked)
-                CompleteRoom();
-            else
-                GameManager.RestartRoom();
-        }
-    }
-
-    private void OnRewardedCanceled()
-    {
-        _handlingFailure = false;
-        GameManager.RestartRoom();
-    }
-
-    private void OnRewardEarned()
-    {
-        // Bonus points are applied in OnRewardedAccepted after the ad flow.
-    }
-
-    private void ApplyRewardPoints(int points)
-    {
-        _destructionScore += points;
-        OnDestructionScoreUpdated(_destructionScore);
-        SignalManager.EmitOnDestructionScoreUpdated(_destructionScore);
+        var gameOverScreen = gameOverScene.Instantiate<GameOverScreen>();
+        AddChild(gameOverScreen);
+        
+        int destroyed = _destructionScore; // Simplified
+        int total = _targetScore;
+        gameOverScreen.SetStatus($"You destroyed {destroyed} points of obstacles.\nTarget: {total}");
     }
 
     /// <summary>

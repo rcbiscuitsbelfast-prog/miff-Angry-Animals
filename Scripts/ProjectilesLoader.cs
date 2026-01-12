@@ -103,4 +103,30 @@ public partial class ProjectilesLoader : Node2D
             EmitSignal(SignalName.AllProjectilesUsed);
         }
     }
+
+    /// <summary>
+    /// Adds extra projectiles to the queue.
+    /// </summary>
+    /// <param name="count">Number of projectiles to add</param>
+    public void AddExtraProjectiles(int count)
+    {
+        if (_faceProjectileScene == null)
+            return;
+
+        for (int i = 0; i < count; i++)
+        {
+            var projectile = _faceProjectileScene.Instantiate<Projectile>();
+            projectile.Freeze = true;
+            AddChild(projectile);
+            _projectileQueue.Enqueue(projectile);
+        }
+
+        if (_isLevelComplete)
+        {
+            _isLevelComplete = false;
+            LoadNextProjectile();
+        }
+        
+        GD.Print($"ProjectilesLoader: Added {count} extra projectiles. Total in queue: {_projectileQueue.Count}");
+    }
 }

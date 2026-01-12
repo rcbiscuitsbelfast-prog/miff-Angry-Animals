@@ -65,6 +65,11 @@ public partial class SignalManager : Node
     /// Triggered when objective text should be refreshed.
     /// </summary>
     [Signal] public delegate void OnObjectivesUpdatedEventHandler(string text);
+    
+    /// <summary>
+    /// Triggered when a rewarded ad reward is earned.
+    /// </summary>
+    [Signal] public delegate void RewardEarnedEventHandler();
 
 
     // Called when the node enters the scene tree for the first time.
@@ -105,4 +110,5 @@ public partial class SignalManager : Node
     public static void EmitOnNpcHit(Node npc) => Instance.EmitSignal(SignalName.OnNpcHit, npc);
     public static void EmitOnNpcDestroyed(Node npc) => Instance.EmitSignal(SignalName.OnNpcDestroyed, npc);
     public static void EmitOnObjectivesUpdated(string text) => Instance.EmitSignal(SignalName.OnObjectivesUpdated, text);
+    public static void EmitRewardEarned() => Instance.EmitSignal(SignalName.RewardEarned);
 }
