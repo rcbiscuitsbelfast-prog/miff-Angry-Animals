@@ -1,0 +1,202 @@
+[gd_scene load_steps=3 format=3 uid="uid://battle_pass_screen"]
+
+[ext_resource type="Script" path="res://Classes/Cosmetics/BattlePassScreenUI.cs" id="1_bp_ui"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.12, 0.12, 0.18, 0.95)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+content_margin_left = 20
+content_margin_top = 20
+content_margin_right = 20
+content_margin_bottom = 20
+
+[node name="BattlePassScreen" type="CanvasLayer"]
+script = ExtResource("1_bp_ui")
+BattlePassManager = null
+MainContainer = NodePath("MainPanel")
+SeasonNameLabel = NodePath("MainPanel/VBoxContainer/Header/SeasonNameLabel")
+SeasonDescriptionLabel = NodePath("MainPanel/VBoxContainer/Header/SeasonDescriptionLabel")
+SeasonBanner = NodePath("MainPanel/VBoxContainer/Header/SeasonBanner")
+DaysRemainingLabel = NodePath("MainPanel/VBoxContainer/Header/DaysRemainingLabel")
+TierProgressBar = NodePath("MainPanel/VBoxContainer/ProgressSection/TierProgressBar")
+TierLabel = NodePath("MainPanel/VBoxContainer/ProgressSection/TierLabel")
+XpLabel = NodePath("MainPanel/VBoxContainer/ProgressSection/XpLabel")
+RewardsScrollContainer = NodePath("MainPanel/VBoxContainer/RewardsScrollContainer")
+RewardsGrid = NodePath("MainPanel/VBoxContainer/RewardsScrollContainer/RewardsGrid")
+PurchaseButton = NodePath("MainPanel/VBoxContainer/ActionButtons/PurchaseButton")
+ClaimRewardButton = NodePath("MainPanel/VBoxContainer/ActionButtons/ClaimRewardButton")
+CloseButton = NodePath("MainPanel/Header/CloseButton")
+PremiumBadge = NodePath("MainPanel/Header/PremiumBadge")
+PremiumCurrencyLabel = NodePath("MainPanel/Header/PremiumCurrencyLabel")
+TierNodeSize = Vector2(80, 100)
+TiersPerRow = 6
+FreeTierColor = Color(0.5, 0.5, 0.5, 0.5)
+PremiumTierColor = Color(0.9, 0.7, 0.1, 0.8)
+ClaimedColor = Color(0.3, 0.8, 0.3, 0.5)
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_fill_parent = true
+color = Color(0, 0, 0, 0.85)
+
+[node name="MainPanel" type="PanelContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1
+anchor_bottom = 1
+offset_left = 100
+offset_top = 50
+offset_right = -100
+offset_bottom = -50
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="MainPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Header" type="HBoxContainer" parent="MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="SeasonBanner" type="TextureRect" parent="MainPanel/MarginContainer/VBoxContainer/Header"]
+custom_minimum_size = Vector2(100, 100)
+expand_mode = 2
+stretch_mode = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel/MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SeasonNameLabel" type="Label" parent="MainPanel/MarginContainer/VBoxContainer/Header/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Season 1: Ice Theme"
+
+[node name="SeasonDescriptionLabel" type="Label" parent="MainPanel/MarginContainer/VBoxContainer/Header/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Cool down with icy cosmetics!"
+autowrap_mode = 2
+
+[node name="DaysRemainingLabel" type="Label" parent="MainPanel/MarginContainer/VBoxContainer/Header/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "28 days remaining"
+modulate = Color(0.8, 0.8, 0.8, 1)
+
+[node name="PremiumBadge" type="TextureRect" parent="MainPanel/MarginContainer/VBoxContainer/Header"]
+visible = false
+custom_minimum_size = Vector2(40, 40)
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PremiumCurrencyLabel" type="Label" parent="MainPanel/MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "0 Premium"
+modulate = Color(1, 0.84, 0, 1)
+
+[node name="CloseButton" type="Button" parent="MainPanel/MarginContainer/VBoxContainer/Header"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "X"
+
+[node name="ProgressSection" type="VBoxContainer" parent="MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="TierLabel" type="Label" parent="MainPanel/MarginContainer/VBoxContainer/ProgressSection"]
+layout_mode = 2
+text = "Tier 1/30"
+horizontal_alignment = 1
+
+[node name="TierProgressBar" type="ProgressBar" parent="MainPanel/MarginContainer/VBoxContainer/ProgressSection"]
+layout_mode = 2
+value = 1.0
+
+[node name="XpLabel" type="Label" parent="MainPanel/MarginContainer/VBoxContainer/ProgressSection"]
+layout_mode = 2
+text = "0 XP (100 to next tier)"
+horizontal_alignment = 1
+
+[node name="RewardsScrollContainer" type="ScrollContainer" parent="MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="MainPanel/MarginContainer/VBoxContainer/RewardsScrollContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="RewardsGrid" type="GridContainer" parent="MainPanel/MarginContainer/VBoxContainer/RewardsScrollContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 6
+
+[node name="ActionButtons" type="HBoxContainer" parent="MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="PurchaseButton" type="Button" parent="MainPanel/MarginContainer/VBoxContainer/ActionButtons"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Buy Battle Pass - $4.99"
+
+[node name="ClaimRewardButton" type="Button" parent="MainPanel/MarginContainer/VBoxContainer/ActionButtons"]
+visible = false
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Claim Rewards"
+
+[node name="InfoPanel" type="PanelContainer" parent="MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainPanel/MarginContainer/VBoxContainer/InfoPanel"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="FreeInfo" type="VBoxContainer" parent="MainPanel/MarginContainer/VBoxContainer/InfoPanel/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="MainPanel/MarginContainer/VBoxContainer/InfoPanel/HBoxContainer/FreeInfo"]
+layout_mode = 2
+text = "Free Track"
+horizontal_alignment = 1
+
+[node name="RewardLabel" type="Label" parent="MainPanel/MarginContainer/VBoxContainer/InfoPanel/HBoxContainer/FreeInfo"]
+layout_mode = 2
+text = "20 Tiers of Rewards"
+horizontal_alignment = 1
+modulate = Color(0.5, 0.8, 1, 1)
+
+[node name="PremiumInfo" type="VBoxContainer" parent="MainPanel/MarginContainer/VBoxContainer/InfoPanel/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label2" type="Label" parent="MainPanel/MarginContainer/VBoxContainer/InfoPanel/HBoxContainer/PremiumInfo"]
+layout_mode = 2
+text = "Premium Track"
+horizontal_alignment = 1
+
+[node name="RewardLabel2" type="Label" parent="MainPanel/MarginContainer/VBoxContainer/InfoPanel/HBoxContainer/PremiumInfo"]
+layout_mode = 2
+text = "30 Tiers + Exclusive Cosmetics"
+horizontal_alignment = 1
+modulate = Color(1, 0.84, 0, 1)
