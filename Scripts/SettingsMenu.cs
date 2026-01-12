@@ -20,6 +20,7 @@ public partial class SettingsMenu : Control
     [Export] private NodePath _easyModeButtonPath;
     [Export] private NodePath _normalModeButtonPath;
     [Export] private NodePath _hardModeButtonPath;
+    [Export] private NodePath _removeAdsButtonPath;
 
     private Control? _panel;
     private Button? _backButton;
@@ -32,6 +33,7 @@ public partial class SettingsMenu : Control
     private Button? _easyModeButton;
     private Button? _normalModeButton;
     private Button? _hardModeButton;
+    private Button? _removeAdsButton;
 
     public override void _Ready()
     {
@@ -53,6 +55,7 @@ public partial class SettingsMenu : Control
         _easyModeButton = GetNodeOrNull<Button>(_easyModeButtonPath);
         _normalModeButton = GetNodeOrNull<Button>(_normalModeButtonPath);
         _hardModeButton = GetNodeOrNull<Button>(_hardModeButtonPath);
+        _removeAdsButton = GetNodeOrNull<Button>(_removeAdsButtonPath);
 
         // Initially hide the panel
         if (_panel != null)
@@ -112,6 +115,11 @@ public partial class SettingsMenu : Control
         {
             _hardModeButton.Pressed += () => ApplyDifficultyPreset("hard");
         }
+
+        if (_removeAdsButton != null)
+        {
+            _removeAdsButton.Pressed += OnRemoveAdsPressed;
+        }
     }
 
     public override void _ExitTree()
@@ -149,6 +157,11 @@ public partial class SettingsMenu : Control
         if (_hapticsToggle != null)
         {
             _hapticsToggle.Toggled -= OnHapticsToggled;
+        }
+
+        if (_removeAdsButton != null)
+        {
+            _removeAdsButton.Pressed -= OnRemoveAdsPressed;
         }
     }
 
@@ -198,6 +211,9 @@ public partial class SettingsMenu : Control
         // Load from PlayerProfile
         if (_hapticsToggle != null && PlayerProfile.Instance != null)
             _hapticsToggle.ButtonPressed = PlayerProfile.Instance.HighContrastMode; // Placeholder
+
+        // Load Remove Ads status
+        UpdateRemoveAdsButton();
     }
 
     #region Volume Controls
@@ -335,6 +351,62 @@ public partial class SettingsMenu : Control
 
     #endregion
 
+    #region Remove Ads
+
+    private async void OnRemoveAdsPressed()
+    {
+        GameFeelManager.Instance?.OnButtonPress(this);
+
+        if (_removeAdsButton == null)
+            return;
+
+        // Check if already purchased
+        if (PremiumManager.Instance?.IsAdFreeVersion == true)
+        {
+            GD.Print("Remove Ads: Already purchased");
+            return;
+        }
+
+        // Show loading state
+        var originalText = _removeAdsButton.Text;
+        _removeAdsButton.Text = "Loading...";
+        _removeAdsButton.Disabled = true;
+
+        try
+        {
+            // Attempt to purchase
+            await PremiumManager.Instance?.PurchaseRemoveAds();
+        }
+        catch (Exception ex)
+        {
+            GD.PushError($"Remove Ads purchase failed: {ex.Message}");
+            _removeAdsButton.Text = originalText;
+            _removeAdsButton.Disabled = false;
+        }
+    }
+
+    private void UpdateRemoveAdsButton()
+    {
+        if (_removeAdsButton == null)
+            return;
+
+        if (PremiumManager.Instance?.IsAdFreeVersion == true)
+        {
+            // Already purchased - show checkmark
+            _removeAdsButton.Text = "✓ Ad-Free";
+            _removeAdsButton.Disabled = true;
+        }
+        else
+        {
+            // Not purchased - show price
+            var price = PremiumManager.Instance?.RemoveAdsPrice ?? "$0.99";
+            _removeAdsButton.Text = $"Remove Ads - {price}";
+            _removeAdsButton.Disabled = false;
+        }
+    }
+
+    #endregion
+
     #region UI Controls
 
     private void OnBackPressed()
@@ -360,6 +432,42 @@ public partial class SettingsMenu : Control
         }
 
         LoadCurrentSettings();
+
+        // Connect to PremiumManager signals to update button state
+        ConnectPremiumManagerSignals();
+    }
+
+    private void ConnectPremiumManagerSignals()
+    {
+        if (PremiumManager.Instance == null)
+            return;
+
+        // Connect signals for Remove Ads purchase handling
+        PremiumManager.Instance.RemoveAdsPurchaseSucceeded += OnRemoveAdsPurchaseSucceeded;
+        PremiumManager.Instance.RemoveAdsPurchaseFailed += OnRemoveAdsPurchaseFailed;
+    }
+
+    private void OnRemoveAdsPurchaseSucceeded()
+    {
+        GD.Print("SettingsMenu: Remove Ads purchase succeeded");
+        UpdateRemoveAdsButton();
+        
+        if (_removeAdsButton != null)
+        {
+            _removeAdsButton.Disabled = false;
+        }
+    }
+
+    private void OnRemoveAdsPurchaseFailed(string reason)
+    {
+        GD.Print($"SettingsMenu: Remove Ads purchase failed: {reason}");
+        
+        if (_removeAdsButton != null)
+        {
+            var price = PremiumManager.Instance?.RemoveAdsPrice ?? "$0.99";
+            _removeAdsButton.Text = $"Remove Ads - {price}";
+            _removeAdsButton.Disabled = false;
+        }
     }
 
     public void HideSettings()
