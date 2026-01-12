@@ -224,10 +224,20 @@ public class AndroidBuildManager : Node
                 writer.WriteLine("            android:exported=\"false\" />");
                 writer.WriteLine();
                 
+                var admobAppId = "";
+                if (ProjectSettings.HasSetting("monetization/admob/app_id_android"))
+                    admobAppId = ProjectSettings.GetSetting("monetization/admob/app_id_android").AsString();
+
+                if (string.IsNullOrWhiteSpace(admobAppId) && ProjectSettings.HasSetting("monetization/admob/app_id"))
+                    admobAppId = ProjectSettings.GetSetting("monetization/admob/app_id").AsString();
+
+                if (string.IsNullOrWhiteSpace(admobAppId))
+                    admobAppId = "ca-app-pub-3940256099942544~3347511713"; // AdMob test app id
+
                 writer.WriteLine("        <!-- Google Mobile Ads SDK metadata -->");
                 writer.WriteLine("        <meta-data");
                 writer.WriteLine("            android:name=\"com.google.android.gms.ads.APPLICATION_ID\"");
-                writer.WriteLine("            android:value=\"ca-app-pub-3940256099942544~3347511713\" />");
+                writer.WriteLine($"            android:value=\"{admobAppId}\" />");
                 writer.WriteLine();
                 
                 writer.WriteLine("        <!-- File provider for sharing -->");

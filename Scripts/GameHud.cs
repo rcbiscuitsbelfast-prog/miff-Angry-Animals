@@ -40,7 +40,6 @@ public partial class GameHud : Control
         InitializeHUD();
         ConnectSignals();
         SetupInputMap();
-        ShowBannerAd();
     }
 
     private void InitializeHUD()
@@ -203,8 +202,6 @@ public partial class GameHud : Control
         {
             _quitButton.Pressed -= OnQuitButtonPressed;
         }
-
-        HideBannerAd();
     }
 
     private void SetupInputMap()
@@ -255,8 +252,6 @@ public partial class GameHud : Control
 
     private void OnLevelCompleted()
     {
-        HideBannerAd();
-
         // Hide pause button when level is complete
         if (_pauseButton != null)
             _pauseButton.Visible = false;
@@ -306,7 +301,7 @@ public partial class GameHud : Control
                 break;
             case GameManager.GameState.RoomComplete:
                 HidePausePanel();
-                HideBannerAd();
+                AdsManager.Instance?.SetBannerRefreshPaused(false);
                 break;
         }
     }
@@ -433,42 +428,17 @@ public partial class GameHud : Control
 
     private void OnRoomCompleted(int roomIndex)
     {
-        HideBannerAd();
+        AdsManager.Instance?.SetBannerRefreshPaused(false);
     }
 
-    /// <summary>
-    /// Called when a playable level starts.
-    /// </summary>
     private void OnLevelStarted()
     {
-        ShowBannerAd();
+        AdsManager.Instance?.SetBannerRefreshPaused(false);
     }
 
-    /// <summary>
-    /// Called when the game is paused.
-    /// </summary>
     private void OnGamePaused()
     {
-        HideBannerAd();
-    }
-
-    /// <summary>
-    /// Shows a banner ad at the bottom of the screen when the player is in a playable room.
-    /// </summary>
-    private void ShowBannerAd()
-    {
-        if (MonetizationManager.Instance?.ShowAds != true)
-            return;
-
-        AdsManager.Instance?.ShowBannerAd();
-    }
-
-    /// <summary>
-    /// Hides the banner ad.
-    /// </summary>
-    private void HideBannerAd()
-    {
-        AdsManager.Instance?.HideBannerAd();
+        AdsManager.Instance?.SetBannerRefreshPaused(true);
     }
 
     /// <summary>

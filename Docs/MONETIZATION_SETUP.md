@@ -2,7 +2,7 @@
 
 This project uses a **free + paid unlock** model:
 
-- **Free tier:** Levels 1–20, ads shown during gameplay.
+- **Free tier:** Levels 1–20, ads shown via a **persistent banner** (menu + level select + gameplay).
 - **Paid unlock (£1.50):** Unlocks all 100 levels and disables ads.
 - Unlock is persisted in `user://profile.json` via `PlayerProfile.IsFullGameUnlocked`.
 
@@ -24,7 +24,7 @@ This project uses a **free + paid unlock** model:
 ### 1.3 Create ad units
 Create three ad units:
 
-- **Banner** (shown during gameplay at the bottom)
+- **Banner** (persistent across the app; configurable top/bottom; standard 320x50)
 - **Interstitial** (shown between levels)
 - **Rewarded** (optional: offered after failure to gain a small bonus)
 
@@ -33,16 +33,26 @@ Copy each **Ad Unit ID**.
 ### 1.4 Configure IDs in the Godot project
 The game reads AdMob configuration from **ProjectSettings** keys (recommended for production builds):
 
-- `monetization/admob/app_id`
+Required IDs:
+- `monetization/admob/app_id` (optional if you use per-platform keys below)
+- `monetization/admob/app_id_android`
+- `monetization/admob/app_id_ios`
 - `monetization/admob/banner_ad_unit_id`
 - `monetization/admob/interstitial_ad_unit_id`
 - `monetization/admob/rewarded_ad_unit_id`
 
+Banner behavior:
+- `monetization/admob/persistent_banner` (bool, default true)
+- `monetization/admob/banner_position` (string: `bottom` or `top`, default `bottom`)
+- `monetization/admob/banner_auto_refresh` (bool, default true)
+- `monetization/admob/banner_refresh_seconds` (int, default 30)
+- `monetization/admob/banner_height_px` (int, default 50; used for UI safe-area adjustments)
+
 You can set these in the Godot Editor:
 1. **Project → Project Settings**
-2. Add the keys above (type: String)
+2. Add the keys above with appropriate types (String / bool / int)
 
-At runtime these settings are passed into `AdsManager.Initialize(...)` from `Globals.cs`.
+At runtime, the ID settings are passed into `AdsManager.Initialize(...)` from `Globals.cs`. Banner behavior settings are read directly by `AdsManager` from ProjectSettings.
 
 ### 1.5 Plugin integration notes
 `AdsManager` expects an AdMob plugin to be installed and exposed as an **Engine Singleton**.
