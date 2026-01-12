@@ -367,18 +367,75 @@ public class AnalyticsManager : Node
     }
 
     /// <summary>
-    /// Track user retention metrics
+    /// Track daily login engagement
     /// </summary>
-    public void TrackRetention(int daysSinceInstall)
+    public void TrackDailyLogin(int streakDay, bool rewardClaimed, int sessionDuration)
     {
-        var retentionKey = $"day_{daysSinceInstall}";
-        
-        if (!_analyticsData.GameplayMetrics.RetentionData.ContainsKey(retentionKey))
+        LogEvent("daily_login", new Dictionary<string, object>
         {
-            _analyticsData.GameplayMetrics.RetentionData[retentionKey] = 0;
-        }
-        
-        _analyticsData.GameplayMetrics.RetentionData[retentionKey]++;
+            { "streak_day", streakDay },
+            { "reward_claimed", rewardClaimed },
+            { "session_duration_minutes", sessionDuration },
+            { "player_segment", DeterminePlayerSegment() }
+        });
+    }
+
+    /// <summary>
+    /// Track streak milestone achievements
+    /// </summary>
+    public void TrackStreakMilestone(int milestoneDay, int totalStreak, bool celebrationShown)
+    {
+        LogEvent("daily_streak_milestone", new Dictionary<string, object>
+        {
+            { "milestone_day", milestoneDay },
+            { "total_streak", totalStreak },
+            { "milestone_type", GetMilestoneType(milestoneDay) },
+            { "celebration_shown", celebrationShown }
+        });
+    }
+
+    /// <summary>
+    /// Track seasonal event participation
+    /// </summary>
+    public void TrackSeasonalEventParticipation(string eventId, string eventName, bool joined, float completionRate)
+    {
+        LogEvent("seasonal_event_participation", new Dictionary<string, object>
+        {
+            { "event_id", eventId },
+            { "event_name", eventName },
+            { "joined_event", joined },
+            { "completion_rate", completionRate },
+            { "participation_date", DateTime.UtcNow.ToString("O") }
+        });
+    }
+
+    /// <summary>
+    /// Track notification engagement
+    /// </summary>
+    public void TrackNotificationEngagement(string notificationType, bool opened, int timeToOpenMinutes)
+    {
+        LogEvent("notification_engagement", new Dictionary<string, object>
+        {
+            { "notification_type", notificationType },
+            { "notification_opened", opened },
+            { "time_to_open_minutes", timeToOpenMinutes },
+            { "platform", OS.GetName() }
+        });
+    }
+
+    /// <summary>
+    /// Track retention metrics
+    /// </summary>
+    public void TrackRetentionMetrics(int daysActive, int currentStreak, int bestStreak, List<string> eventsParticipated)
+    {
+        LogEvent("retention_metrics", new Dictionary<string, object>
+        {
+            { "days_active", daysActive },
+            { "current_streak", currentStreak },
+            { "best_streak", bestStreak },
+            { "events_participated_count", eventsParticipated.Count },
+            { "retention_tier", DetermineRetentionTier(daysActive, currentStreak) }
+        });
     }
 
     /// <summary>
@@ -486,6 +543,78 @@ public class AnalyticsManager : Node
             VramSize = OS.GetVideoAdapterMemorySize(),
             GodotVersion = Engine.GetVersionInfo()["string"].ToString()
         };
+    }
+
+    /// <summary>
+    /// Determine player segment based on behavior
+    /// </summary>
+    private string DeterminePlayerSegment()
+    {
+        // This would integrate with streak and engagement data
+        // For now, return a placeholder based on session count
+        var sessions = _analyticsData.TotalSessions;
+        
+        if (sessions < 7) return "new_player";
+        if (sessions < 30) return "growing_player";
+        if (sessions < 100) return "established_player";
+        return "veteran_player";
+    }
+
+    /// <summary>
+    /// Get milestone type for analytics
+    /// </summary>
+    private string GetMilestoneType(int milestoneDay)
+    {
+        return milestoneDay switch
+        {
+            7 => "week_1",
+            14 => "week_2", 
+            21 => "week_3",
+            30 => "month_master",
+            _ => $"day_{milestoneDay}"
+        };
+    }
+
+    /// <summary>
+    /// Determine retention tier for analytics
+    /// </summary>
+    private string DetermineRetentionTier(int daysActive, int currentStreak)
+    {
+        if (currentStreak >= 30) return "legendary_player";
+        if (currentStreak >= 14) return "dedicated_player";
+        if (currentStreak >= 7) return "engaged_player";
+        if (currentStreak >= 3) return "building_player";
+        if (daysActive >= 7) return "regular_player";
+        return "casual_player";
+    }
+
+    /// <summary>
+    /// Get level difficulty for analytics
+    /// </summary>
+    private string GetLevelDifficulty(int levelNumber)
+    {
+        if (levelNumber <= 10) return "easy";
+        if (levelNumber <= 25) return "medium";
+        if (levelNumber <= 50) return "hard";
+        return "expert";
+    }
+
+    /// <summary>
+    /// Get total unlocked levels
+    /// </summary>
+    private int GetTotalUnlockedLevels()
+    {
+        return PlayerProfile.Instance?.HighestUnlockedRoomIndex ?? 0;
+    }
+
+    /// <summary>
+    /// Determine device tier for performance analytics
+    /// </summary>
+    private string DetermineDeviceTier(float fps, float memoryUsage)
+    {
+        if (fps >= 60 && memoryUsage < 500) return "high_end";
+        if (fps >= 30 && memoryUsage < 1000) return "mid_range";
+        return "low_end";
     }
 
     /// <summary>

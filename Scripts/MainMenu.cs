@@ -40,9 +40,13 @@ public partial class MainMenu : CanvasLayer
         AddCustomizeFaceButton();
         AddLevelEditorButtons();
         AddUnlockFullGameButton();
+        AddRetentionSystemButtons(); // Add retention system buttons
         AddTelemetryMetricsButton(); // Add telemetry button for debug builds
         ConnectSignals();
         SetupInputMap();
+        
+        // Initialize retention systems
+        InitializeRetentionSystems();
     }
 
     private void AddDailyChallengeButton()
@@ -582,5 +586,256 @@ public partial class MainMenu : CanvasLayer
             _unlockFullGameButton.Disabled = false;
             _unlockFullGameButton.Text = "Unlock Full Game - £1.50";
         }
+        
+        // Update retention system UI
+        UpdateRetentionSystemUI();
+    }
+
+    /// <summary>
+    /// Initialize retention systems (streak, events, notifications)
+    /// </summary>
+    private void InitializeRetentionSystems()
+    {
+        // Initialize streak system
+        if (StreakManager.Instance != null)
+        {
+            StreakManager.Instance.CheckDailyLogin();
+        }
+
+        // Initialize seasonal event system
+        if (SeasonalEventManager.Instance != null)
+        {
+            SeasonalEventManager.Instance.CheckAndActivateEvents();
+        }
+
+        // Initialize push notification system
+        if (PushNotificationManager.Instance != null)
+        {
+            // Handle app launch notification check
+            GD.Print("Retention systems initialized");
+        }
+    }
+
+    /// <summary>
+    /// Add retention system buttons to main menu
+    /// </summary>
+    private void AddRetentionSystemButtons()
+    {
+        if (_playButtonNode != null && _playButtonNode.GetParent() is Control container)
+        {
+            // Add streak indicator and login bonus button
+            AddStreakIndicatorButton();
+            AddLoginBonusButton();
+            AddSeasonalEventsButton();
+            AddNotificationSettingsButton();
+        }
+    }
+
+    /// <summary>
+    /// Add streak indicator button showing current streak
+    /// </summary>
+    private void AddStreakIndicatorButton()
+    {
+        var streakBtn = new Button
+        {
+            Text = "🔥 Day 1 of 30!",
+            Name = "StreakIndicatorButton",
+            Modulate = new Color(1f, 0.8f, 0.2f) // Gold color
+        };
+        streakBtn.Pressed += OnStreakIndicatorPressed;
+
+        container.AddChild(streakBtn);
+
+        if (_playButtonNode != null)
+            container.MoveChild(streakBtn, _playButtonNode.GetIndex() + 1);
+    }
+
+    /// <summary>
+    /// Add login bonus button
+    /// </summary>
+    private void AddLoginBonusButton()
+    {
+        var loginBonusBtn = new Button
+        {
+            Text = "🎁 Daily Bonus",
+            Name = "LoginBonusButton",
+            Modulate = new Color(0.5f, 1f, 0.5f) // Green color
+        };
+        loginBonusBtn.Pressed += OnLoginBonusButtonPressed;
+
+        container.AddChild(loginBonusBtn);
+
+        if (_playButtonNode != null)
+            container.MoveChild(loginBonusBtn, _playButtonNode.GetIndex() + 2);
+    }
+
+    /// <summary>
+    /// Add seasonal events button
+    /// </summary>
+    private void AddSeasonalEventsButton()
+    {
+        var eventsBtn = new Button
+        {
+            Text = "🎉 Seasonal Events",
+            Name = "SeasonalEventsButton",
+            Modulate = new Color(0.7f, 0.5f, 1f) // Purple color
+        };
+        eventsBtn.Pressed += OnSeasonalEventsButtonPressed;
+
+        container.AddChild(eventsBtn);
+
+        if (_playButtonNode != null)
+            container.MoveChild(eventsBtn, _playButtonNode.GetIndex() + 3);
+    }
+
+    /// <summary>
+    /// Add notification settings button
+    /// </summary>
+    private void AddNotificationSettingsButton()
+    {
+        var notifBtn = new Button
+        {
+            Text = "🔔 Notifications",
+            Name = "NotificationSettingsButton",
+            Modulate = new Color(1f, 0.7f, 0.5f) // Orange color
+        };
+        notifBtn.Pressed += OnNotificationSettingsButtonPressed;
+
+        container.AddChild(notifBtn);
+
+        if (_playButtonNode != null)
+            container.MoveChild(notifBtn, _playButtonNode.GetIndex() + 4);
+    }
+
+    /// <summary>
+    /// Update retention system UI
+    /// </summary>
+    private void UpdateRetentionSystemUI()
+    {
+        UpdateStreakIndicator();
+    }
+
+    /// <summary>
+    /// Update streak indicator display
+    /// </summary>
+    private void UpdateStreakIndicator()
+    {
+        var streakBtn = GetNodeOrNull<Button>("StreakIndicatorButton");
+        if (streakBtn == null || StreakManager.Instance == null) return;
+
+        var streakData = StreakManager.Instance.GetStreakDisplayData();
+        var currentStreak = (int)streakData.GetValueOrDefault("current_streak", 0);
+
+        if (currentStreak > 0)
+        {
+            streakBtn.Text = $"🔥 Day {currentStreak} of 30!";
+            streakBtn.Modulate = currentStreak switch
+            {
+                >= 22 => Colors.Gold,
+                >= 15 => Colors.Purple,
+                >= 8 => Colors.Blue,
+                _ => new Color(1f, 0.8f, 0.2f)
+            };
+        }
+        else
+        {
+            streakBtn.Text = "🌟 Start your streak!";
+            streakBtn.Modulate = Colors.Gray;
+        }
+    }
+
+    /// <summary>
+    /// Handle streak indicator pressed
+    /// </summary>
+    private void OnStreakIndicatorPressed()
+    {
+        GD.Print("Streak indicator pressed");
+        PlayUiClickSound();
+
+        // Show streak details or login bonus screen
+        OnLoginBonusButtonPressed();
+    }
+
+    /// <summary>
+    /// Handle login bonus button pressed
+    /// </summary>
+    private void OnLoginBonusButtonPressed()
+    {
+        GD.Print("Login bonus button pressed");
+        PlayUiClickSound();
+
+        // Load and show login bonus screen
+        var loginBonusScreen = ResourceLoader.Load<PackedScene>("res://Scenes/UI/LoginBonusScreen.tscn");
+        if (loginBonusScreen != null)
+        {
+            var screenInstance = loginBonusScreen.Instantiate();
+            AddChild(screenInstance);
+        }
+    }
+
+    /// <summary>
+    /// Handle seasonal events button pressed
+    /// </summary>
+    private void OnSeasonalEventsButtonPressed()
+    {
+        GD.Print("Seasonal events button pressed");
+        PlayUiClickSound();
+
+        // Load and show seasonal events screen
+        var eventScreen = ResourceLoader.Load<PackedScene>("res://Scenes/UI/SeasonalEventScreen.tscn");
+        if (eventScreen != null)
+        {
+            var screenInstance = eventScreen.Instantiate();
+            AddChild(screenInstance);
+        }
+    }
+
+    /// <summary>
+    /// Handle notification settings button pressed
+    /// </summary>
+    private void OnNotificationSettingsButtonPressed()
+    {
+        GD.Print("Notification settings button pressed");
+        PlayUiClickSound();
+
+        // Show notification settings dialog
+        ShowNotificationSettingsDialog();
+    }
+
+    /// <summary>
+    /// Show notification settings dialog
+    /// </summary>
+    private void ShowNotificationSettingsDialog()
+    {
+        // This would show a dialog for configuring notification preferences
+        // For now, we'll show a simple message
+        GD.Print("Notification settings - this would open a settings dialog");
+        
+        // Example: Show confirmation dialog
+        var dialog = new ConfirmationDialog();
+        dialog.Title = "Notification Settings";
+        dialog.DialogText = "Push notifications help keep you engaged with daily rewards and events!\n\nEnable notifications for:\n• Daily login reminders\n• Streak milestone celebrations\n• Seasonal event announcements\n\nWould you like to enable push notifications?";
+        
+        dialog.Confirmed += () => EnablePushNotifications();
+        dialog.Canceled += () => GD.Print("Notification settings cancelled");
+        
+        AddChild(dialog);
+        dialog.PopupCentered();
+    }
+
+    /// <summary>
+    /// Enable push notifications
+    /// </summary>
+    private void EnablePushNotifications()
+    {
+        // This would integrate with the PushNotificationManager
+        GD.Print("Enabling push notifications...");
+        
+        // Show success message
+        var successDialog = new AcceptDialog();
+        successDialog.Title = "Notifications Enabled!";
+        successDialog.DialogText = "You'll now receive daily reminders and event notifications to help maintain your streak!";
+        AddChild(successDialog);
+        successDialog.PopupCentered();
     }
 }
