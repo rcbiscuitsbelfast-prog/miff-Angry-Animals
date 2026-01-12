@@ -14,6 +14,13 @@ public partial class AdsManager : Node
     [Signal] public delegate void AdClosedEventHandler();
     [Signal] public delegate void AdClickedEventHandler();
     [Signal] public delegate void RewardEarnedEventHandler();
+    [Signal] public delegate void BannerInsetChangedEventHandler(int insetPx);
+
+    public enum BannerPlacement
+    {
+        Bottom = 0,
+        Top = 1
+    }
 
     /// <summary>
     /// AdMob app ID used for initialization.
@@ -22,9 +29,17 @@ public partial class AdsManager : Node
     [Export] public string AdMobAppId { get; set; } = "";
 
     /// <summary>
+    /// Platform-specific AdMob app ID overrides.
+    /// If set, these take precedence over <see cref="AdMobAppId"/> when running on that platform.
+    /// </summary>
+    [Export] public string AndroidAdMobAppId { get; set; } = "";
+
+    [Export] public string IosAdMobAppId { get; set; } = "";
+
+    /// <summary>
     /// Banner ad unit ID.
     /// </summary>
-    [Export] public string BannerAdUnitId { get; set; } = "";
+    [Export] public string BannerAdUnitId { get; set; } = "ca-app-pub-6675121744131727/8033303534";
 
     /// <summary>
     /// Interstitial ad unit ID.
@@ -36,6 +51,39 @@ public partial class AdsManager : Node
     /// </summary>
     [Export] public string RewardedAdUnitId { get; set; } = "";
 
+    /// <summary>
+    /// Where the banner should be anchored.
+    /// </summary>
+    [Export] public BannerPlacement BannerPosition { get; set; } = BannerPlacement.Bottom;
+
+    /// <summary>
+    /// If enabled, the banner is shown once at startup and stays visible for the entire app session
+    /// (unless ads are disabled via IAP).
+    /// </summary>
+    [Export] public bool PersistentBannerEnabled { get; set; } = true;
+
+    /// <summary>
+    /// If enabled, the manager will attempt to refresh/reload the banner at a fixed interval.
+    /// Some SDK/plugin combinations auto-refresh; this is an additional safety net.
+    /// </summary>
+    [Export] public bool EnableBannerAutoRefresh { get; set; } = true;
+
+    /// <summary>
+    /// Banner refresh interval in seconds.
+    /// </summary>
+    [Export] public int BannerRefreshSeconds { get; set; } = 30;
+
+    /// <summary>
+    /// Expected banner height in pixels for safe-area/UI adjustments.
+    /// Standard banners are 320x50 on phones.
+    /// </summary>
+    [Export] public int BannerHeightPx { get; set; } = 50;
+
+    /// <summary>
+    /// On non-mobile platforms, show a small placeholder bar to simulate the banner.
+    /// </summary>
+    [Export] public bool ShowEditorPlaceholderBanner { get; set; } = true;
+
     private GodotObject? _adPlugin;
     private bool _initialized;
 
@@ -43,31 +91,56 @@ public partial class AdsManager : Node
     private bool _interstitialReady;
     private bool _rewardedReady;
 
+    private Timer? _bannerRefreshTimer;
+
+    private CanvasLayer? _placeholderLayer;
+    private Control? _placeholderBanner;
+
+    private int _lastBannerInset;
+
+    public int CurrentBannerInsetPx => _bannerVisible ? BannerHeightPx : 0;
+
     public override void _Ready()
     {
         Instance = this;
         ProcessMode = ProcessModeEnum.Always;
+
+        ApplyBannerSettingsFromProjectSettings();
+        SetupPlaceholderBannerIfNeeded();
+
+        CallDeferred(nameof(EnsurePersistentBannerIfPossible));
+    }
+
+    public override void _ExitTree()
+    {
+        StopBannerRefreshTimer();
+        DestroyBanner();
     }
 
     /// <summary>
     /// Initializes the underlying AdMob plugin (if available) with the provided IDs.
     /// This is safe to call multiple times.
     /// </summary>
-    /// <param name="adMobAppId">AdMob app ID.</param>
+    /// <param name="adMobAppId">AdMob app ID (optional if provided via platform configs/manifest).</param>
     /// <param name="bannerAdUnitId">Banner ad unit ID.</param>
     /// <param name="interstitialAdUnitId">Interstitial ad unit ID.</param>
     /// <param name="rewardedAdUnitId">Rewarded ad unit ID.</param>
     public void Initialize(string adMobAppId, string bannerAdUnitId, string interstitialAdUnitId, string rewardedAdUnitId)
     {
-        AdMobAppId = string.IsNullOrWhiteSpace(adMobAppId) ? AdMobAppId : adMobAppId.Trim();
+        var resolvedAppId = ResolveAdMobAppId(adMobAppId);
+
+        AdMobAppId = string.IsNullOrWhiteSpace(resolvedAppId) ? AdMobAppId : resolvedAppId.Trim();
         BannerAdUnitId = string.IsNullOrWhiteSpace(bannerAdUnitId) ? BannerAdUnitId : bannerAdUnitId.Trim();
         InterstitialAdUnitId = string.IsNullOrWhiteSpace(interstitialAdUnitId) ? InterstitialAdUnitId : interstitialAdUnitId.Trim();
         RewardedAdUnitId = string.IsNullOrWhiteSpace(rewardedAdUnitId) ? RewardedAdUnitId : rewardedAdUnitId.Trim();
+
+        ApplyBannerSettingsFromProjectSettings();
 
         if (!IsPlatformSupported())
         {
             _initialized = false;
             _adPlugin = null;
+            UpdatePlaceholderVisibility();
             return;
         }
 
@@ -76,6 +149,7 @@ public partial class AdsManager : Node
         {
             GD.PushWarning("AdsManager: No AdMob plugin singleton found. Ads are disabled.");
             _initialized = false;
+            UpdatePlaceholderVisibility();
             return;
         }
 
@@ -87,22 +161,31 @@ public partial class AdsManager : Node
                 TryCallPlugin("initialize", AdMobAppId);
                 TryCallPlugin("init", AdMobAppId);
                 TryCallPlugin("set_app_id", AdMobAppId);
+                TryCallPlugin("setAppId", AdMobAppId);
+            }
+            else
+            {
+                // Some plugins/exports rely on manifest/Info.plist app IDs.
+                TryCallPlugin("initialize");
+                TryCallPlugin("init");
             }
 
             _initialized = true;
 
             _ = LoadAdsAsync();
+            CallDeferred(nameof(EnsurePersistentBannerIfPossible));
         }
         catch (Exception ex)
         {
             GD.PushWarning($"AdsManager: initialization failed: {ex.Message}");
             _initialized = false;
             _adPlugin = null;
+            UpdatePlaceholderVisibility();
         }
     }
 
     /// <summary>
-    /// Shows a banner ad at the bottom of the screen.
+    /// Shows a banner ad.
     /// Does nothing when ads are unavailable.
     /// </summary>
     public void ShowBannerAd()
@@ -113,26 +196,38 @@ public partial class AdsManager : Node
         if (_bannerVisible)
             return;
 
-        _bannerVisible = true;
-
         try
         {
+            ConfigureBannerPositionAndSize();
+
+            bool shown;
             if (!string.IsNullOrWhiteSpace(BannerAdUnitId))
             {
-                TryCallPlugin("show_banner", BannerAdUnitId);
-                TryCallPlugin("showBanner", BannerAdUnitId);
-                TryCallPlugin("show_banner_ad", BannerAdUnitId);
+                shown =
+                    TryCallPlugin("show_banner", BannerAdUnitId) ||
+                    TryCallPlugin("showBanner", BannerAdUnitId) ||
+                    TryCallPlugin("show_banner_ad", BannerAdUnitId) ||
+                    TryCallPlugin("show_banner_ad_unit", BannerAdUnitId);
             }
             else
             {
-                TryCallPlugin("show_banner");
-                TryCallPlugin("showBanner");
-                TryCallPlugin("show_banner_ad");
+                shown =
+                    TryCallPlugin("show_banner") ||
+                    TryCallPlugin("showBanner") ||
+                    TryCallPlugin("show_banner_ad");
             }
+
+            _bannerVisible = shown;
+            UpdateBannerInset();
+
+            if (_bannerVisible)
+                StartBannerRefreshTimerIfNeeded();
         }
         catch (Exception ex)
         {
             GD.PushWarning($"AdsManager: ShowBannerAd failed: {ex.Message}");
+            _bannerVisible = false;
+            UpdateBannerInset();
         }
     }
 
@@ -142,9 +237,14 @@ public partial class AdsManager : Node
     public void HideBannerAd()
     {
         _bannerVisible = false;
+        StopBannerRefreshTimer();
+        UpdateBannerInset();
 
         if (!IsPlatformSupported())
+        {
+            UpdatePlaceholderVisibility();
             return;
+        }
 
         try
         {
@@ -156,6 +256,17 @@ public partial class AdsManager : Node
         {
             GD.PushWarning($"AdsManager: HideBannerAd failed: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Pauses/resumes manual banner refresh. (Optional optimization for pause menus.)
+    /// </summary>
+    public void SetBannerRefreshPaused(bool paused)
+    {
+        if (_bannerRefreshTimer == null)
+            return;
+
+        _bannerRefreshTimer.Paused = paused;
     }
 
     /// <summary>
@@ -180,7 +291,6 @@ public partial class AdsManager : Node
 
         try
         {
-            // Attempt to show. If plugin supports callbacks it should call back into NotifyAdClosed/NotifyAdClicked.
             bool shown =
                 TryCallPlugin("show_interstitial") ||
                 TryCallPlugin("showInterstitial") ||
@@ -284,6 +394,41 @@ public partial class AdsManager : Node
         EmitSignal(SignalName.RewardEarned);
     }
 
+    private void EnsurePersistentBannerIfPossible()
+    {
+        if (!PersistentBannerEnabled)
+        {
+            HideBannerAd();
+            return;
+        }
+
+        if (MonetizationManager.Instance?.ShowAds == false)
+        {
+            HideBannerAd();
+            return;
+        }
+
+        UpdatePlaceholderVisibility();
+
+        if (!IsReadyForShowingAds())
+            return;
+
+        _ = EnsureBannerLoadedAndShownAsync();
+    }
+
+    private async Task EnsureBannerLoadedAndShownAsync()
+    {
+        try
+        {
+            await LoadBannerAsync();
+            ShowBannerAd();
+        }
+        catch (Exception ex)
+        {
+            GD.PushWarning($"AdsManager: EnsureBannerLoadedAndShownAsync failed: {ex.Message}");
+        }
+    }
+
     private async Task LoadAdsAsync()
     {
         await LoadBannerAsync();
@@ -298,16 +443,37 @@ public partial class AdsManager : Node
 
         try
         {
+            ConfigureBannerPositionAndSize();
+
+            bool called;
+            var positionString = BannerPosition == BannerPlacement.Top ? "top" : "bottom";
+            var positionInt = BannerPosition == BannerPlacement.Top ? 1 : 0;
+
             if (!string.IsNullOrWhiteSpace(BannerAdUnitId))
             {
-                TryCallPlugin("load_banner", BannerAdUnitId);
-                TryCallPlugin("loadBanner", BannerAdUnitId);
+                called =
+                    TryCallPlugin("load_banner", BannerAdUnitId, "BANNER", positionString) ||
+                    TryCallPlugin("load_banner", BannerAdUnitId, "BANNER", positionInt) ||
+                    TryCallPlugin("load_banner", BannerAdUnitId, positionString) ||
+                    TryCallPlugin("load_banner", BannerAdUnitId) ||
+                    TryCallPlugin("loadBanner", BannerAdUnitId, "BANNER", positionString) ||
+                    TryCallPlugin("loadBanner", BannerAdUnitId, "BANNER", positionInt) ||
+                    TryCallPlugin("loadBanner", BannerAdUnitId, positionString) ||
+                    TryCallPlugin("loadBanner", BannerAdUnitId) ||
+                    TryCallPlugin("create_banner", BannerAdUnitId, "BANNER", positionString) ||
+                    TryCallPlugin("createBanner", BannerAdUnitId, "BANNER", positionString);
             }
             else
             {
-                TryCallPlugin("load_banner");
-                TryCallPlugin("loadBanner");
+                called =
+                    TryCallPlugin("load_banner") ||
+                    TryCallPlugin("loadBanner") ||
+                    TryCallPlugin("create_banner") ||
+                    TryCallPlugin("createBanner");
             }
+
+            if (!called)
+                return;
 
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         }
@@ -434,6 +600,245 @@ public partial class AdsManager : Node
 
         _adPlugin.Call(method, args);
         return true;
+    }
+
+    private void ConfigureBannerPositionAndSize()
+    {
+        if (_adPlugin == null)
+            return;
+
+        var positionString = BannerPosition == BannerPlacement.Top ? "top" : "bottom";
+        var positionInt = BannerPosition == BannerPlacement.Top ? 1 : 0;
+
+        // Position
+        TryCallPlugin("set_banner_position", positionString);
+        TryCallPlugin("setBannerPosition", positionString);
+        TryCallPlugin("set_banner_position", positionInt);
+        TryCallPlugin("setBannerPosition", positionInt);
+        TryCallPlugin("set_banner_anchor", positionString);
+        TryCallPlugin("setBannerAnchor", positionString);
+
+        // Size
+        TryCallPlugin("set_banner_size", "BANNER");
+        TryCallPlugin("setBannerSize", "BANNER");
+        TryCallPlugin("set_banner_size", 320, 50);
+        TryCallPlugin("setBannerSize", 320, 50);
+    }
+
+    private string ResolveAdMobAppId(string fromInitializeCall)
+    {
+        if (!string.IsNullOrWhiteSpace(fromInitializeCall))
+            return fromInitializeCall;
+
+        var os = OS.GetName();
+        var platformOverride = os == "Android" ? AndroidAdMobAppId : IosAdMobAppId;
+        if (!string.IsNullOrWhiteSpace(platformOverride))
+            return platformOverride;
+
+        // Optional project settings overrides.
+        // These keys are not required but allow build-time configuration without touching scenes/scripts.
+        var settingKey = os == "Android" ? "monetization/admob/app_id_android" : "monetization/admob/app_id_ios";
+        if (ProjectSettings.HasSetting(settingKey))
+        {
+            var value = ProjectSettings.GetSetting(settingKey).AsString();
+            if (!string.IsNullOrWhiteSpace(value))
+                return value;
+        }
+
+        if (ProjectSettings.HasSetting("monetization/admob/app_id"))
+        {
+            var value = ProjectSettings.GetSetting("monetization/admob/app_id").AsString();
+            if (!string.IsNullOrWhiteSpace(value))
+                return value;
+        }
+
+        return AdMobAppId;
+    }
+
+    private void ApplyBannerSettingsFromProjectSettings()
+    {
+        if (ProjectSettings.HasSetting("monetization/admob/persistent_banner"))
+            PersistentBannerEnabled = ProjectSettings.GetSetting("monetization/admob/persistent_banner").AsBool();
+
+        if (ProjectSettings.HasSetting("monetization/admob/banner_auto_refresh"))
+            EnableBannerAutoRefresh = ProjectSettings.GetSetting("monetization/admob/banner_auto_refresh").AsBool();
+
+        if (ProjectSettings.HasSetting("monetization/admob/banner_refresh_seconds"))
+        {
+            var seconds = (int)ProjectSettings.GetSetting("monetization/admob/banner_refresh_seconds").AsInt32();
+            if (seconds > 0)
+                BannerRefreshSeconds = seconds;
+        }
+
+        if (ProjectSettings.HasSetting("monetization/admob/banner_height_px"))
+        {
+            var height = (int)ProjectSettings.GetSetting("monetization/admob/banner_height_px").AsInt32();
+            if (height > 0)
+                BannerHeightPx = height;
+        }
+
+        if (ProjectSettings.HasSetting("monetization/admob/banner_position"))
+        {
+            var pos = ProjectSettings.GetSetting("monetization/admob/banner_position").AsString().Trim().ToLowerInvariant();
+            if (pos == "top")
+                BannerPosition = BannerPlacement.Top;
+            else if (pos == "bottom")
+                BannerPosition = BannerPlacement.Bottom;
+        }
+    }
+
+    private void StartBannerRefreshTimerIfNeeded()
+    {
+        if (!EnableBannerAutoRefresh)
+            return;
+
+        if (BannerRefreshSeconds <= 0)
+            return;
+
+        if (_bannerRefreshTimer != null)
+            return;
+
+        _bannerRefreshTimer = new Timer
+        {
+            OneShot = false,
+            WaitTime = BannerRefreshSeconds,
+            ProcessCallback = Timer.TimerProcessCallback.Idle
+        };
+
+        _bannerRefreshTimer.Timeout += OnBannerRefreshTimerTimeout;
+        AddChild(_bannerRefreshTimer);
+        _bannerRefreshTimer.Start();
+    }
+
+    private void StopBannerRefreshTimer()
+    {
+        if (_bannerRefreshTimer == null)
+            return;
+
+        _bannerRefreshTimer.Timeout -= OnBannerRefreshTimerTimeout;
+        _bannerRefreshTimer.QueueFree();
+        _bannerRefreshTimer = null;
+    }
+
+    private void OnBannerRefreshTimerTimeout()
+    {
+        if (!_bannerVisible)
+            return;
+
+        if (MonetizationManager.Instance?.ShowAds == false)
+        {
+            HideBannerAd();
+            return;
+        }
+
+        if (!IsReadyForShowingAds())
+            return;
+
+        _ = RefreshBannerAsync();
+    }
+
+    private async Task RefreshBannerAsync()
+    {
+        try
+        {
+            // Reloading the banner is plugin-dependent.
+            // We try a few common method names, falling back to re-loading.
+            bool called =
+                TryCallPlugin("refresh_banner") ||
+                TryCallPlugin("refreshBanner") ||
+                TryCallPlugin("reload_banner") ||
+                TryCallPlugin("reloadBanner");
+
+            if (!called)
+                await LoadBannerAsync();
+
+            // Some plugins require explicitly showing after reload.
+            if (_bannerVisible)
+            {
+                TryCallPlugin("show_banner");
+                TryCallPlugin("showBanner");
+            }
+        }
+        catch (Exception ex)
+        {
+            GD.PushWarning($"AdsManager: banner refresh failed: {ex.Message}");
+        }
+    }
+
+    private void DestroyBanner()
+    {
+        if (!IsPlatformSupported())
+            return;
+
+        try
+        {
+            TryCallPlugin("destroy_banner");
+            TryCallPlugin("destroyBanner");
+            TryCallPlugin("remove_banner");
+            TryCallPlugin("removeBanner");
+        }
+        catch (Exception ex)
+        {
+            GD.PushWarning($"AdsManager: DestroyBanner failed: {ex.Message}");
+        }
+    }
+
+    private void SetupPlaceholderBannerIfNeeded()
+    {
+        if (IsPlatformSupported())
+            return;
+
+        if (!ShowEditorPlaceholderBanner)
+            return;
+
+        _placeholderLayer = new CanvasLayer { Name = "AdBannerPlaceholderLayer", Layer = 1000 };
+
+        _placeholderBanner = new PanelContainer
+        {
+            Name = "AdBannerPlaceholder",
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            AnchorsPreset = LayoutPreset.BottomWide,
+            AnchorLeft = 0,
+            AnchorRight = 1,
+            AnchorTop = 1,
+            AnchorBottom = 1,
+            OffsetTop = -BannerHeightPx,
+            OffsetBottom = 0
+        };
+
+        var label = new Label
+        {
+            Text = "Banner Ad (placeholder)",
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        _placeholderBanner.AddChild(label);
+        _placeholderLayer.AddChild(_placeholderBanner);
+        AddChild(_placeholderLayer);
+
+        UpdatePlaceholderVisibility();
+    }
+
+    private void UpdatePlaceholderVisibility()
+    {
+        if (_placeholderBanner == null)
+            return;
+
+        var show = !IsPlatformSupported() && ShowEditorPlaceholderBanner && (MonetizationManager.Instance?.ShowAds != false) && PersistentBannerEnabled;
+        _placeholderBanner.Visible = show;
+
+        _bannerVisible = show;
+        UpdateBannerInset();
+    }
+
+    private void UpdateBannerInset()
+    {
+        var inset = CurrentBannerInsetPx;
+        if (inset == _lastBannerInset)
+            return;
+
+        _lastBannerInset = inset;
+        EmitSignal(SignalName.BannerInsetChanged, inset);
     }
 
     private async Task EmitAdClosedNextFrameAsync()

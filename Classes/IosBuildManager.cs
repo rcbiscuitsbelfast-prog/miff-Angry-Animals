@@ -147,6 +147,16 @@ public class IosBuildManager : Node
         {
             using (var writer = new StreamWriter(_infoPlistPath))
             {
+                var admobAppId = "";
+                if (ProjectSettings.HasSetting("monetization/admob/app_id_ios"))
+                    admobAppId = ProjectSettings.GetSetting("monetization/admob/app_id_ios").AsString();
+
+                if (string.IsNullOrWhiteSpace(admobAppId) && ProjectSettings.HasSetting("monetization/admob/app_id"))
+                    admobAppId = ProjectSettings.GetSetting("monetization/admob/app_id").AsString();
+
+                if (string.IsNullOrWhiteSpace(admobAppId))
+                    admobAppId = "ca-app-pub-3940256099942544~1458002511"; // AdMob test app id
+
                 writer.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                 writer.WriteLine("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
                 writer.WriteLine("<plist version=\"1.0\">");
@@ -202,6 +212,11 @@ public class IosBuildManager : Node
                 writer.WriteLine("        <key>NSAllowsLocalNetworking</key>");
                 writer.WriteLine("        <true/>");
                 writer.WriteLine("    </dict>");
+                writer.WriteLine();
+
+                writer.WriteLine("    <!-- Google Mobile Ads -->");
+                writer.WriteLine("    <key>GADApplicationIdentifier</key>");
+                writer.WriteLine($"    <string>{admobAppId}</string>");
                 writer.WriteLine();
                 
                 writer.WriteLine("    <!-- Status Bar Configuration -->");

@@ -80,7 +80,14 @@ project/assembly_name="AngryAnimals"
 [monetization]
 
 admob/app_id=""
-admob/banner_ad_unit_id=""
+admob/app_id_android=""
+admob/app_id_ios=""
+admob/banner_ad_unit_id="ca-app-pub-6675121744131727/8033303534"
+admob/banner_position="bottom"
+admob/persistent_banner=true
+admob/banner_auto_refresh=true
+admob/banner_refresh_seconds=30
+admob/banner_height_px=50
 admob/interstitial_ad_unit_id=""
 admob/rewarded_ad_unit_id=""
 iap/ios_product_id="full_game_unlock"
@@ -108,3 +115,12 @@ ui_menu_back={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":4194305,"physical_keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ]
 }
+
+[android]
+
+manifest/uses_permission=PackedStringArray("android.permission.INTERNET", "android.permission.ACCESS_NETWORK_STATE")
+gradle_dependencies=PackedStringArray("com.google.android.gms:play-services-ads:23.5.0")
+
+[ios]
+
+frameworks=PackedStringArray("Google-Mobile-Ads-SDK")
