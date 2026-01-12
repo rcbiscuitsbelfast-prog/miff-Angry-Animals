@@ -40,6 +40,7 @@ public partial class MainMenu : CanvasLayer
         AddCustomizeFaceButton();
         AddLevelEditorButtons();
         AddUnlockFullGameButton();
+        AddTelemetryMetricsButton(); // Add telemetry button for debug builds
         ConnectSignals();
         SetupInputMap();
     }
@@ -202,6 +203,53 @@ public partial class MainMenu : CanvasLayer
         // Put it near the Play/Room Selection actions.
         if (_roomSelectionButtonNode != null)
             container.MoveChild(_unlockFullGameButton, _roomSelectionButtonNode.GetIndex() + 1);
+    }
+
+    private void AddTelemetryMetricsButton()
+    {
+        #if DEBUG
+        if (_playButtonNode == null || _playButtonNode.GetParent() is not Control container)
+            return;
+
+        var telemetryBtn = new Button
+        {
+            Text = "📊 View Metrics",
+            Name = "TelemetryMetricsButton",
+            Modulate = new Color(0.5f, 0.8f, 1f),
+            CustomMinimumSize = new Vector2(200, 40)
+        };
+        telemetryBtn.Pressed += OnTelemetryMetricsButtonPressed;
+
+        container.AddChild(telemetryBtn);
+
+        // Position it near the bottom of the menu
+        if (_quitButtonNode != null)
+            container.MoveChild(telemetryBtn, _quitButtonNode.GetIndex());
+        #endif
+    }
+
+    private void OnTelemetryMetricsButtonPressed()
+    {
+        GD.Print("Telemetry Metrics button pressed");
+        PlayUiClickSound();
+
+        // Show the telemetry debug panel
+        if (TelemetryDebugPanel.Instance != null)
+        {
+            TelemetryDebugPanel.Instance.ShowPanel();
+        }
+        else
+        {
+            // Create and show telemetry panel if not already created
+            var telemetryPanel = TelemetryDebugPanel.Instance;
+            if (telemetryPanel == null)
+            {
+                // Create a new instance
+                var panel = new TelemetryDebugPanel();
+                AddChild(panel);
+                panel.ShowPanel();
+            }
+        }
     }
 
     private void OnCustomizeFaceButtonPressed()

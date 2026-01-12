@@ -1,0 +1,137 @@
+{
+  "export_timestamp": "2024-01-15T14:30:00Z",
+  "session_info": {
+    "session_id": "20240115_143000",
+    "duration": "00:15:32",
+    "platform": "Editor",
+    "user_segment": "free"
+  },
+  "event_counts": {
+    "level_started": 15,
+    "level_completed": 12,
+    "level_failed": 3,
+    "perfect_score_achieved": 2,
+    "cosmetic_purchased": 1,
+    "rewarded_ad_watched": 5,
+    "session_start": 1,
+    "session_end": 1
+  },
+  "total_events": 40,
+  "events": [
+    {
+      "event_name": "session_start",
+      "timestamp": "2024-01-15T14:15:28Z",
+      "parameters": {
+        "platform": "Editor",
+        "user_segment": "free",
+        "session_id": "20240115_143000",
+        "timestamp": "2024-01-15T14:15:28Z"
+      }
+    },
+    {
+      "event_name": "level_started",
+      "timestamp": "2024-01-15T14:15:45Z",
+      "parameters": {
+        "level_number": 1,
+        "level_type": "normal",
+        "user_segment": "free",
+        "session_duration": 17,
+        "levels_completed_today": 0,
+        "device_type": "mid_range",
+        "platform": "Editor",
+        "user_segment": "free",
+        "session_id": "20240115_143000"
+      }
+    },
+    {
+      "event_name": "level_completed",
+      "timestamp": "2024-01-15T14:16:12Z",
+      "parameters": {
+        "level_number": 1,
+        "completion_time": 27.5,
+        "attempts": 1,
+        "score": 150,
+        "perfect": false,
+        "user_segment": "free",
+        "difficulty_rating": "easy",
+        "platform": "Editor",
+        "user_segment": "free",
+        "session_id": "20240115_143000"
+      }
+    },
+    {
+      "event_name": "level_started",
+      "timestamp": "2024-01-15T14:16:25Z",
+      "parameters": {
+        "level_number": 2,
+        "level_type": "normal",
+        "user_segment": "free",
+        "session_duration": 57,
+        "levels_completed_today": 1,
+        "device_type": "mid_range",
+        "platform": "Editor",
+        "user_segment": "free",
+        "session_id": "20240115_143000"
+      }
+    },
+    {
+      "event_name": "level_completed",
+      "timestamp": "2024-01-15T14:17:05Z",
+      "parameters": {
+        "level_number": 2,
+        "completion_time": 40.2,
+        "attempts": 1,
+        "score": 180,
+        "perfect": true,
+        "user_segment": "free",
+        "difficulty_rating": "easy",
+        "platform": "Editor",
+        "user_segment": "free",
+        "session_id": "20240115_143000"
+      }
+    },
+    {
+      "event_name": "perfect_score_achieved",
+      "timestamp": "2024-01-15T14:17:05Z",
+      "parameters": {
+        "level_number": 2,
+        "completion_time": 40.2,
+        "user_segment": "free",
+        "total_perfect_scores": 1,
+        "platform": "Editor",
+        "user_segment": "free",
+        "session_id": "20240115_143000"
+      }
+    },
+    {
+      "event_name": "rewarded_ad_watched",
+      "timestamp": "2024-01-15T14:18:30Z",
+      "parameters": {
+        "reward_type": "extra_attempts",
+        "reward_amount": 3,
+        "ad_source": "admob",
+        "user_segment": "free",
+        "ads_watched_today": 1,
+        "platform": "Editor",
+        "user_segment": "free",
+        "session_id": "20240115_143000"
+      }
+    },
+    {
+      "event_name": "cosmetic_purchased",
+      "timestamp": "2024-01-15T14:20:15Z",
+      "parameters": {
+        "cosmetic_type": "hat",
+        "cosmetic_id": "cowboy_hat",
+        "cost": 2.99,
+        "currency": "USD",
+        "user_segment": "free",
+        "total_spent": 2.99,
+        "purchase_source": "shop",
+        "platform": "Editor",
+        "user_segment": "free",
+        "session_id": "20240115_143000"
+      }
+    }
+  ]
+}
