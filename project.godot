@@ -88,6 +88,14 @@ NotificationPreferences="*res://Globals/NotificationPreferences.cs"
 StreakData="*res://Globals/StreakData.cs"
 SeasonalEvent="*res://Globals/SeasonalEvent.cs"
 
+# Social Features Systems
+FriendLeaderboard="*res://Globals/FriendLeaderboard.cs"
+FriendChallengeManager="*res://Globals/FriendChallengeManager.cs"
+ReplayManager="*res://Globals/ReplayManager.cs"
+GlobalLeaderboard="*res://Globals/GlobalLeaderboard.cs"
+SocialCosmetics="*res://Globals/SocialCosmetics.cs"
+SocialFeaturesTestingFramework="*res://Classes/SocialFeaturesTestingFramework.cs"
+
 [audio]
 
 buses/default_bus_layout="res://default_bus_layout.tres"
