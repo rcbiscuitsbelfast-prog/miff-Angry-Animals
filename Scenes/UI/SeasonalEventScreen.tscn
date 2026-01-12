@@ -1,0 +1,115 @@
+[gd_scene load_steps=2 format=3 uid="uid://b3v8q5k2mnp9r"]
+
+[ext_resource type="Script" path="res://UI/SeasonalEventScreenUI.cs" id="1"]
+
+[node name="SeasonalEventScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+main_container = NodePath("MainContainer")
+event_carousel_container = NodePath("MainContainer/EventCarousel")
+event_details_container = NodePath("MainContainer/EventDetails")
+current_event_title = NodePath("MainContainer/EventDetails/EventTitle")
+event_description = NodePath("MainContainer/EventDetails/EventDescription")
+event_countdown = NodePath("MainContainer/EventDetails/EventCountdown")
+event_progress_bar = NodePath("MainContainer/EventDetails/EventProgressBar")
+cosmetics_grid_container = NodePath("MainContainer/EventDetails/CosmeticsGrid")
+unlock_cosmetics_button = NodePath("MainContainer/EventDetails/UnlockCosmeticsButton")
+dismiss_button = NodePath("MainContainer/DismissButton")
+event_background = NodePath("EventBackground")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.9)
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="MainContainer"]
+layout_mode = 2
+text = "🎉 SEASONAL EVENTS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EventCarousel" type="ScrollContainer" parent="MainContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+
+[node name="CarouselHBox" type="HBoxContainer" parent="MainContainer/EventCarousel"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 10
+
+[node name="EventDetails" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="EventTitle" type="Label" parent="MainContainer/EventDetails"]
+layout_mode = 2
+text = "Winter Wonderland"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EventDescription" type="RichTextLabel" parent="MainContainer/EventDetails"]
+layout_mode = 2
+bbcode_enabled = true
+text = "Bundle up for a frosty adventure! Unlock exclusive ice-themed cosmetics and special winter effects."
+fit_content = true
+
+[node name="EventCountdown" type="Label" parent="MainContainer/EventDetails"]
+layout_mode = 2
+text = "⏰ Ends in 5d 12h"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EventProgressBar" type="ProgressBar" parent="MainContainer/EventDetails"]
+layout_mode = 2
+min_value = 1.0
+max_value = 100.0
+value = 65.0
+tooltip_text = "Event Progress"
+
+[node name="CosmeticsLabel" type="Label" parent="MainContainer/EventDetails"]
+layout_mode = 2
+text = "🎁 Event Cosmetics"
+horizontal_alignment = 1
+
+[node name="CosmeticsGrid" type="GridContainer" parent="MainContainer/EventDetails"]
+layout_mode = 2
+columns = 4
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="UnlockCosmeticsButton" type="Button" parent="MainContainer/EventDetails"]
+layout_mode = 2
+text = "Unlock Event Cosmetics (2/5)"
+
+[node name="DismissButton" type="Button" parent="MainContainer"]
+layout_mode = 2
+text = "Back to Menu"
+size_flags_horizontal = 4
+
+[node name="EventBackground" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch_mode = 6

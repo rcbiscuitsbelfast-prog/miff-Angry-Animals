@@ -79,6 +79,15 @@ DifficultyHeatmapTracker="*res://Classes/DifficultyHeatmapTracker.cs"
 TelemetryDebugPanel="*res://Classes/TelemetryDebugPanel.cs"
 AnalyticsTestingFramework="*res://Classes/AnalyticsTestingFramework.cs"
 
+# Retention & Engagement Systems
+StreakManager="*res://Globals/StreakManager.cs"
+SeasonalEventManager="*res://Globals/SeasonalEventManager.cs"
+SeasonalEventDatabase="*res://Globals/SeasonalEventDatabase.cs"
+PushNotificationManager="*res://Globals/PushNotificationManager.cs"
+NotificationPreferences="*res://Globals/NotificationPreferences.cs"
+StreakData="*res://Globals/StreakData.cs"
+SeasonalEvent="*res://Globals/SeasonalEvent.cs"
+
 [audio]
 
 buses/default_bus_layout="res://default_bus_layout.tres"

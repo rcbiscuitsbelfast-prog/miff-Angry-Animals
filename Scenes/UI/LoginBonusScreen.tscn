@@ -1,0 +1,128 @@
+[gd_scene load_steps=3 format=3 uid="uid://c8xqvw2lhdp1k"]
+
+[ext_resource type="Script" path="res://UI/LoginBonusScreenUI.cs" id="1"]
+
+[node name="LoginBonusScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+main_container = NodePath("MainContainer")
+reward_preview_container = NodePath("MainContainer/RewardPreview")
+streak_counter_label = NodePath("MainContainer/StreakCounterLabel")
+reward_title_label = NodePath("MainContainer/RewardPreview/RewardTitle")
+reward_description_label = NodePath("MainContainer/RewardPreview/RewardDescription")
+next_reward_preview_label = NodePath("MainContainer/NextRewardPreview")
+streak_calendar_container = NodePath("MainContainer/StreakCalendar")
+dismiss_button = NodePath("MainContainer/DismissButton")
+view_events_button = NodePath("MainContainer/ViewEventsButton")
+celebration_effects = NodePath("CelebrationEffects")
+progress_fill = NodePath("MainContainer/ProgressBar")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="MainContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="MainContainer"]
+layout_mode = 2
+text = "🎁 DAILY LOGIN BONUS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StreakCounterLabel" type="Label" parent="MainContainer"]
+layout_mode = 2
+text = "🔥 Day 1 of 30!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RewardPreview" type="VBoxContainer" parent="MainContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RewardIcon" type="Label" parent="MainContainer/RewardPreview"]
+layout_mode = 2
+text = "🎁"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RewardTitle" type="Label" parent="MainContainer/RewardPreview"]
+layout_mode = 2
+text = "Day 1 Reward: Welcome Bonus!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RewardDescription" type="Label" parent="MainContainer/RewardPreview"]
+layout_mode = 2
+text = "Welcome to the game! Here's a starter reward to get you going!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="MainContainer"]
+layout_mode = 2
+min_value = 1.0
+max_value = 100.0
+value = 3.33
+tooltip_text = "Progress to next milestone"
+
+[node name="NextRewardPreview" type="Label" parent="MainContainer"]
+layout_mode = 2
+text = "🎯 Next milestone (7): Week 1 Complete Hat + 200 coins"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StreakCalendar" type="GridContainer" parent="MainContainer"]
+layout_mode = 2
+columns = 15
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
+
+[node name="ViewEventsButton" type="Button" parent="MainContainer"]
+layout_mode = 2
+text = "🎉 View Active Events"
+visible = false
+
+[node name="DismissButton" type="Button" parent="MainContainer"]
+layout_mode = 2
+text = "Continue Playing"
+size_flags_horizontal = 4
+
+[node name="CelebrationEffects" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ConfettiContainer" type="Control" parent="CelebrationEffects"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

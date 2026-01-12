@@ -283,6 +283,16 @@ public partial class PlayerProfile : Node
                 ["unlocked_list"] = JArray.FromObject(UnlockedCosmetics.ToList())
             }
         };
+        
+        // Retention Systems Data
+        var retentionRoot = new JObject
+        {
+            ["streak_data"] = GetStreakDataForSave(),
+            ["seasonal_events"] = GetSeasonalEventDataForSave(),
+            ["notification_preferences"] = GetNotificationPreferencesForSave(),
+            ["last_session_date"] = DateTime.UtcNow.ToString("O")
+        };
+        root["retention"] = retentionRoot;
 
         try
         {
@@ -498,5 +508,73 @@ public partial class PlayerProfile : Node
             return value;
 
         return null;
+    }
+
+    /// <summary>
+    /// Get streak data for saving to profile
+    /// </summary>
+    private static JObject GetStreakDataForSave()
+    {
+        if (StreakManager.Instance == null)
+            return new JObject();
+
+        var streakData = StreakManager.Instance.GetStreakAnalytics();
+        return new JObject
+        {
+            ["current_streak"] = (int)streakData.GetValueOrDefault("current_streak", 0),
+            ["best_streak"] = (int)streakData.GetValueOrDefault("best_streak", 0),
+            ["total_streak_days"] = (int)streakData.GetValueOrDefault("total_streak_days", 0),
+            ["achieved_milestones"] = new JArray((int[])streakData.GetValueOrDefault("achieved_milestones", new int[0])),
+            ["streak_active"] = (bool)streakData.GetValueOrDefault("streak_active", false)
+        };
+    }
+
+    /// <summary>
+    /// Get seasonal event data for saving to profile
+    /// </summary>
+    private static JObject GetSeasonalEventDataForSave()
+    {
+        if (SeasonalEventManager.Instance == null)
+            return new JObject();
+
+        var activeEvents = SeasonalEventManager.Instance.GetActiveEvents();
+        var eventData = new JObject();
+
+        foreach (var eventItem in activeEvents)
+        {
+            var playerData = SeasonalEventManager.Instance.GetPlayerEventData(eventItem.EventId);
+            if (playerData != null)
+            {
+                eventData[eventItem.EventId] = new JObject
+                {
+                    ["participation_start_date"] = playerData.ParticipationStartDate.ToString("O"),
+                    ["completion_percentage"] = playerData.GetCompletionPercentage(),
+                    ["event_completed"] = playerData.EventCompleted,
+                    ["unlocked_cosmetics"] = new JArray(playerData.UnlockedCosmetics)
+                };
+            }
+        }
+
+        return eventData;
+    }
+
+    /// <summary>
+    /// Get notification preferences for saving to profile
+    /// </summary>
+    private static JObject GetNotificationPreferencesForSave()
+    {
+        if (PushNotificationManager.Instance == null)
+            return new JObject();
+
+        var preferences = PushNotificationManager.Instance.GetNotificationStatistics();
+        return new JObject
+        {
+            ["notifications_enabled"] = (bool)preferences.GetValueOrDefault("notifications_enabled", false),
+            ["daily_reminder_enabled"] = (bool)preferences.GetValueOrDefault("daily_reminder_enabled", false),
+            ["milestone_notifications_enabled"] = (bool)preferences.GetValueOrDefault("milestone_notifications_enabled", true),
+            ["streak_broken_alerts_enabled"] = (bool)preferences.GetValueOrDefault("streak_broken_alerts_enabled", true),
+            ["seasonal_event_notifications_enabled"] = (bool)preferences.GetValueOrDefault("seasonal_event_notifications_enabled", true),
+            ["lapsed_player_notifications_enabled"] = (bool)preferences.GetValueOrDefault("lapsed_player_notifications_enabled", true)
+        };
     }
 }
