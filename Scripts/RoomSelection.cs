@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Godot;
 
 /// <summary>
@@ -27,6 +28,20 @@ public partial class RoomSelection : Control
         InitializeUI();
         ConnectSignals();
         PopulateRoomButtons();
+        
+        // Preload interstitial ads when entering room selection
+        PreloadInterstitialAdsAsync();
+    }
+
+    private async void PreloadInterstitialAdsAsync()
+    {
+        await Task.Delay(1000); // Small delay to let the scene load
+        
+        if (AdsManager.Instance != null && MonetizationManager.Instance?.ShowAds != false)
+        {
+            GD.Print("Preloading interstitial ads from room selection");
+            await AdsManager.Instance.LoadInterstitialAd();
+        }
     }
 
     private void InitializeUI()
