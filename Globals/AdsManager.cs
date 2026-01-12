@@ -204,7 +204,7 @@ public partial class AdsManager : Node
     /// </summary>
     public void ShowBannerAd()
     {
-        if (!IsReadyForShowingAds())
+        if (!IsReadyForShowingAds() || !ShouldShowAds())
             return;
 
         if (_bannerVisible)
@@ -288,7 +288,7 @@ public partial class AdsManager : Node
     /// </summary>
     public async Task ShowInterstitialAd()
     {
-        if (!IsReadyForShowingAds())
+        if (!IsReadyForShowingAds() || !ShouldShowAds())
         {
             await EmitAdClosedNextFrameAsync();
             return;
@@ -438,6 +438,17 @@ public partial class AdsManager : Node
     public bool IsAdReady() => _interstitialReady || _rewardedReady;
 
     /// <summary>
+    /// Returns whether ads should be shown based on premium status.
+    /// Ads are hidden if user has purchased either full game unlock or remove ads.
+    /// </summary>
+    public bool ShouldShowAds()
+    {
+        // Don't show ads if user is premium (full game unlocked OR remove ads purchased)
+        return !(MonetizationManager.Instance?.IsFullGameUnlocked ?? false) && 
+               !(PremiumManager.Instance?.IsAdFreeVersion ?? false);
+    }
+
+    /// <summary>
     /// Callback hook for plugins to notify that an ad was closed.
     /// This method is safe to call from platform code via <c>Callable</c>/<c>Call</c>.
     /// </summary>
@@ -470,7 +481,8 @@ public partial class AdsManager : Node
             return;
         }
 
-        if (MonetizationManager.Instance?.ShowAds == false)
+        // Check if user is premium (either full game unlocked or remove ads purchased)
+        if (!ShouldShowAds())
         {
             HideBannerAd();
             return;

@@ -29,6 +29,8 @@ FileManager="*res://Globals/FileManager.cs"
 AudioManager="*res://Globals/AudioManager.cs"
 AdsManager="*res://Globals/AdsManager.cs"
 MonetizationManager="*res://Globals/MonetizationManager.cs"
+PremiumManager="*res://Globals/PremiumManager.cs"
+PurchaseStateManager="*res://Globals/PurchaseStateManager.cs"
 ObjectPool="*res://Globals/ObjectPool.cs"
 LevelGenerator="*res://Globals/LevelGenerator.cs"
 MaterialDistributor="*res://Globals/MaterialDistributor.cs"
@@ -88,10 +90,12 @@ admob/persistent_banner=true
 admob/banner_auto_refresh=true
 admob/banner_refresh_seconds=30
 admob/banner_height_px=50
-admob/interstitial_ad_unit_id=""
+admob/interstitial_ad_unit_id="ca-app-pub-6675121744131727/8410569879"
 admob/rewarded_ad_unit_id=""
 iap/ios_product_id="full_game_unlock"
 iap/android_product_id="full_game_unlock"
+iap/remove_ads_product_id="remove_ads"
+iap/remove_ads_price="$0.99"
 
 [input]
 
