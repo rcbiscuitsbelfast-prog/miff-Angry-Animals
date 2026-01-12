@@ -1,0 +1,252 @@
+[gd_scene load_steps=3 format=3 uid="uid://cosmetics_shop"]
+
+[ext_resource type="Script" path="res://Classes/Cosmetics/CosmeticsShopUI.cs" id="1_shop_ui"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.15, 0.15, 0.2, 0.95)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+content_margin_left = 20
+content_margin_top = 20
+content_margin_right = 20
+content_margin_bottom = 20
+
+[node name="CosmeticsShop" type="CanvasLayer"]
+script = ExtResource("1_shop_ui")
+ShopManager = null
+ShopContainer = NodePath("ShopPanel")
+CosmeticsGrid = NodePath("ShopPanel/MarginContainer/VBoxContainer/CosmeticsScroll/CosmeticsGrid")
+PreviewPanel = NodePath("PreviewPanel")
+PreviewNameLabel = NodePath("PreviewPanel/VBoxContainer/NameLabel")
+PreviewTexture = NodePath("PreviewPanel/VBoxContainer/PreviewTexture")
+PreviewDescriptionLabel = NodePath("PreviewPanel/VBoxContainer/DescriptionLabel")
+PreviewRarityLabel = NodePath("PreviewPanel/VBoxContainer/RarityLabel")
+PreviewPriceLabel = NodePath("PreviewPanel/VBoxContainer/PriceLabel")
+PurchaseButton = NodePath("PreviewPanel/VBoxContainer/ActionButtons/PurchaseButton")
+EquipButton = NodePath("PreviewPanel/VBoxContainer/ActionButtons/EquipButton")
+CloseButton = NodePath("ShopPanel/Header/CloseButton")
+FilterTabs = NodePath("ShopPanel/MarginContainer/VBoxContainer/FilterTabs")
+FilterAll = NodePath("ShopPanel/MarginContainer/VBoxContainer/FilterTabs/FilterAll")
+FilterHats = NodePath("ShopPanel/MarginContainer/VBoxContainer/FilterTabs/FilterHats")
+FilterGlasses = NodePath("ShopPanel/MarginContainer/VBoxContainer/FilterTabs/FilterGlasses")
+FilterMustaches = NodePath("ShopPanel/MarginContainer/VBoxContainer/FilterTabs/FilterMustaches")
+FilterWigs = NodePath("ShopPanel/MarginContainer/VBoxContainer/FilterTabs/FilterWigs")
+FilterEmotions = NodePath("ShopPanel/MarginContainer/VBoxContainer/FilterTabs/FilterEmotions")
+FilterNew = NodePath("ShopPanel/MarginContainer/VBoxContainer/FilterTabs/FilterNew")
+FilterLimited = NodePath("ShopPanel/MarginContainer/VBoxContainer/FilterTabs/FilterLimited")
+SortOption = NodePath("ShopPanel/MarginContainer/VBoxContainer/SortControls/SortOption")
+SortAscendingButton = NodePath("ShopPanel/MarginContainer/VBoxContainer/SortControls/SortAscendingButton")
+SearchInput = NodePath("ShopPanel/MarginContainer/VBoxContainer/SearchInput")
+LoadoutPanel = NodePath("LoadoutPanel")
+SaveLoadoutButton = NodePath("LoadoutPanel/VBoxContainer/SaveLoadoutButton")
+LoadLoadoutButton = NodePath("LoadoutPanel/VBoxContainer/LoadLoadoutButton")
+LoadoutGrid = NodePath("LoadoutPanel/VBoxContainer/LoadoutGrid")
+TileSize = Vector2(120, 150)
+ItemsPerRow = 5
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_fill_parent = true
+color = Color(0, 0, 0, 0.8)
+
+[node name="ShopPanel" type="PanelContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1
+anchor_bottom = 1
+offset_left = 50
+offset_top = 50
+offset_right = -50
+offset_bottom = -50
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="ShopPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ShopPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="ShopPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="ShopPanel/MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "Cosmetics Shop"
+horizontal_alignment = 1
+
+[node name="CloseButton" type="Button" parent="ShopPanel/MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+custom_minimum_size = Vector2(40, 40)
+text = "X"
+
+[node name="FilterTabs" type="HBoxContainer" parent="ShopPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="FilterAll" type="Button" parent="ShopPanel/MarginContainer/VBoxContainer/FilterTabs"]
+custom_minimum_size = Vector2(80, 40)
+layout_mode = 2
+text = "All"
+
+[node name="FilterHats" type="Button" parent="ShopPanel/MarginContainer/VBoxContainer/FilterTabs"]
+custom_minimum_size = Vector2(80, 40)
+layout_mode = 2
+text = "Hats"
+
+[node name="FilterGlasses" type="Button" parent="ShopPanel/MarginContainer/VBoxContainer/FilterTabs"]
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+text = "Glasses"
+
+[node name="FilterMustaches" type="Button" parent="ShopPanel/MarginContainer/VBoxContainer/FilterTabs"]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+text = "Mustaches"
+
+[node name="FilterWigs" type="Button" parent="ShopPanel/MarginContainer/VBoxContainer/FilterTabs"]
+custom_minimum_size = Vector2(80, 40)
+layout_mode = 2
+text = "Wigs"
+
+[node name="FilterEmotions" type="Button" parent="ShopPanel/MarginContainer/VBoxContainer/FilterTabs"]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+text = "Emotions"
+
+[node name="FilterNew" type="Button" parent="ShopPanel/MarginContainer/VBoxContainer/FilterTabs"]
+custom_minimum_size = Vector2(80, 40)
+layout_mode = 2
+text = "New"
+
+[node name="FilterLimited" type="Button" parent="ShopPanel/MarginContainer/VBoxContainer/FilterTabs"]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+text = "Limited"
+
+[node name="SearchInput" type="LineEdit" parent="ShopPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Search cosmetics..."
+clear_button_enabled = true
+
+[node name="SortControls" type="HBoxContainer" parent="ShopPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="ShopPanel/MarginContainer/VBoxContainer/SortControls"]
+layout_mode = 2
+text = "Sort by:"
+
+[node name="SortOption" type="OptionButton" parent="ShopPanel/MarginContainer/VBoxContainer/SortControls"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 0)
+
+[node name="SortAscendingButton" type="Button" parent="ShopPanel/MarginContainer/VBoxContainer/SortControls"]
+layout_mode = 2
+custom_minimum_size = Vector2(30, 30)
+text = "↑"
+
+[node name="CosmeticsScroll" type="ScrollContainer" parent="ShopPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="CosmeticsGrid" type="GridContainer" parent="ShopPanel/MarginContainer/VBoxContainer/CosmeticsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 5
+
+[node name="PreviewPanel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 3
+anchor_left = 1
+anchor_top = 1
+anchor_right = 1
+anchor_bottom = 1
+offset_left = -300
+offset_top = -400
+offset_right = -20
+offset_bottom = -20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PreviewPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NameLabel" type="Label" parent="PreviewPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Cosmetic Name"
+horizontal_alignment = 1
+
+[node name="PreviewTexture" type="TextureRect" parent="PreviewPanel/VBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 150)
+expand_mode = 2
+stretch_mode = 4
+
+[node name="RarityLabel" type="Label" parent="PreviewPanel/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="DescriptionLabel" type="Label" parent="PreviewPanel/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="PriceLabel" type="Label" parent="PreviewPanel/VBoxContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="ActionButtons" type="HBoxContainer" parent="PreviewPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PurchaseButton" type="Button" parent="PreviewPanel/VBoxContainer/ActionButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Buy"
+
+[node name="EquipButton" type="Button" parent="PreviewPanel/VBoxContainer/ActionButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Equip"
+
+[node name="LoadoutPanel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 2
+anchor_top = 1
+anchor_bottom = 1
+offset_left = 20
+offset_top = -200
+offset_right = 200
+offset_bottom = -20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LoadoutPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="LoadoutPanel/VBoxContainer"]
+layout_mode = 2
+text = "Loadouts"
+horizontal_alignment = 1
+
+[node name="LoadoutGrid" type="GridContainer" parent="LoadoutPanel/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="SaveLoadoutButton" type="Button" parent="LoadoutPanel/VBoxContainer"]
+layout_mode = 2
+text = "Save Loadout"
+
+[node name="LoadLoadoutButton" type="Button" parent="LoadoutPanel/VBoxContainer"]
+layout_mode = 2
+text = "Load Loadout"

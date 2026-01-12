@@ -50,6 +50,10 @@ CosmeticLootTable="*res://Globals/CosmeticLootTable.cs"
 UnlockablesManager="*res://Globals/UnlockablesManager.cs"
 TransitionManager="*res://Globals/TransitionManager.cs"
 
+# Monetization Systems
+CosmeticsShop="*res://Classes/Cosmetics/CosmeticsShop.cs"
+BattlePass="*res://Classes/Cosmetics/BattlePass.cs"
+
 # Infrastructure Systems
 AssetLoader="*res://Classes/AssetLoader.cs"
 AssetRegistry="*res://Classes/AssetRegistry.cs"

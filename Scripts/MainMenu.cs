@@ -38,6 +38,8 @@ public partial class MainMenu : CanvasLayer
         InitializeMenu();
         AddDailyChallengeButton();
         AddCustomizeFaceButton();
+        AddCosmeticsShopButton();
+        AddBattlePassButton();
         AddLevelEditorButtons();
         AddUnlockFullGameButton();
         AddTelemetryMetricsButton(); // Add telemetry button for debug builds
@@ -87,6 +89,72 @@ public partial class MainMenu : CanvasLayer
 
             if (_roomSelectionButtonNode != null)
                 container.MoveChild(customizeBtn, _roomSelectionButtonNode.GetIndex() + 1);
+        }
+    }
+
+    private void AddCosmeticsShopButton()
+    {
+        if (_playButtonNode != null && _playButtonNode.GetParent() is Control container)
+        {
+            var shopBtn = new Button
+            {
+                Text = "🎨 Cosmetics Shop",
+                Name = "CosmeticsShopButton",
+                Modulate = new Color(0.9f, 0.5f, 0.9f)
+            };
+            shopBtn.Pressed += OnCosmeticsShopButtonPressed;
+
+            container.AddChild(shopBtn);
+
+            if (_roomSelectionButtonNode != null)
+                container.MoveChild(shopBtn, _roomSelectionButtonNode.GetIndex() + 1);
+        }
+    }
+
+    private void AddBattlePassButton()
+    {
+        if (_playButtonNode != null && _playButtonNode.GetParent() is Control container)
+        {
+            var bpBtn = new Button
+            {
+                Text = "🏆 Battle Pass",
+                Name = "BattlePassButton",
+                Modulate = new Color(1f, 0.8f, 0.3f)
+            };
+            bpBtn.Pressed += OnBattlePassButtonPressed;
+
+            container.AddChild(bpBtn);
+
+            if (_roomSelectionButtonNode != null)
+                container.MoveChild(bpBtn, _roomSelectionButtonNode.GetIndex() + 2);
+        }
+    }
+
+    private void OnCosmeticsShopButtonPressed()
+    {
+        GD.Print("Cosmetics Shop button pressed");
+        PlayUiClickSound();
+
+        // Open the cosmetics shop scene
+        var shopScene = GD.Load<PackedScene>("res://Scenes/UI/CosmeticsShop.tscn");
+        if (shopScene != null)
+        {
+            var shopInstance = shopScene.Instantiate();
+            GetTree().Root.AddChild(shopInstance);
+        }
+    }
+
+    private void OnBattlePassButtonPressed()
+    {
+        GD.Print("Battle Pass button pressed");
+        PlayUiClickSound();
+
+        // Open the battle pass screen scene
+        var bpScene = GD.Load<PackedScene>("res://Scenes/UI/BattlePassScreen.tscn");
+        if (bpScene != null)
+        {
+            var bpInstance = bpScene.Instantiate();
+            GetTree().Root.AddChild(bpInstance);
         }
     }
 
