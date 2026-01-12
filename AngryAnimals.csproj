@@ -9,5 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- MediaPipe.NET bindings for C# (uncomment when available) -->
+    <!-- <PackageReference Include="MediaPipe.NET" Version="0.10.0" /> -->
   </ItemGroup>
 </Project>
