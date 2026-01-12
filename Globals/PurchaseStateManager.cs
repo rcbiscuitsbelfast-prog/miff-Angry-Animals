@@ -303,4 +303,32 @@ public partial class PurchaseStateManager : Node
             return "{}";
         }
     }
+
+    private bool _hasPendingReward = false;
+
+    /// <summary>
+    /// Saves whether a reward (like second chance) has been earned and is pending.
+    /// </summary>
+    public void SaveRewardEarned(bool earned)
+    {
+        _hasPendingReward = earned;
+        GD.Print($"PurchaseStateManager: Pending reward set to {earned}");
+    }
+
+    /// <summary>
+    /// Checks if there is a pending reward to be applied.
+    /// </summary>
+    public bool HasPendingReward()
+    {
+        return _hasPendingReward;
+    }
+
+    /// <summary>
+    /// Clears any pending rewards.
+    /// </summary>
+    public void ClearPendingReward()
+    {
+        _hasPendingReward = false;
+        GD.Print("PurchaseStateManager: Pending reward cleared");
+    }
 }
