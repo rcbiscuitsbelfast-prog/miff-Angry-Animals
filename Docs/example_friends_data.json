@@ -1,0 +1,174 @@
+{
+  "friends": {
+    "player_001": {
+      "friend_id": "player_001",
+      "friend_name": "ProGamer_Alex",
+      "friendship_date": "2024-01-15T10:30:00Z",
+      "total_challenges_sent": 15,
+      "total_challenges_received": 12,
+      "challenges_won": 8,
+      "challenges_lost": 4,
+      "last_interaction_date": "2024-01-20T14:22:00Z",
+      "current_streak": 3,
+      "highest_streak": 7,
+      "favorite_cosmetics": {
+        "hat_index": 2,
+        "glasses_index": 3,
+        "moustache_index": 1,
+        "wig_index": 0,
+        "slingshot_skin_index": 4,
+        "projectile_skin_index": 2
+      },
+      "achievements_count": 42,
+      "global_rank": 157,
+      "total_score": 145230,
+      "perfect_levels_count": 8,
+      "is_online": true,
+      "last_seen": "2024-01-20T14:22:00Z"
+    },
+    "player_002": {
+      "friend_id": "player_002",
+      "friend_name": "CasualGamer_Sam",
+      "friendship_date": "2024-01-10T08:15:00Z",
+      "total_challenges_sent": 5,
+      "total_challenges_received": 8,
+      "challenges_won": 2,
+      "challenges_lost": 6,
+      "last_interaction_date": "2024-01-19T11:45:00Z",
+      "current_streak": 1,
+      "highest_streak": 2,
+      "favorite_cosmetics": {
+        "hat_index": 1,
+        "glasses_index": 0,
+        "moustache_index": 0,
+        "wig_index": 1,
+        "slingshot_skin_index": 0,
+        "projectile_skin_index": 0
+      },
+      "achievements_count": 18,
+      "global_rank": 892,
+      "total_score": 67820,
+      "perfect_levels_count": 2,
+      "is_online": false,
+      "last_seen": "2024-01-19T11:45:00Z"
+    },
+    "player_003": {
+      "friend_id": "player_003",
+      "friend_name": "SpeedRunner_Kim",
+      "friendship_date": "2024-01-12T16:00:00Z",
+      "total_challenges_sent": 25,
+      "total_challenges_received": 20,
+      "challenges_won": 18,
+      "challenges_lost": 7,
+      "last_interaction_date": "2024-01-20T13:10:00Z",
+      "current_streak": 5,
+      "highest_streak": 12,
+      "favorite_cosmetics": {
+        "hat_index": 4,
+        "glasses_index": 5,
+        "moustache_index": 3,
+        "wig_index": 2,
+        "slingshot_skin_index": 3,
+        "projectile_skin_index": 4
+      },
+      "achievements_count": 58,
+      "global_rank": 23,
+      "total_score": 289450,
+      "perfect_levels_count": 15,
+      "is_online": true,
+      "last_seen": "2024-01-20T13:10:00Z"
+    },
+    "player_004": {
+      "friend_id": "player_004",
+      "friend_name": "Collector_Jordan",
+      "friendship_date": "2024-01-08T12:30:00Z",
+      "total_challenges_sent": 10,
+      "total_challenges_received": 10,
+      "challenges_won": 5,
+      "challenges_lost": 5,
+      "last_interaction_date": "2024-01-18T09:20:00Z",
+      "current_streak": 0,
+      "highest_streak": 4,
+      "favorite_cosmetics": {
+        "hat_index": 6,
+        "glasses_index": 6,
+        "moustache_index": 5,
+        "wig_index": 4,
+        "slingshot_skin_index": 2,
+        "projectile_skin_index": 3
+      },
+      "achievements_count": 35,
+      "global_rank": 445,
+      "total_score": 112890,
+      "perfect_levels_count": 5,
+      "is_online": false,
+      "last_seen": "2024-01-18T09:20:00Z"
+    },
+    "player_005": {
+      "friend_id": "player_005",
+      "friend_name": "Champion_Riley",
+      "friendship_date": "2024-01-05T14:00:00Z",
+      "total_challenges_sent": 30,
+      "total_challenges_received": 35,
+      "challenges_won": 22,
+      "challenges_lost": 13,
+      "last_interaction_date": "2024-01-20T15:00:00Z",
+      "current_streak": 6,
+      "highest_streak": 10,
+      "favorite_cosmetics": {
+        "hat_index": 2,
+        "glasses_index": 1,
+        "moustache_index": 2,
+        "wig_index": 3,
+        "slingshot_skin_index": 5,
+        "projectile_skin_index": 5
+      },
+      "achievements_count": 67,
+      "global_rank": 8,
+      "total_score": 345670,
+      "perfect_levels_count": 20,
+      "is_online": true,
+      "last_seen": "2024-01-20T15:00:00Z"
+    }
+  },
+  "scores_by_level": {
+    "player_001": {
+      "level_01": 8500,
+      "level_02": 9200,
+      "level_03": 12300,
+      "level_04": 15600,
+      "level_05": 14800
+    },
+    "player_002": {
+      "level_01": 6200,
+      "level_02": 7100,
+      "level_03": 8900,
+      "level_04": 10200
+    },
+    "player_003": {
+      "level_01": 9800,
+      "level_02": 11500,
+      "level_03": 15400,
+      "level_04": 18900,
+      "level_05": 19200,
+      "level_06": 21000
+    },
+    "player_004": {
+      "level_01": 7400,
+      "level_02": 8600,
+      "level_03": 11200,
+      "level_04": 13500,
+      "level_05": 14100
+    },
+    "player_005": {
+      "level_01": 10200,
+      "level_02": 12300,
+      "level_03": 16800,
+      "level_04": 20100,
+      "level_05": 21500,
+      "level_06": 23400,
+      "level_07": 25000
+    }
+  },
+  "version": "1.0"
+}
