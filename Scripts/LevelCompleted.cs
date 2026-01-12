@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Godot;
 
 /// <summary>
@@ -21,6 +22,16 @@ public partial class LevelCompleted : Control
     [Export] private NodePath _roomSelectionButtonPath;
     [Export] private NodePath _mainMenuButtonPath;
     [Export] private NodePath _starsContainerPath;
+
+    /// <summary>
+    /// Whether to automatically show interstitial ads after level completion.
+    /// </summary>
+    [Export] public bool ShowInterstitialOnLevelComplete { get; set; } = true;
+
+    /// <summary>
+    /// Minimum level number to show interstitial ads (avoid early levels).
+    /// </summary>
+    [Export] public int MinimumLevelForInterstitial { get; set; } = 2;
 
     private Panel? _panel;
     private Label? _titleLabel;
@@ -193,6 +204,38 @@ public partial class LevelCompleted : Control
         AnimateStars();
 
         PlayCompletionSound();
+
+        // Show interstitial ad after level completion (with conditions)
+        _ = ShowInterstitialAfterDelayAsync();
+    }
+
+    private async Task ShowInterstitialAfterDelayAsync()
+    {
+        // Wait a moment for the completion UI to show
+        await Task.Delay(2000);
+
+        // Check if we should show interstitial
+        if (!ShowInterstitialOnLevelComplete || _currentLevel < MinimumLevelForInterstitial)
+            return;
+
+        // Check monetization settings
+        if (MonetizationManager.Instance?.ShowAds == false)
+            return;
+
+        // Check if AdsManager is available
+        if (AdsManager.Instance == null)
+            return;
+
+        // Check if interstitial is ready and cooldown allows it
+        if (!AdsManager.Instance.IsInterstitialReady())
+        {
+            GD.Print("Interstitial not ready - preloading for next time");
+            await AdsManager.Instance.LoadInterstitialAd();
+            return;
+        }
+
+        GD.Print($"Showing interstitial after level {_currentLevel} completion");
+        await AdsManager.Instance.ShowInterstitialAd();
     }
 
     private void OnLevelCompleted()

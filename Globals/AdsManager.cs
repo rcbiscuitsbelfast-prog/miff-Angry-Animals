@@ -44,7 +44,7 @@ public partial class AdsManager : Node
     /// <summary>
     /// Interstitial ad unit ID.
     /// </summary>
-    [Export] public string InterstitialAdUnitId { get; set; } = "";
+    [Export] public string InterstitialAdUnitId { get; set; } = "ca-app-pub-6675121744131727/8410569879";
 
     /// <summary>
     /// Rewarded video ad unit ID.
@@ -87,16 +87,29 @@ public partial class AdsManager : Node
     private GodotObject? _adPlugin;
     private bool _initialized;
 
+    /// <summary>
+    /// Minimum time between interstitial ads in seconds.
+    /// Prevents ad spam and improves user experience.
+    /// </summary>
+    [Export] public float InterstitialCooldownSeconds { get; set; } = 45.0f;
+
+    /// <summary>
+    /// Whether to automatically preload the next interstitial ad after showing one.
+    /// </summary>
+    [Export] public bool EnableInterstitialPreloading { get; set; } = true;
+
     private bool _bannerVisible;
     private bool _interstitialReady;
     private bool _rewardedReady;
 
     private Timer? _bannerRefreshTimer;
+    private Timer? _interstitialCooldownTimer;
 
     private CanvasLayer? _placeholderLayer;
     private Control? _placeholderBanner;
 
     private int _lastBannerInset;
+    private DateTime _lastInterstitialShownTime;
 
     public int CurrentBannerInsetPx => _bannerVisible ? BannerHeightPx : 0;
 
@@ -114,6 +127,7 @@ public partial class AdsManager : Node
     public override void _ExitTree()
     {
         StopBannerRefreshTimer();
+        StopInterstitialCooldownTimer();
         DestroyBanner();
     }
 
@@ -280,6 +294,14 @@ public partial class AdsManager : Node
             return;
         }
 
+        // Check cooldown
+        if (!CanShowInterstitial())
+        {
+            GD.Print($"Interstitial ad skipped - cooldown active ({GetRemainingCooldownSeconds():F1}s remaining)");
+            await EmitAdClosedNextFrameAsync();
+            return;
+        }
+
         if (!_interstitialReady)
             await LoadInterstitialAsync();
 
@@ -302,6 +324,10 @@ public partial class AdsManager : Node
                 return;
             }
 
+            // Record that we showed an interstitial
+            _lastInterstitialShownTime = DateTime.Now;
+            StartInterstitialCooldownTimer();
+
             await WaitForAdClosedOrTimeoutAsync(10.0);
         }
         catch (Exception ex)
@@ -312,8 +338,50 @@ public partial class AdsManager : Node
         finally
         {
             _interstitialReady = false;
-            _ = LoadInterstitialAsync();
+            if (EnableInterstitialPreloading)
+            {
+                _ = LoadInterstitialAsync();
+            }
         }
+    }
+
+    /// <summary>
+    /// Manually load an interstitial ad in the background.
+    /// </summary>
+    public async Task LoadInterstitialAd()
+    {
+        await LoadInterstitialAsync();
+    }
+
+    /// <summary>
+    /// Check if an interstitial ad is currently loaded and ready to show.
+    /// </summary>
+    public bool IsInterstitialReady()
+    {
+        return _interstitialReady && CanShowInterstitial();
+    }
+
+    /// <summary>
+    /// Force reset the interstitial cooldown timer. Use with caution - only for testing.
+    /// </summary>
+    public void ResetInterstitialCooldown()
+    {
+        _lastInterstitialShownTime = DateTime.MinValue;
+        if (_interstitialCooldownTimer != null)
+        {
+            _interstitialCooldownTimer.Stop();
+            _interstitialCooldownTimer.QueueFree();
+            _interstitialCooldownTimer = null;
+        }
+    }
+
+    /// <summary>
+    /// Get remaining cooldown time in seconds for interstitial ads.
+    /// </summary>
+    public float GetRemainingCooldownSeconds()
+    {
+        var elapsed = (DateTime.Now - _lastInterstitialShownTime).TotalSeconds;
+        return Mathf.Max(0, InterstitialCooldownSeconds - (float)elapsed);
     }
 
     /// <summary>
@@ -434,6 +502,56 @@ public partial class AdsManager : Node
         await LoadBannerAsync();
         await LoadInterstitialAsync();
         await LoadRewardedAsync();
+    }
+
+    private bool CanShowInterstitial()
+    {
+        // Check if enough time has passed since last interstitial
+        var elapsed = (DateTime.Now - _lastInterstitialShownTime).TotalSeconds;
+        return elapsed >= InterstitialCooldownSeconds;
+    }
+
+    private void StartInterstitialCooldownTimer()
+    {
+        if (_interstitialCooldownTimer != null)
+        {
+            _interstitialCooldownTimer.Stop();
+            _interstitialCooldownTimer.QueueFree();
+        }
+
+        _interstitialCooldownTimer = new Timer
+        {
+            OneShot = true,
+            WaitTime = InterstitialCooldownSeconds,
+            ProcessCallback = Timer.TimerProcessCallback.Idle
+        };
+
+        _interstitialCooldownTimer.Timeout += OnInterstitialCooldownTimerTimeout;
+        AddChild(_interstitialCooldownTimer);
+        _interstitialCooldownTimer.Start();
+    }
+
+    private void OnInterstitialCooldownTimerTimeout()
+    {
+        if (_interstitialCooldownTimer != null)
+        {
+            _interstitialCooldownTimer.Timeout -= OnInterstitialCooldownTimerTimeout;
+            _interstitialCooldownTimer.QueueFree();
+            _interstitialCooldownTimer = null;
+        }
+
+        GD.Print("Interstitial cooldown expired - ads can be shown again");
+    }
+
+    private void StopInterstitialCooldownTimer()
+    {
+        if (_interstitialCooldownTimer != null)
+        {
+            _interstitialCooldownTimer.Timeout -= OnInterstitialCooldownTimerTimeout;
+            _interstitialCooldownTimer.Stop();
+            _interstitialCooldownTimer.QueueFree();
+            _interstitialCooldownTimer = null;
+        }
     }
 
     private async Task LoadBannerAsync()
