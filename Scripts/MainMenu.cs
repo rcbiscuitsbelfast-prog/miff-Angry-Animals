@@ -104,17 +104,28 @@ public partial class MainMenu : CanvasLayer
 
             var playCustomBtn = new Button
             {
-                Text = "Play Custom Level",
-                Name = "PlayCustomLevelButton",
+                Text = "📁 Play Custom Levels",
+                Name = "PlayCustomLevelsButton",
                 Modulate = new Color(0.7f, 0.5f, 1f)
             };
-            playCustomBtn.Pressed += OnPlayCustomLevelButtonPressed;
+            playCustomBtn.Pressed += OnPlayCustomLevelsButtonPressed;
             container.AddChild(playCustomBtn);
+
+            // "Generate 100 Levels" button
+            var generateLevelsBtn = new Button
+            {
+                Text = "🎲 Generate 100 Levels",
+                Name = "GenerateLevelsButton",
+                Modulate = new Color(1f, 0.8f, 0.2f)
+            };
+            generateLevelsBtn.Pressed += OnGenerateLevelsButtonPressed;
+            container.AddChild(generateLevelsBtn);
 
             if (_roomSelectionButtonNode != null)
             {
                 container.MoveChild(createLevelBtn, _roomSelectionButtonNode.GetIndex() + 1);
                 container.MoveChild(playCustomBtn, _roomSelectionButtonNode.GetIndex() + 2);
+                container.MoveChild(generateLevelsBtn, _roomSelectionButtonNode.GetIndex() + 3);
             }
         }
     }
@@ -133,6 +144,40 @@ public partial class MainMenu : CanvasLayer
         PlayUiClickSound();
 
         CustomLevelInputDialog.ShowDialog(this);
+    }
+
+    private void OnPlayCustomLevelsButtonPressed()
+    {
+        GD.Print("Play Custom Levels button pressed");
+        PlayUiClickSound();
+
+        GetTree().ChangeSceneToFile("res://Scenes/Levels/LevelBrowser.tscn");
+    }
+
+    private void OnGenerateLevelsButtonPressed()
+    {
+        GD.Print("Generate 100 Levels button pressed");
+        PlayUiClickSound();
+
+        // Show confirmation dialog
+        var dialog = new ConfirmationDialog();
+        dialog.Title = "Generate 100 Levels";
+        dialog.DialogText = "This will generate 100 themed levels procedurally. This may take a moment.\n\nContinue?";
+        
+        dialog.Confirmed += () => {
+            GD.Print("🎲 Starting batch level generation...");
+            GenerateAllLevels.GenerateAll100Levels();
+            
+            // Show completion dialog
+            var completeDialog = new AcceptDialog();
+            completeDialog.Title = "Generation Complete";
+            completeDialog.DialogText = "✅ Successfully generated 100 themed levels!\n\nYou can now play them from the Level Browser.";
+            AddChild(completeDialog);
+            completeDialog.PopupCentered();
+        };
+        
+        AddChild(dialog);
+        dialog.PopupCentered();
     }
 
     private void AddUnlockFullGameButton()
