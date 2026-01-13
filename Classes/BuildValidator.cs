@@ -695,7 +695,7 @@ public class BuildValidator : Node
                 writer.WriteLine();
                 
                 writer.WriteLine("## Summary");
-                writer.WriteLine($"- **Status**: {_validationResults.IsValid ? "✅ Ready for Submission" : "❌ Not Ready for Submission"}");
+                writer.WriteLine($"- **Status**: {(_validationResults.IsValid ? "✅ Ready for Submission" : "❌ Not Ready for Submission")}");
                 writer.WriteLine($"- **Validation Score**: {_validationResults.CompletionPercentage:F1}%");
                 writer.WriteLine($"- **Checks Passed**: {_validationResults.PassedChecks}/{_validationResults.TotalChecks}");
                 writer.WriteLine($"- **Warnings**: {_validationResults.WarningChecks}");

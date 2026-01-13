@@ -163,7 +163,7 @@ public partial class ProceduralRoom : RoomBase
         string message = $"🎉 Congratulations!\n\n" +
                         $"Level: {CurrentLevelName}\n" +
                         $"Blocks Destroyed: {BlocksDestroyed}/{LevelGoal}\n" +
-                        $\"Time: {Math.Floor(GameTime)}s\";
+                        $"Time: {Math.Floor(GameTime)}s";
         
         if (BlocksDestroyed >= LevelGoal)
         {
