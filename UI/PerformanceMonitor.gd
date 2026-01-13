@@ -1,286 +1,219 @@
 extends Control
 
-/// <summary>
-/// Performance Monitor UI - shows real-time performance metrics overlay
-/// Only visible in debug builds with toggleable interface
-/// </summary>
+# Performance Monitor UI - Real-time performance metrics overlay
+# Shows FPS, memory, CPU usage, and performance alerts
 
-# Performance telemetry reference
-var _performanceTelemetry
-var _currentMetrics = {}
+@onready var toggle_button: Button = %ToggleButton
+@onready var fps_label: Label = %FPSLabel
+@onready var fps_bar: ProgressBar = %FPSBar
+@onready var memory_label: Label = %MemoryLabel
+@onready var memory_bar: ProgressBar = %MemoryBar
+@onready var cpu_label: Label = %CPULabel
+@onready var cpu_bar: ProgressBar = %CPUBar
+@onready var network_label: Label = %NetworkLabel
+@onready var alerts_list: VBoxContainer = %AlertsList
+@onready var session_label: Label = %SessionLabel
 
-# UI References
-@onready var fps_label = $VBoxContainer/MetricsContainer/FPSContainer/FPSLabel
-@onready var fps_bar = $VBoxContainer/MetricsContainer/FPSContainer/FPSBar
-@onready var memory_label = $VBoxContainer/MetricsContainer/MemoryContainer/MemoryLabel
-@onready var memory_bar = $VBoxContainer/MetricsContainer/MemoryContainer/MemoryBar
-@onready var cpu_label = $VBoxContainer/MetricsContainer/CPUContainer/CPULabel
-@onready var cpu_bar = $VBoxContainer/MetricsContainer/CPUContainer/CPUBar
-@onready var network_label = $VBoxContainer/MetricsContainer/NetworkContainer/NetworkLabel
-@onready var alerts_container = $VBoxContainer/AlertsContainer/AlertsList
-@onready var session_label = $VBoxContainer/SessionContainer/SessionLabel
-@onready var toggle_button = $VBoxContainer/HeaderContainer/ToggleButton
-
-# Performance monitor state
-var _isVisible = false
-var _isMinimized = false
-var _updateInterval = 1.0 # seconds
-var _autoHideTimer = 0.0
-var _autoHideDelay = 10.0 # seconds
+var performance_telemetry: PerformanceTelemetry
+var is_minimized = false
+var last_update_time = 0.0
 
 func _ready():
-    # Initialize performance monitor
-    _performanceTelemetry = PerformanceTelemetry.Instance
-    if _performanceTelemetry == null:
-        queue_free()
-        return
-    
-    # Connect signals
-    _performanceTelemetry.connect("PerformanceMetricUpdated", _on_performance_metric_updated)
-    _performanceTelemetry.connect("PerformanceAlertTriggered", _on_performance_alert_triggered)
-    
-    # Setup UI
-    _setup_ui()
-    _update_performance_display()
-    
-    # Start update timer
-    _start_update_timer()
-    
-    GD.Print("Performance Monitor UI initialized")
+	# Only show in debug builds
+	if not OS.has_feature("debug"):
+		queue_free()
+		return
+		
+	performance_telemetry = PerformanceTelemetry.Instance
+	if performance_telemetry == null:
+		print("Performance Telemetry not found!")
+		return
+	
+	# Connect signals
+	toggle_button.pressed.connect(_on_toggle_pressed)
+	performance_telemetry.performance_metric_updated.connect(_on_performance_updated)
+	performance_telemetry.performance_alert_triggered.connect(_on_alert_triggered)
+	
+	# Connect to analytics if available
+	if AnalyticsEventTracker.Instance:
+		AnalyticsEventTracker.Instance.connect("analytics_updated", _on_analytics_updated)
+	
+	# Initial update
+	_update_display()
 
-func _setup_ui():
-    # Configure monitor appearance
-    visible = _should_show_monitor()
-    
-    # Setup button connections
-    toggle_button.pressed.connect(_on_toggle_pressed)
-    
-    # Style the monitor
-    _style_monitor()
+func _on_toggle_pressed():
+	is_minimized = not is_minimized
+	$"VBoxContainer/MetricsContainer".visible = not is_minimized
+	$"VBoxContainer/AlertsContainer".visible = not is_minimized
+	$"VBoxContainer/SessionContainer".visible = not is_minimized
+	
+	toggle_button.text = "Maximize" if is_minimized else "Minimize"
 
-func _style_monitor():
-    # Set up colors and styling for performance indicators
-    # FPS colors: Green > 30, Yellow 20-30, Red < 20
-    # Memory colors: Green < 300MB, Yellow 300-500MB, Red > 500MB
-    # CPU colors: Green < 50%, Yellow 50-80%, Red > 80%
-    pass
+func _on_performance_updated(metric_name: String, value: float):
+	if OS.get_ticks_msec() - last_update_time < 100: # Update max 10 times per second
+		return
+		
+	_update_display()
 
-func _should_show_monitor() -> bool:
-    # Only show in debug builds or when explicitly enabled
-    return OS.IsDebugBuild() || ProjectSettings.GetSetting("debug/show_performance_monitor", false)
+func _on_alert_triggered(alert: PerformanceAlert):
+	var alert_label = Label.new()
+	alert_label.text = "%s: %s" % [alert.AlertType.ToString(), alert.Message]
+	
+	# Color code by severity
+	match alert.Severity:
+		AlertSeverity.Low:
+			alert_label.add_theme_color_override("font_color", Color.YELLOW)
+		AlertSeverity.Medium:
+			alert_label.add_theme_color_override("font_color", Color.ORANGE_RED)
+		AlertSeverity.High:
+			alert_label.add_theme_color_override("font_color", Color.RED)
+	
+	alerts_list.add_child(alert_label)
+	
+	# Remove alert after 10 seconds
+	var timer = Timer.new()
+	timer.one_shot = true
+	timer.wait_time = 10.0
+	timer.timeout.connect(func(): alert_label.queue_free())
+	add_child(timer)
+	timer.start()
 
-func _start_update_timer():
-    # Start timer for periodic updates
-    var timer = Timer.new()
-    timer.wait_time = _updateInterval
-    timer.timeout.connect(_update_performance_display)
-    add_child(timer)
-    timer.start()
+func _on_analytics_updated(_data: Dictionary):
+	_update_session_data()
 
-func _update_performance_display():
-    # Get current performance metrics
-    _currentMetrics = _performanceTelemetry.GetPerformanceSummary()
-    
-    # Update FPS display
-    _update_fps_display()
-    
-    # Update memory display
-    _update_memory_display()
-    
-    # Update CPU display
-    _update_cpu_display()
-    
-    # Update network display
-    _update_network_display()
-    
-    # Update session metrics
-    _update_session_display()
-    
-    # Update alerts
-    _update_alerts_display()
+func _update_display():
+	if not performance_telemetry:
+		return
+	
+	var summary = performance_telemetry.GetPerformanceSummary()
+	
+	# Update FPS
+	var current_fps = float(summary.get("current_fps", 0))
+	fps_label.text = "FPS: %.1f" % current_fps
+	fps_bar.value = current_fps
+	
+	# Color code FPS
+	if current_fps >= 50.0:
+		fps_label.add_theme_color_override("font_color", Color.GREEN)
+	elif current_fps >= 30.0:
+		fps_label.add_theme_color_override("font_color", Color.YELLOW)
+	else:
+		fps_label.add_theme_color_override("font_color", Color.RED)
+	
+	# Update Memory
+	var current_memory = float(summary.get("current_memory_mb", 0))
+	var peak_memory = float(summary.get("peak_memory_mb", 0))
+	memory_label.text = "Memory: %d MB (Peak: %d MB)" % [int(current_memory), int(peak_memory)]
+	memory_bar.value = current_memory
+	
+	# Color code memory
+	if current_memory < 200.0:
+		memory_label.add_theme_color_override("font_color", Color.GREEN)
+	elif current_memory < 400.0:
+		memory_label.add_theme_color_override("font_color", Color.YELLOW)
+	else:
+		memory_label.add_theme_color_override("font_color", Color.RED)
+	
+	# Update CPU
+	var cpu_usage = float(summary.get("cpu_usage", 0))
+	cpu_label.text = "CPU: %.1f%%" % cpu_usage
+	cpu_bar.value = cpu_usage
+	
+	# Color code CPU
+	if cpu_usage < 50.0:
+		cpu_label.add_theme_color_override("font_color", Color.GREEN)
+	elif cpu_usage < 80.0:
+		cpu_label.add_theme_color_override("font_color", Color.YELLOW)
+	else:
+		cpu_label.add_theme_color_override("font_color", Color.RED)
+	
+	# Update Network
+	var network_kbps = float(summary.get("network_kbps", 0))
+	if network_kbps > 0:
+		network_label.text = "Network: %.1f KB/s" % network_kbps
+		network_label.add_theme_color_override("font_color", Color.GREEN)
+	else:
+		network_label.text = "Network: Offline"
+		network_label.add_theme_color_override("font_color", Color.RED)
+	
+	last_update_time = OS.get_ticks_msec()
 
-func _update_fps_display():
-    var current_fps = _currentMetrics.get("current_fps", 0.0)
-    var average_fps = _currentMetrics.get("average_fps", 0.0)
-    
-    fps_label.text = "FPS: %.1f (avg: %.1f)" % [current_fps, average_fps]
-    
-    # Set FPS bar color based on performance
-    fps_bar.value = current_fps
-    fps_bar.max_value = 60.0
-    
-    if current_fps >= 30.0:
-        fps_bar.add_theme_color_override("theme_override_styles/fill", _create_performance_style(Color.GREEN))
-        fps_label.add_theme_color_override("font_color", Color.GREEN)
-    elif current_fps >= 20.0:
-        fps_bar.add_theme_color_override("theme_override_styles/fill", _create_performance_style(Color.YELLOW))
-        fps_label.add_theme_color_override("font_color", Color.YELLOW)
-    else:
-        fps_bar.add_theme_color_override("theme_override_styles/fill", _create_performance_style(Color.RED))
-        fps_label.add_theme_color_override("font_color", Color.RED)
-
-func _update_memory_display():
-    var current_memory = _currentMetrics.get("current_memory_mb", 0)
-    var peak_memory = _currentMetrics.get("peak_memory_mb", 0)
-    
-    memory_label.text = "Memory: %d MB (peak: %d MB)" % [current_memory, peak_memory]
-    
-    # Set memory bar color based on usage
-    memory_bar.value = current_memory
-    memory_bar.max_value = 800.0
-    
-    if current_memory < 300:
-        memory_bar.add_theme_color_override("theme_override_styles/fill", _create_performance_style(Color.GREEN))
-        memory_label.add_theme_color_override("font_color", Color.GREEN)
-    elif current_memory < 500:
-        memory_bar.add_theme_color_override("theme_override_styles/fill", _create_performance_style(Color.YELLOW))
-        memory_label.add_theme_color_override("font_color", Color.YELLOW)
-    else:
-        memory_bar.add_theme_color_override("theme_override_styles/fill", _create_performance_style(Color.RED))
-        memory_label.add_theme_color_override("font_color", Color.RED)
-
-func _update_cpu_display():
-    var cpu_usage = _currentMetrics.get("cpu_usage", 0.0)
-    
-    cpu_label.text = "CPU: %.1f%%" % cpu_usage
-    
-    # Set CPU bar color based on usage
-    cpu_bar.value = cpu_usage
-    cpu_bar.max_value = 100.0
-    
-    if cpu_usage < 50.0:
-        cpu_bar.add_theme_color_override("theme_override_styles/fill", _create_performance_style(Color.GREEN))
-        cpu_label.add_theme_color_override("font_color", Color.GREEN)
-    elif cpu_usage < 80.0:
-        cpu_bar.add_theme_color_override("theme_override_styles/fill", _create_performance_style(Color.YELLOW))
-        cpu_label.add_theme_color_override("font_color", Color.YELLOW)
-    else:
-        cpu_bar.add_theme_color_override("theme_override_styles/fill", _create_performance_style(Color.RED))
-        cpu_label.add_theme_color_override("font_color", Color.RED)
-
-func _update_network_display():
-    var network_kbps = _currentMetrics.get("network_kbps", 0.0)
-    var is_connected = network_kbps > 0
-    
-    if is_connected:
-        network_label.text = "Network: %.1f KB/s" % network_kbps
-        network_label.add_theme_color_override("font_color", Color.GREEN)
-    else:
-        network_label.text = "Network: Offline"
-        network_label.add_theme_color_override("font_color", Color.RED)
-
-func _update_session_display():
-    var session_time = _currentMetrics.get("session_time", 0.0)
-    var levels_completed = _currentMetrics.get("levels_completed", 0)
-    var frame_drops = _currentMetrics.get("frame_drops", 0)
-    var memory_spikes = _currentMetrics.get("memory_spikes", 0)
-    
-    session_label.text = """Session: %.1f min
+func _update_session_data():
+	if not performance_telemetry:
+		return
+	
+	var summary = performance_telemetry.GetPerformanceSummary()
+	var session_time = float(summary.get("session_time", 0))
+	var levels_completed = int(summary.get("levels_completed", 0))
+	var frame_drops = int(summary.get("frame_drops", 0))
+	var memory_spikes = int(summary.get("memory_spikes", 0))
+	var load_timeouts = int(summary.get("load_timeouts", 0))
+	var active_alerts = int(summary.get("active_alerts", 0))
+	
+	var session_minutes = session_time / 60.0
+	session_label.text = """Session: %.1f min
 Levels: %d
 Frame Drops: %d
-Memory Spikes: %d""" % [
-        session_time / 60.0,
-        levels_completed,
-        frame_drops,
-        memory_spikes
-    ]
-
-func _update_alerts_display():
-    # Clear existing alerts
-    for child in alerts_container.get_children():
-        child.queue_free()
-    
-    # Add current alerts
-    var active_alerts = _currentMetrics.get("active_alerts", 0)
-    if active_alerts > 0:
-        var alert_label = Label.new()
-        alert_label.text = "⚠️ %d Active Alerts" % active_alerts
-        alert_label.add_theme_color_override("font_color", Color.ORANGE)
-        alert_label.add_theme_font_size_override("font_size", 12)
-        alerts_container.add_child(alert_label)
-    else:
-        var ok_label = Label.new()
-        ok_label.text = "✅ No Alerts"
-        ok_label.add_theme_color_override("font_color", Color.GREEN)
-        ok_label.add_theme_font_size_override("font_size", 12)
-        alerts_container.add_child(ok_label)
-
-func _create_performance_style(color: Color) -> StyleBoxFlat:
-    var style = StyleBoxFlat.new()
-    style.bg_color = color
-    style.corner_radius_top_left = 3
-    style.corner_radius_top_right = 3
-    style.corner_radius_bottom_left = 3
-    style.corner_radius_bottom_right = 3
-    return style
-
-# Signal handlers
-func _on_performance_metric_updated(metric_name: String, value: float):
-    # Update specific metric display when signal is received
-    match metric_name:
-        "fps":
-            _update_fps_display()
-        "memory_mb":
-            _update_memory_display()
-        "cpu_usage":
-            _update_cpu_display()
-
-func _on_performance_alert_triggered(alert):
-    # Add new alert to display
-    var alert_label = Label.new()
-    alert_label.text = "⚠️ %s: %s" % [alert.AlertType, alert.Message]
-    alert_label.add_theme_color_override("font_color", _get_alert_color(alert.Severity))
-    alert_label.add_theme_font_size_override("font_size", 10)
-    
-    alerts_container.add_child(alert_label)
-    
-    # Auto-remove old alerts
-    var timer = Timer.new()
-    timer.wait_time = 5.0
-    timer.timeout.connect(func(): alert_label.queue_free())
-    add_child(timer)
-    timer.start()
-
-func _get_alert_color(severity) -> Color:
-    match severity:
-        AlertSeverity.Low:
-            return Color.BLUE
-        AlertSeverity.Medium:
-            return Color.YELLOW
-        AlertSeverity.High:
-            return Color.ORANGE
-        AlertSeverity.Critical:
-            return Color.RED
-        _:
-            return Color.WHITE
-
-# UI Event handlers
-func _on_toggle_pressed():
-    _isMinimized = !_isMinimized
-    $VBoxContainer/MetricsContainer.visible = !_isMinimized
-    $VBoxContainer/AlertsContainer.visible = !_isMinimized
-    $VBoxContainer/SessionContainer.visible = !_isMinimized
-    
-    toggle_button.text = "Maximize" if _isMinimized else "Minimize"
-
-func toggle_visibility():
-    _isVisible = !_isVisible
-    visible = _isVisible and _should_show_monitor()
+Memory Spikes: %d
+Load Timeouts: %d
+Active Alerts: %d""" % [
+		session_minutes,
+		levels_completed,
+		frame_drops,
+		memory_spikes,
+		load_timeouts,
+		active_alerts
+	]
 
 func _input(event):
-    if event.is_action_pressed("toggle_performance_monitor"):
-        toggle_visibility()
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_F2:
+			visible = not visible
+		elif event.keycode == KEY_ESCAPE and visible:
+			hide()
 
-func _process(delta):
-    # Auto-hide functionality
-    if visible:
-        _autoHideTimer += delta
-        if _autoHideTimer > _autoHideDelay:
-            visible = false
-            _isVisible = false
-    else:
-        _autoHideTimer = 0.0
+func _process(_delta):
+	# Auto-hide when not needed
+	if OS.get_ticks_msec() % 1000 < 16: # Update every second
+		_update_display()
 
-func _exit_tree():
-    # Clean up resources
-    pass
+func _notification(what):
+	if what == NOTIFICATION_VISIBILITY_CHANGED:
+		if visible:
+			_update_display()
+
+# Export performance data
+func export_performance_data():
+	if performance_telemetry:
+		var csv_data = performance_telemetry.ExportPerformanceDataToCSV()
+		_show_export_dialog(csv_data)
+
+func _show_export_dialog(csv_data: String):
+	var dialog = AcceptDialog.new()
+	dialog.title = "Export Performance Data"
+	dialog.size = Vector2i(600, 400)
+	
+	var text_edit = TextEdit.new()
+	text_edit.text = csv_data
+	text_edit.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	text_edit.readonly = true
+	
+	var scroll = ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.add_child(text_edit)
+	
+	dialog.add_child(scroll)
+	add_child(dialog)
+	dialog.popup_centered()
+
+# Get performance recommendations
+func get_recommendations() -> Array:
+	if performance_telemetry:
+		return performance_telemetry.GetPerformanceRecommendations()
+	return []
+
+# Reset performance counters
+func reset_session_counters():
+	if performance_telemetry:
+		performance_telemetry.ResetSessionMetrics()
+	_update_display()
