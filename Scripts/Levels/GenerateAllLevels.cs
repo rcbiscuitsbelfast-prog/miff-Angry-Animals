@@ -183,9 +183,9 @@ public static class GenerateAllLevels
             ["TargetTime"] = level.TargetTime,
             ["ParScore"] = level.ParScore,
             ["CreatedTimestamp"] = level.CreatedTimestamp,
-            [\"CreatorName\"] = level.CreatorName,
-            [\"IsGenerated\"] = level.IsGenerated,
-            [\"Items\"] = SerializeItems(level.Items)
+            ["CreatorName"] = level.CreatorName,
+            ["IsGenerated"] = level.IsGenerated,
+            ["Items"] = SerializeItems(level.Items)
         };
         
         return Json.Stringify(data);
@@ -202,12 +202,12 @@ public static class GenerateAllLevels
         {
             var itemData = new Godot.Collections.Dictionary
             {
-                [\"ItemId\"] = item.ItemId,
-                [\"PositionX\"] = item.Position.X,
-                [\"PositionY\"] = item.Position.Y,
-                [\"Rotation\"] = item.Rotation,
-                [\"Scale\"] = item.Scale,
-                [\"MaterialOverride\"] = (int)item.MaterialOverride
+                ["ItemId"] = item.ItemId,
+                ["PositionX"] = item.Position.X,
+                ["PositionY"] = item.Position.Y,
+                ["Rotation"] = item.Rotation,
+                ["Scale"] = item.Scale,
+                ["MaterialOverride"] = (int)item.MaterialOverride
             };
             array.Add(itemData);
         }
@@ -220,7 +220,7 @@ public static class GenerateAllLevels
     /// </summary>
     private static string GetLevelFilePath(string levelId)
     {
-        return $\"user://levels/generated/{levelId}.json\";
+        return $"user://levels/generated/{levelId}.json";
     }
     
     /// <summary>
@@ -228,17 +228,17 @@ public static class GenerateAllLevels
     /// </summary>
     private static void CreateLevelDirectories()
     {
-        var dir = DirAccess.Open(\"user://\");
+        var dir = DirAccess.Open("user://");
         if (dir != null)
         {
-            if (!DirAccess.DirExistsAbsolute(\"user://levels\"))
-                dir.MakeDir(\"levels\");
+            if (!DirAccess.DirExistsAbsolute("user://levels"))
+                dir.MakeDir("levels");
             
-            if (!DirAccess.DirExistsAbsolute(\"user://levels/generated\"))
-                dir.MakeDir(\"levels/generated\");
+            if (!DirAccess.DirExistsAbsolute("user://levels/generated"))
+                dir.MakeDir("levels/generated");
             
-            if (!DirAccess.DirExistsAbsolute(\"user://levels/custom\"))
-                dir.MakeDir(\"levels/custom\");
+            if (!DirAccess.DirExistsAbsolute("user://levels/custom"))
+                dir.MakeDir("levels/custom");
         }
     }
     
@@ -251,18 +251,18 @@ public static class GenerateAllLevels
         var levelList = new Godot.Collections.Array();
         
         // Get all generated levels
-        var dir = DirAccess.Open(\"user://levels/generated\");
+        var dir = DirAccess.Open("user://levels/generated");
         if (dir != null)
         {
             string fileName = dir.GetNext();
-            while (fileName != \"\")
+            while (fileName != "")
             {
-                if (fileName.EndsWith(\".json\"))
+                if (fileName.EndsWith(".json"))
                 {
                     var levelData = new Godot.Collections.Dictionary
                     {
-                        [\"FileName\"] = fileName,
-                        [\"LevelId\"] = fileName.Replace(\".json\", \"\")
+                        ["FileName"] = fileName,
+                        ["LevelId"] = fileName.Replace(".json", "")
                     };
                     levelList.Add(levelData);
                 }
@@ -270,12 +270,12 @@ public static class GenerateAllLevels
             }
         }
         
-        manifest[\"TotalLevels\"] = levelList.Count;
-        manifest[\"GeneratedDate\"] = DateTime.UtcNow.ToString(\"o\");
-        manifest[\"Levels\"] = levelList;
+        manifest["TotalLevels"] = levelList.Count;
+        manifest["GeneratedDate"] = DateTime.UtcNow.ToString("o");
+        manifest["Levels"] = levelList;
         
         string manifestJson = Json.Stringify(manifest);
-        var file = FileAccess.Open(\"user://levels/generated/manifest.json\", FileAccess.ModeFlags.Write);
+        var file = FileAccess.Open("user://levels/generated/manifest.json", FileAccess.ModeFlags.Write);
         if (file != null)
         {
             file.StoreString(manifestJson);

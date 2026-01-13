@@ -290,26 +290,26 @@ public partial class ProceduralLevelGenerator : Node
         {
             Theme = "livingroom",
             LevelId = $"livingroom_{levelNumber:D3}",
-            LevelName = $\"Living Room Mayhem #{levelNumber}\",
+            LevelName = $"Living Room Mayhem #{levelNumber}",
             Difficulty = GetDifficultyForLevel(levelNumber),
-            Description = \"Tidy up the living room!\",
+            Description = "Tidy up the living room!",
             IsGenerated = true
         };
         
         var random = new Random(GetSeed(levelNumber, LevelTheme.LivingRoom));
         
         // Furniture
-        AddThemedItems(level, \"home\", levelNumber, random, \"couch\", 2, 3);
-        AddThemedItems(level, \"livingroom\", levelNumber, random, \"coffee_table\", 1, 1);
-        AddThemedItems(level, \"livingroom\", levelNumber, random, \"bookshelf_lr\", 1, 2);
-        AddThemedItems(level, \"livingroom\", levelNumber, random, \"tv_stand\", 1, 1);
+        AddThemedItems(level, "home", levelNumber, random, "couch", 2, 3);
+        AddThemedItems(level, "livingroom", levelNumber, random, "coffee_table", 1, 1);
+        AddThemedItems(level, "livingroom", levelNumber, random, "bookshelf_lr", 1, 2);
+        AddThemedItems(level, "livingroom", levelNumber, random, "tv_stand", 1, 1);
         
         // Electronics and decor
-        AddThemedItems(level, \"home\", levelNumber, random, \"tv\", 1, 1);
-        AddThemedItems(level, \"livingroom\", levelNumber, random, \"game_console\", 1, 2);
-        AddThemedItems(level, \"livingroom\", levelNumber, random, \"plant\", 2, 4);
-        AddThemedItems(level, \"livingroom\", levelNumber, random, \"vase\", 1, 3);
-        AddThemedItems(level, \"home\", levelNumber, random, \"lamp\", 1, 2);
+        AddThemedItems(level, "home", levelNumber, random, "tv", 1, 1);
+        AddThemedItems(level, "livingroom", levelNumber, random, "game_console", 1, 2);
+        AddThemedItems(level, "livingroom", levelNumber, random, "plant", 2, 4);
+        AddThemedItems(level, "livingroom", levelNumber, random, "vase", 1, 3);
+        AddThemedItems(level, "home", levelNumber, random, "lamp", 1, 2);
         
         level.Goal = CalculateGoal(levelNumber);
         level.TargetTime = CalculateTargetTime(levelNumber);
@@ -321,30 +321,30 @@ public partial class ProceduralLevelGenerator : Node
     {
         var level = new LevelMetadata
         {
-            Theme = \"factory\",
-            LevelId = $\"factory_{levelNumber:D3}\",
-            LevelName = \"Factory Floor #{levelNumber}\",
+            Theme = "factory",
+            LevelId = $"factory_{levelNumber:D3}",
+            LevelName = "Factory Floor #{levelNumber}",
             Difficulty = GetDifficultyForLevel(levelNumber),
-            Description = \"Clean up the industrial mess!\",
+            Description = "Clean up the industrial mess!",
             IsGenerated = true
         };
         
         var random = new Random(GetSeed(levelNumber, LevelTheme.Factory));
         
         // Industrial equipment
-        AddThemedItems(level, \"factory\", levelNumber, random, \"conveyor_belt\", 2, 4);
-        AddThemedItems(level, \"factory\", levelNumber, random, \"industrial_barrel\", 4, 8);
-        AddThemedItems(level, \"factory\", levelNumber, random, \"machine_part\", 6, 10);
+        AddThemedItems(level, "factory", levelNumber, random, "conveyor_belt", 2, 4);
+        AddThemedItems(level, "factory", levelNumber, random, "industrial_barrel", 4, 8);
+        AddThemedItems(level, "factory", levelNumber, random, "machine_part", 6, 10);
         
         // Storage
-        AddThemedItems(level, \"all\", levelNumber, random, \"crate\", 3, 5);
-        AddThemedItems(level, \"all\", levelNumber, random, \"barrel\", 3, 5);
+        AddThemedItems(level, "all", levelNumber, random, "crate", 3, 5);
+        AddThemedItems(level, "all", levelNumber, random, "barrel", 3, 5);
         
         // Explosives (common in factory theme)
         if (levelNumber > 3)
-            AddThemedItems(level, \"all\", levelNumber, random, \"tnt_medium\", 2, 4);
+            AddThemedItems(level, "all", levelNumber, random, "tnt_medium", 2, 4);
         if (levelNumber > 10)
-            AddThemedItems(level, \"all\", levelNumber, random, \"dynamite\", 1, 3);
+            AddThemedItems(level, "all", levelNumber, random, "dynamite", 1, 3);
         
         level.Goal = CalculateGoal(levelNumber);
         level.TargetTime = CalculateTargetTime(levelNumber);
@@ -356,24 +356,24 @@ public partial class ProceduralLevelGenerator : Node
     {
         var level = new LevelMetadata
         {
-            Theme = \"arcade\",
-            LevelId = $\"arcade_{levelNumber:D3}\",
-            LevelName = \"Arcade After Hours #{levelNumber}\",
+            Theme = "arcade",
+            LevelId = $"arcade_{levelNumber:D3}",
+            LevelName = "Arcade After Hours #{levelNumber}",
             Difficulty = GetDifficultyForLevel(levelNumber),
-            Description = \"Clean up the arcade!\",
+            Description = "Clean up the arcade!",
             IsGenerated = true
         };
         
         var random = new Random(GetSeed(levelNumber, LevelTheme.Arcade));
         
         // Arcade machines
-        AddThemedItems(level, \"arcade\", levelNumber, random, \"arcade_cabinet\", 3, 6);
-        AddThemedItems(level, \"arcade\", levelNumber, random, \"pinball_machine\", 2, 3);
-        AddThemedItems(level, \"arcade\", levelNumber, random, \"claw_machine\", 1, 2);
+        AddThemedItems(level, "arcade", levelNumber, random, "arcade_cabinet", 3, 6);
+        AddThemedItems(level, "arcade", levelNumber, random, "pinball_machine", 2, 3);
+        AddThemedItems(level, "arcade", levelNumber, random, "claw_machine", 1, 2);
         
         // Decorations
-        AddThemedItems(level, \"all\", levelNumber, random, \"game_console\", 2, 4);
-        AddThemedItems(level, \"all\", levelNumber, random, \"tv\", 1, 2);
+        AddThemedItems(level, "all", levelNumber, random, "game_console", 2, 4);
+        AddThemedItems(level, "all", levelNumber, random, "tv", 1, 2);
         
         level.Goal = CalculateGoal(levelNumber);
         level.TargetTime = CalculateTargetTime(levelNumber);

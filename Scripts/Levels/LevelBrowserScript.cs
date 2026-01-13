@@ -308,7 +308,7 @@ public partial class LevelBrowserScript : Control
                            $"Items: {_selectedLevel.Items.Count}\n" +
                            $"Created: {DateTimeOffset.FromUnixTimeSeconds(_selectedLevel.CreatedTimestamp):yyyy-MM-dd}\n" +
                            $"Creator: {_selectedLevel.CreatorName}\n" +
-                           $"Type: {(_selectedLevel.IsGenerated ? \"Generated\" : \"Custom\")}";
+                           $"Type: {(_selectedLevel.IsGenerated ? "Generated" : "Custom")}";
         
         AddChild(dialog);
         dialog.PopupCentered();
@@ -368,12 +368,12 @@ public partial class LevelBrowserScript : Control
     private string GetLevelFilePath(string levelId)
     {
         // Try generated directory first
-        string generatedPath = $\"user://levels/generated/{levelId}.json\";
+        string generatedPath = $"user://levels/generated/{levelId}.json";
         if (FileAccess.FileExists(generatedPath))
             return generatedPath;
         
         // Try custom directory
-        return $\"user://levels/custom/{levelId}.json\";
+        return $"user://levels/custom/{levelId}.json";
     }
     
     private void OnRefreshPressed()
