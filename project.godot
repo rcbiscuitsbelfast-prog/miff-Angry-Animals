@@ -96,6 +96,14 @@ GlobalLeaderboard="*res://Globals/GlobalLeaderboard.cs"
 SocialCosmetics="*res://Globals/SocialCosmetics.cs"
 SocialFeaturesTestingFramework="*res://Classes/SocialFeaturesTestingFramework.cs"
 
+# QA & Optimization Systems
+ABTestingManager="*res://Classes/ABTestingManager.cs"
+PerformanceTelemetry="*res://Classes/PerformanceTelemetry.cs"
+DifficultyHeatmapAnalyzer="*res://Classes/DifficultyHeatmapAnalyzer.cs"
+AdFrequencyOptimizer="*res://Classes/AdFrequencyOptimizer.cs"
+DataExporter="*res://Classes/DataExporter.cs"
+CrashDetector="*res://Classes/CrashDetector.cs"
+
 [audio]
 
 buses/default_bus_layout="res://default_bus_layout.tres"

@@ -1,0 +1,123 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8q5y4pwxnc9e"]
+
+[ext_resource type="Script" path="res://UI/PerformanceMonitor.gd" id="1_perf_monitor"]
+
+[node name="PerformanceMonitor" type="Control"]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -350.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 300.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("1_perf_monitor")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+
+[node name="HeaderContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer/HeaderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Performance Monitor"
+
+[node name="ToggleButton" type="Button" parent="VBoxContainer/HeaderContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 0)
+text = "Minimize"
+
+[node name="MetricsContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="FPSContainer" type="HBoxContainer" parent="VBoxContainer/MetricsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FPSLabel" type="Label" parent="VBoxContainer/MetricsContainer/FPSContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_font_sizes/font_size = 12
+text = "FPS: 60.0"
+
+[node name="FPSBar" type="ProgressBar" parent="VBoxContainer/MetricsContainer/FPSContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+value = 60.0
+max_value = 60.0
+
+[node name="MemoryContainer" type="HBoxContainer" parent="VBoxContainer/MetricsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MemoryLabel" type="Label" parent="VBoxContainer/MetricsContainer/MemoryContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_font_sizes/font_size = 12
+text = "Memory: 0 MB"
+
+[node name="MemoryBar" type="ProgressBar" parent="VBoxContainer/MetricsContainer/MemoryContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+value = 0.0
+max_value = 800.0
+
+[node name="CPUContainer" type="HBoxContainer" parent="VBoxContainer/MetricsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CPULabel" type="Label" parent="VBoxContainer/MetricsContainer/CPUContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 0)
+theme_override_font_sizes/font_size = 12
+text = "CPU: 0%"
+
+[node name="CPUBar" type="ProgressBar" parent="VBoxContainer/MetricsContainer/CPUContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+value = 0.0
+max_value = 100.0
+
+[node name="NetworkContainer" type="HBoxContainer" parent="VBoxContainer/MetricsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NetworkLabel" type="Label" parent="VBoxContainer/MetricsContainer/NetworkContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "Network: Disconnected"
+
+[node name="AlertsContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="AlertsLabel" type="Label" parent="VBoxContainer/AlertsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Alerts:"
+
+[node name="AlertsList" type="VBoxContainer" parent="VBoxContainer/AlertsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="SessionContainer" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="SessionLabel" type="Label" parent="VBoxContainer/SessionContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "Session: 0.0 min\nLevels: 0\nFrame Drops: 0\nMemory Spikes: 0"
