@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://b0g7pp6ge7fjt"
+
+[deps]
+
+files=["res://Docs/example_difficulty_heatmap.Total Attempts.translation", "res://Docs/example_difficulty_heatmap.Completions.translation", "res://Docs/example_difficulty_heatmap.Failures.translation", "res://Docs/example_difficulty_heatmap.Completion Rate %.translation", "res://Docs/example_difficulty_heatmap.Average Time (s).translation", "res://Docs/example_difficulty_heatmap.Fastest Time (s).translation", "res://Docs/example_difficulty_heatmap.Slowest Time (s).translation", "res://Docs/example_difficulty_heatmap.Difficulty Score.translation", "res://Docs/example_difficulty_heatmap.Rage Quits.translation", "res://Docs/example_difficulty_heatmap.First Attempt Success Rate %.translation", "res://Docs/example_difficulty_heatmap.Failure Reasons.translation"]
+
+source_file="res://Docs/example_difficulty_heatmap.csv"
+dest_files=["res://Docs/example_difficulty_heatmap.Total Attempts.translation", "res://Docs/example_difficulty_heatmap.Completions.translation", "res://Docs/example_difficulty_heatmap.Failures.translation", "res://Docs/example_difficulty_heatmap.Completion Rate %.translation", "res://Docs/example_difficulty_heatmap.Average Time (s).translation", "res://Docs/example_difficulty_heatmap.Fastest Time (s).translation", "res://Docs/example_difficulty_heatmap.Slowest Time (s).translation", "res://Docs/example_difficulty_heatmap.Difficulty Score.translation", "res://Docs/example_difficulty_heatmap.Rage Quits.translation", "res://Docs/example_difficulty_heatmap.First Attempt Success Rate %.translation", "res://Docs/example_difficulty_heatmap.Failure Reasons.translation"]
+
+[params]
+
+compress=true
+delimiter=0

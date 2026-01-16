@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://b07j2kdlrpfpd"]
 
-[ext_resource type="Script" path="res://Scripts/MainMenu.cs" id="1_p8lqh"]
+[ext_resource type="Script" uid="uid://cypikv2o5nffx" path="res://Scripts/MainMenu.cs" id="1_p8lqh"]
 
 [node name="MainMenu" type="CanvasLayer" node_paths=PackedStringArray("_playButton", "_quitButton", "_titleContainer", "_titleLabel")]
 script = ExtResource("1_p8lqh")
@@ -10,11 +10,9 @@ _titleContainer = NodePath("VBoxContainer/TitleContainer")
 _titleLabel = NodePath("VBoxContainer/TitleContainer/TitleLabel")
 
 [node name="ColorRect" type="ColorRect" parent="."]
-anchors_fill_parent = true
 color = Color(0.2, 0.2, 0.2, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
-anchors_fill_parent = true
 alignment = 1
 
 [node name="TitleContainer" type="Control" parent="VBoxContainer"]
@@ -22,7 +20,7 @@ custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 
 [node name="TitleLabel" type="Label" parent="VBoxContainer/TitleContainer"]
-anchors_fill_parent = true
+layout_mode = 0
 theme_override_font_sizes/font_size = 80
 text = "ANGRY ANIMALS"
 horizontal_alignment = 1

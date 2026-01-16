@@ -1,6 +1,6 @@
 ; Engine configuration file.
 ; It's best edited using the editor UI and not directly,
-; since the parameters that go here are meant to be changed rarely.
+; since the parameters that go here are not all obvious.
 ;
 ; Format:
 ;   [section] ; section goes between []
@@ -8,13 +8,18 @@
 
 config_version=5
 
+[android]
+
+manifest/uses_permission=PackedStringArray("android.permission.INTERNET", "android.permission.ACCESS_NETWORK_STATE")
+gradle_dependencies=PackedStringArray("com.google.android.gms:play-services-ads:23.5.0")
+
 [application]
 
 config/name="Angry Animals"
-config/icon="res://icon.svg"
 config/version="1.0"
 run/main_scene="res://Scenes/MainMenu.tscn"
 config/features=PackedStringArray("4.4", "C#")
+config/icon="res://icon.svg"
 
 [autoload]
 
@@ -49,9 +54,7 @@ MemeGateway="*res://Scripts/MemeGateway.cs"
 CosmeticLootTable="*res://Globals/CosmeticLootTable.cs"
 UnlockablesManager="*res://Globals/UnlockablesManager.cs"
 TransitionManager="*res://Globals/TransitionManager.cs"
-
-# Infrastructure Systems
-AssetLoader="*res://Classes/AssetLoader.cs"
+#InfrastructureSystemsAssetLoader="*res://Classes/AssetLoader.cs"
 AssetRegistry="*res://Classes/AssetRegistry.cs"
 SpriteSheetLoader="*res://Classes/SpriteSheetLoader.cs"
 AssetValidationTool="*res://Classes/AssetValidationTool.cs"
@@ -71,64 +74,34 @@ CrashReporter="*res://Classes/CrashReporter.cs"
 TestingFramework="*res://Classes/TestingFramework.cs"
 DifficultyAnalyzer="*res://Classes/DifficultyAnalyzer.cs"
 ReleaseNotesGenerator="*res://Classes/ReleaseNotesGenerator.cs"
-
-# Analytics & Telemetry Systems
-FirebaseManager="*res://Classes/FirebaseManager.cs"
+#Analytics&TelemetrySystemsFirebaseManager="*res://Classes/FirebaseManager.cs"
 AnalyticsEventTracker="*res://Classes/AnalyticsEventTracker.cs"
 DifficultyHeatmapTracker="*res://Classes/DifficultyHeatmapTracker.cs"
 TelemetryDebugPanel="*res://Classes/TelemetryDebugPanel.cs"
 AnalyticsTestingFramework="*res://Classes/AnalyticsTestingFramework.cs"
-
-# Retention & Engagement Systems
-StreakManager="*res://Globals/StreakManager.cs"
+#Retention&EngagementSystemsStreakManager="*res://Globals/StreakManager.cs"
 SeasonalEventManager="*res://Globals/SeasonalEventManager.cs"
 SeasonalEventDatabase="*res://Globals/SeasonalEventDatabase.cs"
 PushNotificationManager="*res://Globals/PushNotificationManager.cs"
 NotificationPreferences="*res://Globals/NotificationPreferences.cs"
 StreakData="*res://Globals/StreakData.cs"
 SeasonalEvent="*res://Globals/SeasonalEvent.cs"
-
-# Social Features Systems
-FriendLeaderboard="*res://Globals/FriendLeaderboard.cs"
+#SocialFeaturesSystemsFriendLeaderboard="*res://Globals/FriendLeaderboard.cs"
 FriendChallengeManager="*res://Globals/FriendChallengeManager.cs"
 ReplayManager="*res://Globals/ReplayManager.cs"
 GlobalLeaderboard="*res://Globals/GlobalLeaderboard.cs"
 SocialCosmetics="*res://Globals/SocialCosmetics.cs"
 SocialFeaturesTestingFramework="*res://Classes/SocialFeaturesTestingFramework.cs"
-
-# QA & Optimization Systems
-ABTestingManager="*res://Classes/ABTestingManager.cs"
+#QA&OptimizationSystemsABTestingManager="*res://Classes/ABTestingManager.cs"
 PerformanceTelemetry="*res://Classes/PerformanceTelemetry.cs"
 DifficultyHeatmapAnalyzer="*res://Classes/DifficultyHeatmapAnalyzer.cs"
 AdFrequencyOptimizer="*res://Classes/AdFrequencyOptimizer.cs"
 DataExporter="*res://Classes/DataExporter.cs"
 CrashDetector="*res://Classes/CrashDetector.cs"
 
-[audio]
-
-buses/default_bus_layout="res://default_bus_layout.tres"
-
 [dotnet]
 
 project/assembly_name="AngryAnimals"
-
-[monetization]
-
-admob/app_id=""
-admob/app_id_android=""
-admob/app_id_ios=""
-admob/banner_ad_unit_id="ca-app-pub-6675121744131727/8033303534"
-admob/banner_position="bottom"
-admob/persistent_banner=true
-admob/banner_auto_refresh=true
-admob/banner_refresh_seconds=30
-admob/banner_height_px=50
-admob/interstitial_ad_unit_id="ca-app-pub-6675121744131727/8410569879"
-admob/rewarded_ad_unit_id="ca-app-pub-6675121744131727/8406522837"
-iap/ios_product_id="full_game_unlock"
-iap/android_product_id="full_game_unlock"
-iap/remove_ads_product_id="remove_ads"
-iap/remove_ads_price="$0.99"
 
 [input]
 
@@ -153,11 +126,24 @@ ui_menu_back={
 ]
 }
 
-[android]
-
-manifest/uses_permission=PackedStringArray("android.permission.INTERNET", "android.permission.ACCESS_NETWORK_STATE")
-gradle_dependencies=PackedStringArray("com.google.android.gms:play-services-ads:23.5.0")
-
 [ios]
 
 frameworks=PackedStringArray("Google-Mobile-Ads-SDK")
+
+[monetization]
+
+admob/app_id=""
+admob/app_id_android=""
+admob/app_id_ios=""
+admob/banner_ad_unit_id="ca-app-pub-6675121744131727/8033303534"
+admob/banner_position="bottom"
+admob/persistent_banner=true
+admob/banner_auto_refresh=true
+admob/banner_refresh_seconds=30
+admob/banner_height_px=50
+admob/interstitial_ad_unit_id="ca-app-pub-6675121744131727/8410569879"
+admob/rewarded_ad_unit_id="ca-app-pub-6675121744131727/8406522837"
+iap/ios_product_id="full_game_unlock"
+iap/android_product_id="full_game_unlock"
+iap/remove_ads_product_id="remove_ads"
+iap/remove_ads_price="$0.99"
