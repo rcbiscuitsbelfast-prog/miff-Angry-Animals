@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" path="res://Scripts/RagdollSpawner.cs" id="1"]
 [ext_resource type="PackedScene" path="res://Scenes/RagdollStickClone.tscn" id="2"]
-[ext_resource type="Script" path="res://Scripts/Slingshot.cs" id="3"]
-[ext_resource type="Script" path="res://Scripts/Projectile.cs" id="4"]
+[ext_resource type="Script" path="res://Scenes/Scripts/Gameplay/Slingshot.gd" id="3"]
+[ext_resource type="Script" path="res://Scenes/Scripts/Gameplay/PhysicsProjectile.gd" id="4"]
 
 [node name="RagdollTestScene" type="Node2D"]
 
