@@ -1,6 +1,5 @@
 [gd_scene load_steps=8 format=3 uid="uid://custom_play_room"]
 
-[ext_resource type="Script" path="res://Scripts/CustomPlayRoom.cs" id="1_script"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/Slingshot.tscn" id="2_sling"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/ProjectilesLoader.tscn" id="3_loader"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/CameraFocus.tscn" id="4_cam"]
@@ -14,7 +13,7 @@ size = Vector2(1200, 40)
 size = Vector2(60, 100)
 
 [node name="CustomPlayRoom" type="Node2D"]
-script = ExtResource("1_script")
+script = load("res://Scenes/Scripts/Gameplay/CustomPlayRoom.gd")
 slingshot_path = NodePath("Slingshot")
 exit_door_path = NodePath("Environment/ExitDoor")
 projectiles_loader_path = NodePath("ProjectilesLoader")

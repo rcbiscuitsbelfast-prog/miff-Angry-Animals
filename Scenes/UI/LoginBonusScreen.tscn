@@ -1,6 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://c8xqvw2lhdp1k"]
-
-[ext_resource type="Script" path="res://UI/LoginBonusScreenUI.cs" id="1"]
+[gd_scene load_steps=2 format=3 uid="uid://c8xqvw2lhdp1k"]
 
 [node name="LoginBonusScreen" type="Control"]
 layout_mode = 3
@@ -9,7 +7,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1")
+script = load("res://Scenes/Scripts/UI/LoginBonusScreen.gd")
 main_container = NodePath("MainContainer")
 reward_preview_container = NodePath("MainContainer/RewardPreview")
 streak_counter_label = NodePath("MainContainer/StreakCounterLabel")
