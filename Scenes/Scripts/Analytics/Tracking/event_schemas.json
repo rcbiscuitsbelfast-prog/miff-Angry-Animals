@@ -1,0 +1,211 @@
+{
+  "event_schemas": {
+    "session_start": {
+      "name": "session_start",
+      "category": "session",
+      "parameters": {
+        "session_id": "string",
+        "timestamp": "datetime"
+      }
+    },
+    "session_end": {
+      "name": "session_end",
+      "category": "session",
+      "parameters": {
+        "session_id": "string",
+        "duration": "float",
+        "timestamp": "datetime"
+      }
+    },
+    "level_started": {
+      "name": "level_started",
+      "category": "gameplay",
+      "parameters": {
+        "level_number": "integer",
+        "level_type": "string",
+        "user_segment": "string",
+        "session_duration": "float",
+        "levels_completed_today": "integer",
+        "device_type": "string"
+      }
+    },
+    "level_completed": {
+      "name": "level_completed",
+      "category": "gameplay",
+      "parameters": {
+        "level_number": "integer",
+        "completion_time": "float",
+        "attempts": "integer",
+        "score": "integer",
+        "perfect": "boolean",
+        "user_segment": "string",
+        "difficulty_rating": "integer"
+      }
+    },
+    "level_failed": {
+      "name": "level_failed",
+      "category": "gameplay",
+      "parameters": {
+        "level_number": "integer",
+        "attempts": "integer",
+        "time_spent": "float",
+        "failure_reason": "string",
+        "user_segment": "string",
+        "consecutive_failures": "integer"
+      }
+    },
+    "perfect_score_achieved": {
+      "name": "perfect_score_achieved",
+      "category": "gameplay",
+      "parameters": {
+        "level_number": "integer",
+        "completion_time": "float",
+        "user_segment": "string",
+        "total_perfect_scores": "integer"
+      }
+    },
+    "cosmetic_purchased": {
+      "name": "cosmetic_purchased",
+      "category": "monetization",
+      "parameters": {
+        "cosmetic_type": "string",
+        "cosmetic_id": "string",
+        "cost": "float",
+        "currency": "string",
+        "user_segment": "string",
+        "total_spent": "float",
+        "purchase_source": "string"
+      }
+    },
+    "cosmetic_unlocked": {
+      "name": "cosmetic_unlocked",
+      "category": "monetization",
+      "parameters": {
+        "cosmetic_type": "string",
+        "cosmetic_id": "string",
+        "unlock_method": "string",
+        "user_segment": "string",
+        "total_cosmetics_unlocked": "integer"
+      }
+    },
+    "rewarded_ad_watched": {
+      "name": "rewarded_ad_watched",
+      "category": "monetization",
+      "parameters": {
+        "reward_type": "string",
+        "reward_amount": "float",
+        "ad_source": "string",
+        "user_segment": "string",
+        "ads_watched_today": "integer"
+      }
+    },
+    "daily_login_streak_reached": {
+      "name": "daily_login_streak_reached",
+      "category": "engagement",
+      "parameters": {
+        "streak_days": "integer",
+        "user_segment": "string",
+        "longest_streak": "integer",
+        "is_new_record": "boolean"
+      }
+    },
+    "achievement_unlocked": {
+      "name": "achievement_unlocked",
+      "category": "engagement",
+      "parameters": {
+        "achievement_id": "string",
+        "achievement_type": "string",
+        "user_segment": "string",
+        "total_achievements": "integer",
+        "rarity": "string"
+      }
+    },
+    "seasonal_event_started": {
+      "name": "seasonal_event_started",
+      "category": "engagement",
+      "parameters": {
+        "event_id": "string",
+        "event_type": "string",
+        "user_segment": "string",
+        "participation_count": "integer"
+      }
+    },
+    "friend_added": {
+      "name": "friend_added",
+      "category": "social",
+      "parameters": {
+        "friend_id": "string",
+        "total_friends": "integer"
+      }
+    },
+    "friend_removed": {
+      "name": "friend_removed",
+      "category": "social",
+      "parameters": {
+        "friend_id": "string",
+        "total_friends": "integer"
+      }
+    },
+    "challenge_created": {
+      "name": "challenge_created",
+      "category": "social",
+      "parameters": {
+        "challenge_id": "string",
+        "challengee_id": "string",
+        "level_id": "string",
+        "target_score": "integer"
+      }
+    },
+    "challenge_accepted": {
+      "name": "challenge_accepted",
+      "category": "social",
+      "parameters": {
+        "challenge_id": "string",
+        "challenger_id": "string"
+      }
+    },
+    "challenge_completed": {
+      "name": "challenge_completed",
+      "category": "social",
+      "parameters": {
+        "challenge_id": "string",
+        "winner_id": "string",
+        "challenger_score": "integer",
+        "challengee_score": "integer"
+      }
+    },
+    "replay_shared": {
+      "name": "replay_shared",
+      "category": "social",
+      "parameters": {
+        "replay_id": "string",
+        "level_id": "string",
+        "score": "integer",
+        "share_method": "string"
+      }
+    },
+    "crash_detected": {
+      "name": "crash_detected",
+      "category": "quality",
+      "parameters": {
+        "crash_type": "string",
+        "scene_name": "string",
+        "additional_info": "string",
+        "platform": "string",
+        "device_type": "string",
+        "session_duration": "float"
+      }
+    },
+    "performance_frame_drop": {
+      "name": "performance_frame_drop",
+      "category": "quality",
+      "parameters": {
+        "fps": "float",
+        "frame_time": "float",
+        "device_type": "string",
+        "memory_usage": "float",
+        "platform": "string"
+      }
+    }
+  }
+}
