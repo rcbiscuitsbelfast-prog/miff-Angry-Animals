@@ -1,11 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://c2pkkqr82slax"]
+[gd_scene load_steps=3 format=3 uid="uid://c2pkkqr82slax"]
 
-[ext_resource type="Script" path="res://Scripts/Level.cs" id="1_y8wso"]
 [ext_resource type="Script" path="res://Scenes/Scripts/Gameplay/Scorer.gd" id="2_w5pq8"]
 [ext_resource type="Script" path="res://Scenes/Scripts/Gameplay/Ui.gd" id="3_a0y39"]
 
 [node name="Level" type="Node2D"]
-script = ExtResource("1_y8wso")
+script = load("res://Scenes/Scripts/Gameplay/Level.gd")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 anchors_fill_parent = true

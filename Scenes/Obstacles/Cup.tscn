@@ -1,7 +1,5 @@
 [gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://Scripts/Cup.cs" id="1_script"]
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(40, 40)
 
@@ -28,7 +26,7 @@ _data = {
 [node name="Cup" type="RigidBody2D" node_paths=PackedStringArray("_vanishAnimation")]
 collision_layer = 4
 collision_mask = 7
-script = ExtResource("1_script")
+script = load("res://Scenes/Scripts/Gameplay/Cup.gd")
 _vanishAnimation = NodePath("AnimationPlayer")
 MaxHp = 10
 ScoreValue = 500

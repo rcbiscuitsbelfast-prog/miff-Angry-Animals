@@ -1,7 +1,5 @@
 [gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://Scripts/FaceProjectile.cs" id="1_script"]
-
 [sub_resource type="CircleShape2D" id="CircleShape2D_1"]
 radius = 15.0
 
@@ -21,7 +19,7 @@ collision_mask = 13
 freeze = true
 max_contacts_reported = 4
 contact_monitor = true
-script = ExtResource("1_script")
+script = load("res://Scenes/Scripts/Gameplay/FaceProjectile.gd")
 _faceSprite = NodePath("Sprite2D")
 kick_wood_sound = NodePath("KickWoodSound")
 on_screen_notifier = NodePath("VisibleOnScreenNotifier2D")

@@ -1,7 +1,5 @@
 [gd_scene load_steps=2 format=3 uid="uid://b8yqx5y2j6k7"]
 
-[ext_resource type="Script" path="res://Scripts/GameOverScreen.cs" id="1_script"]
-
 [node name="GameOverScreen" type="Control"]
 process_mode = 3
 layout_mode = 3
@@ -10,7 +8,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_script")
+script = load("res://Scenes/Scripts/UI/GameOverScreen.gd")
 _retryButtonPath = NodePath("Panel/VBoxContainer/RetryButton")
 _watchAdButtonPath = NodePath("Panel/VBoxContainer/WatchAdButton")
 _selectLevelButtonPath = NodePath("Panel/VBoxContainer/SelectLevelButton")

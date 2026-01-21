@@ -1,6 +1,4 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://Scripts/CameraFocus.cs" id="1_script"]
-
 [node name="CameraFocus" type="Camera2D"]
-script = ExtResource("1_script")
+script = load("res://Scenes/Scripts/Gameplay/CameraFocus.gd")

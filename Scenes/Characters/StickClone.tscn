@@ -1,17 +1,15 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://Scripts/StickClone.cs" id="1_script"]
-
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
 radius = 15.0
 height = 60.0
 
 [node name="StickClone" type="CharacterBody2D"]
 collision_mask = 2
-script = ExtResource("1_script")
-_faceSpritePath = NodePath("Visuals/Head/FaceSprite")
-_hatNodePath = NodePath("Visuals/Head/HatNode")
-_glassesNodePath = NodePath("Visuals/Head/GlassesNode")
+script = load("res://Scenes/Scripts/Gameplay/StickClone.gd")
+_face_sprite_path = NodePath("Visuals/Head/FaceSprite")
+_hat_node_path = NodePath("Visuals/Head/HatNode")
+_glasses_node_path = NodePath("Visuals/Head/GlassesNode")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_1")
