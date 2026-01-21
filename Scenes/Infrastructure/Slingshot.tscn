@@ -1,15 +1,15 @@
 [gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://Scripts/Slingshot.cs" id="1_script"]
+[ext_resource type="Script" path="res://Scenes/Scripts/Gameplay/Slingshot.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/InputArea.tscn" id="2_input"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/TrajectoryDrawer.tscn" id="3_traj"]
 
-[node name="Slingshot" type="Node2D" node_paths=PackedStringArray("_inputArea", "_trajectoryDrawer", "_projectileHolder", "_restPosition")]
+[node name="Slingshot" type="Node2D" node_paths=PackedStringArray("input_area", "trajectory_drawer", "projectile_holder", "rest_position")]
 script = ExtResource("1_script")
-_inputArea = NodePath("InputArea")
-_trajectoryDrawer = NodePath("TrajectoryDrawer")
-_projectileHolder = NodePath("ProjectileHolder")
-_restPosition = NodePath("RestPosition")
+input_area = NodePath("InputArea")
+trajectory_drawer = NodePath("TrajectoryDrawer")
+projectile_holder = NodePath("ProjectileHolder")
+rest_position = NodePath("RestPosition")
 
 [node name="Visual" type="Node2D" parent="."]
 

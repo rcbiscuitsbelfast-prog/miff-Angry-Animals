@@ -15,10 +15,10 @@ size = Vector2(60, 100)
 
 [node name="CustomPlayRoom" type="Node2D"]
 script = ExtResource("1_script")
-_slingshotPath = NodePath("Slingshot")
-_exitDoorPath = NodePath("Environment/ExitDoor")
-_projectilesLoaderPath = NodePath("ProjectilesLoader")
-_targetScore = 3
+slingshot_path = NodePath("Slingshot")
+exit_door_path = NodePath("Environment/ExitDoor")
+projectiles_loader_path = NodePath("ProjectilesLoader")
+target_score = 3
 _obstacleScene = ExtResource("6_cup")
 _obstaclesParentPath = NodePath("Obstacles")
 
