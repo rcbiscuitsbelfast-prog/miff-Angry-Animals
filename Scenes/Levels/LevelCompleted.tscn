@@ -1,7 +1,5 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://Scripts/LevelCompleted.cs" id="1_script"]
-
 [node name="LevelCompleted" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -9,17 +7,17 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_script")
+script = load("res://Scenes/Scripts/Gameplay/LevelCompleted.gd")
 panel_path = NodePath("Panel")
 title_label_path = NodePath("Panel/VBoxContainer/TitleLabel")
-_finalScoreLabelPath = NodePath("Panel/VBoxContainer/FinalScoreLabel")
-_bestScoreLabelPath = NodePath("Panel/VBoxContainer/BestScoreLabel")
-_newRecordLabelPath = NodePath("Panel/VBoxContainer/NewRecordLabel")
-_nextLevelButtonPath = NodePath("Panel/VBoxContainer/HBoxContainer/NextLevelButton")
-_restartLevelButtonPath = NodePath("Panel/VBoxContainer/HBoxContainer/RestartButton")
-_roomSelectionButtonPath = NodePath("Panel/VBoxContainer/HBoxContainer/RoomSelectionButton")
-_mainMenuButtonPath = NodePath("Panel/VBoxContainer/HBoxContainer/MainMenuButton")
-_starsContainerPath = NodePath("Panel/VBoxContainer/StarsContainer")
+_final_score_label_path = NodePath("Panel/VBoxContainer/FinalScoreLabel")
+_best_score_label_path = NodePath("Panel/VBoxContainer/BestScoreLabel")
+_new_record_label_path = NodePath("Panel/VBoxContainer/NewRecordLabel")
+_next_level_button_path = NodePath("Panel/VBoxContainer/HBoxContainer/NextLevelButton")
+_restart_level_button_path = NodePath("Panel/VBoxContainer/HBoxContainer/RestartButton")
+_room_selection_button_path = NodePath("Panel/VBoxContainer/HBoxContainer/RoomSelectionButton")
+_main_menu_button_path = NodePath("Panel/VBoxContainer/HBoxContainer/MainMenuButton")
+_stars_container_path = NodePath("Panel/VBoxContainer/StarsContainer")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1

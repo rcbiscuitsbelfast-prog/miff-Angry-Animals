@@ -1,6 +1,5 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://Scripts/GameHud.cs" id="1_script"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/PausePanel.tscn" id="2_pause"]
 
 [node name="GameHud" type="Control"]
@@ -11,7 +10,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
-script = ExtResource("1_script")
+script = load("res://Scenes/Scripts/UI/GameHud.gd")
 _attemptsLabelPath = NodePath("MarginContainer/HBoxContainer/AttemptsLabel")
 _rageBarPath = NodePath("MarginContainer/HBoxContainer/RageContainer/RageBar")
 _rageFillPath = NodePath("MarginContainer/HBoxContainer/RageContainer/RageBar/Fill")

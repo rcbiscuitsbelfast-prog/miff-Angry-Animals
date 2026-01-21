@@ -1,9 +1,7 @@
 [gd_scene load_steps=2 format=3 uid="uid://b07j2kdlrpfpd"]
 
-[ext_resource type="Script" uid="uid://cypikv2o5nffx" path="res://Scripts/MainMenu.cs" id="1_p8lqh"]
-
 [node name="MainMenu" type="CanvasLayer" node_paths=PackedStringArray("_playButton", "_quitButton", "_titleContainer", "_titleLabel")]
-script = ExtResource("1_p8lqh")
+script = load("res://Scenes/Scripts/Gameplay/MainMenu.gd")
 _playButton = NodePath("VBoxContainer/PlayButton")
 _quitButton = NodePath("VBoxContainer/QuitButton")
 _titleContainer = NodePath("VBoxContainer/TitleContainer")
