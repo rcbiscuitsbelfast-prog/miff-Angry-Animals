@@ -1,0 +1,70 @@
+{
+	"cosmetics": {
+		"hats": {
+			"none": {"id": "none", "name": "None", "rarity": "common"},
+			"cap": {"id": "cap", "name": "Cap", "rarity": "common"},
+			"crown": {"id": "crown", "name": "Crown", "rarity": "uncommon"},
+			"beanie": {"id": "beanie", "name": "Beanie", "rarity": "common"},
+			"tophat": {"id": "tophat", "name": "Top Hat", "rarity": "rare"},
+			"cowboy": {"id": "cowboy", "name": "Cowboy Hat", "rarity": "uncommon"},
+			"beret": {"id": "beret", "name": "Beret", "rarity": "uncommon"}
+		},
+		"glasses": {
+			"none": {"id": "none", "name": "None", "rarity": "common"},
+			"round": {"id": "round", "name": "Round Glasses", "rarity": "common"},
+			"aviator": {"id": "aviator", "name": "Aviator Glasses", "rarity": "uncommon"},
+			"sunglasses": {"id": "sunglasses", "name": "Sunglasses", "rarity": "common"},
+			"nerd_glasses": {"id": "nerd_glasses", "name": "Nerd Glasses", "rarity": "common"},
+			"monocle": {"id": "monocle", "name": "Monocle", "rarity": "rare"},
+			"3d_glasses": {"id": "3d_glasses", "name": "3D Glasses", "rarity": "uncommon"}
+		},
+		"emotions": {
+			"neutral": {"id": "neutral", "name": "Neutral", "rarity": "common"},
+			"happy": {"id": "happy", "name": "Happy", "rarity": "common"},
+			"angry": {"id": "angry", "name": "Angry", "rarity": "common"},
+			"sad": {"id": "sad", "name": "Sad", "rarity": "common"},
+			"excited": {"id": "excited", "name": "Excited", "rarity": "common"},
+			"surprised": {"id": "surprised", "name": "Surprised", "rarity": "uncommon"}
+		},
+		"moustaches": {
+			"none": {"id": "none", "name": "None", "rarity": "common"},
+			"normal": {"id": "normal", "name": "Normal", "rarity": "common"},
+			"fancy": {"id": "fancy", "name": "Fancy", "rarity": "uncommon"},
+			"handlebar": {"id": "handlebar", "name": "Handlebar", "rarity": "common"},
+			"pencil": {"id": "pencil", "name": "Pencil", "rarity": "uncommon"},
+			"walrus": {"id": "walrus", "name": "Walrus", "rarity": "rare"}
+		},
+		"wigs": {
+			"none": {"id": "none", "name": "None", "rarity": "common"},
+			"afro": {"id": "afro", "name": "Afro", "rarity": "rare"},
+			"long_hair": {"id": "long_hair", "name": "Long Hair", "rarity": "uncommon"},
+			"ponytail": {"id": "ponytail", "name": "Ponytail", "rarity": "common"},
+			"mohawk": {"id": "mohawk", "name": "Mohawk", "rarity": "uncommon"}
+		},
+		"slingshot_skins": {
+			"none": {"id": "none", "name": "Default", "rarity": "common"},
+			"golden_slingshot": {"id": "golden_slingshot", "name": "Golden Slingshot", "rarity": "legendary"},
+			"rainbow_slingshot": {"id": "rainbow_slingshot", "name": "Rainbow Slingshot", "rarity": "epic"}
+		},
+		"projectile_skins": {
+			"none": {"id": "none", "name": "Default", "rarity": "common"},
+			"rainbow_projectile": {"id": "rainbow_projectile", "name": "Rainbow Projectile", "rarity": "epic"},
+			"fire_projectile": {"id": "fire_projectile", "name": "Fire Projectile", "rarity": "epic"}
+		},
+		"trail_effects": {
+			"none": {"id": "none", "name": "None", "rarity": "common"},
+			"sparkle_trail": {"id": "sparkle_trail", "name": "Sparkle Trail", "rarity": "rare"},
+			"smoke_trail": {"id": "smoke_trail", "name": "Smoke Trail", "rarity": "uncommon"}
+		},
+		"hit_effects": {
+			"none": {"id": "none", "name": "None", "rarity": "common"},
+			"explosion_hit": {"id": "explosion_hit", "name": "Explosion Hit", "rarity": "rare"},
+			"flash_hit": {"id": "flash_hit", "name": "Flash Hit", "rarity": "uncommon"}
+		},
+		"victory_effects": {
+			"none": {"id": "none", "name": "None", "rarity": "common"},
+			"victory_fireworks": {"id": "victory_fireworks", "name": "Victory Fireworks", "rarity": "legendary"},
+			"confetti_victory": {"id": "confetti_victory", "name": "Confetti Victory", "rarity": "epic"}
+		}
+	}
+}
