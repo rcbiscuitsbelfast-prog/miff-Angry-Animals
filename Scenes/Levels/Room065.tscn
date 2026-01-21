@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3]
 
-[ext_resource type="Script" path="res://Scripts/RoomBase.cs" id="1_script"]
+[ext_resource type="Script" path="res://Scenes/Scripts/Gameplay/RoomBase.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/Slingshot.tscn" id="2_sling"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/ProjectilesLoader.tscn" id="3_loader"]
 [ext_resource type="PackedScene" path="res://Scenes/Infrastructure/CameraFocus.tscn" id="4_cam"]
@@ -15,10 +15,10 @@ size = Vector2(60, 100)
 
 [node name="Room065" type="Node2D"]
 script = ExtResource("1_script")
-_slingshotPath = NodePath("Slingshot")
-_exitDoorPath = NodePath("Environment/ExitDoor")
-_projectilesLoaderPath = NodePath("ProjectilesLoader")
-_targetScore = 9
+slingshot_path = NodePath("Slingshot")
+exit_door_path = NodePath("Environment/ExitDoor")
+projectiles_loader_path = NodePath("ProjectilesLoader")
+target_score = 9
 
 [node name="Slingshot" parent="." instance=ExtResource("2_sling")]
 position = Vector2(200, 500)

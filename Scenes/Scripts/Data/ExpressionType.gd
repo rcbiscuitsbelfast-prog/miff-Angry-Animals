@@ -1,0 +1,18 @@
+extends Node
+
+enum ExpressionType {
+	NEUTRAL,
+	DETERMINED,
+	EXCITED,
+	SCARED,
+	DIZZY,
+	CURIOUS,
+	FRIGHTENED,
+	HAPPY,
+	BORED,
+	ANGRY,
+	NAUSEOUS,
+	MELTING,
+	COLD,
+	DISGUSTED
+}
