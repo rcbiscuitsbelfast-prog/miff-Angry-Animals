@@ -1,7 +1,5 @@
 [gd_scene load_steps=2 format=3 uid="uid://b3v8q5k2mnp9r"]
 
-[ext_resource type="Script" path="res://UI/SeasonalEventScreenUI.cs" id="1"]
-
 [node name="SeasonalEventScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -9,7 +7,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1")
+script = load("res://Scenes/Scripts/UI/SeasonalEventScreen.gd")
 main_container = NodePath("MainContainer")
 event_carousel_container = NodePath("MainContainer/EventCarousel")
 event_details_container = NodePath("MainContainer/EventDetails")

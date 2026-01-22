@@ -1,7 +1,5 @@
 [gd_scene load_steps=2 format=3 uid="uid://b8k8p8p8p8p8p"]
 
-[ext_resource type="Script" path="res://Scenes/Tests/ProceduralDifficultyTest.cs" id="1_x1x1x"]
-
 [node name="ProceduralDifficultyTest" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -9,7 +7,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_x1x1x")
+script = load("res://Scenes/Scripts/Tests/ProceduralDifficultyTest.gd")
+grid_container_path = NodePath("GridContainer")
+refresh_button_path = NodePath("RefreshButton")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
